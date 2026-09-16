@@ -27,7 +27,7 @@ Após a primeira execução, alterações em `src/` são refletidas automaticame
 O primeiro administrador é criado automaticamente na inicialização:
 
 - E-mail: `bruuno@gmail.com`
-- Senha: `182436`
+- Senha: `123456`
 
 Altere a chave `SECRET_KEY` no `.env` antes de publicar a aplicação. Somente usuários com perfil de administrador podem criar, editar ou remover usuários.
 

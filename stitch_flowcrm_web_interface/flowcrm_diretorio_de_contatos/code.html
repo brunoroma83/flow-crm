@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>FlowCRM</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface": "#f8f9ff", "primary-fixed": "#dbe1ff", "primary-container": "#2563eb", "on-secondary": "#ffffff", "inverse-on-surface": "#eaf1ff", "outline": "#737686", "surface-bright": "#f8f9ff", "on-tertiary-fixed-variant": "#005236", "tertiary-fixed-dim": "#4edea3", "tertiary-fixed": "#6ffbbe", "surface-container-low": "#eff4ff", "secondary-fixed": "#dae2fd", "on-tertiary-container": "#bdffdb", "on-secondary-fixed-variant": "#3f465c", "surface-container": "#e5eeff", "on-error": "#ffffff", "primary": "#004ac6", "secondary-container": "#dae2fd", "tertiary-container": "#007d55", "surface-container-lowest": "#ffffff", "on-tertiary-fixed": "#002113", "surface-container-highest": "#d3e4fe", "on-primary": "#ffffff", "on-error-container": "#93000a", "on-primary-fixed": "#00174b", "surface-container-high": "#dce9ff", "on-surface": "#0b1c30", "on-background": "#0b1c30", "outline-variant": "#c3c6d7", "secondary": "#565e74", "on-surface-variant": "#434655", "inverse-surface": "#213145", "error-container": "#ffdad6", "on-secondary-container": "#5c647a", "on-tertiary": "#ffffff", "surface-tint": "#0053db", "background": "#f8f9ff", "surface-variant": "#d3e4fe", "surface-dim": "#cbdbf5", "inverse-primary": "#b4c5ff", "on-primary-container": "#eeefff", "secondary-fixed-dim": "#bec6e0", "error": "#ba1a1a", "tertiary": "#006242", "on-secondary-fixed": "#131b2e", "on-primary-fixed-variant": "#003ea8", "primary-fixed-dim": "#b4c5ff" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter": "1rem", "margin": "1.5rem", "space-xl": "1.5rem", "space-md": "0.75rem", "margin-mobile": "1rem", "space-lg": "1rem", "space-xs": "0.25rem", "space-sm": "0.5rem", "gutter-mobile": "0.75rem" }, "fontFamily": { "label-sm": ["Inter"], "label-md": ["Inter"], "headline-lg": ["Inter"], "headline-lg-mobile": ["Inter"], "body-md": ["Inter"], "body-lg": ["Inter"], "body-sm": ["Inter"], "headline-xl": ["Inter"], "headline-xl-mobile": ["Inter"], "headline-md": ["Inter"], "data-mono": ["Inter"] }, "fontSize": { "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-lg-mobile": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-md": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "body-lg": ["15px", { "lineHeight": "22px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700" }], "headline-xl-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-md": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "data-mono": ["13px", { "lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "500" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-outline-variant/40 z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center gap-space-sm border-b border-outline-variant/40"><img alt="FlowCRM Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1W2ogsWYGHT_q-6eFtXEk94qwUWuYtOTY7mJIynCPEjMhBWxVhpHTUVwgQqRYEBa_77X1K_DN7c8xfYWnra02Z5QxFvT_-BFlBSJGJieVJGVyU72kupqKLFxLLLmN6LKpscZmuMyrNmttkGjhCmjx-3LDHdT8HDwp6cDGWu_6MovSlh9z5luNegakpXoimaPYE9ekr-HRg2ff_3Jw4G6YGM40P8KjH_6r9O6SiOoVfH6IT_0CeSst4Omrk"/><div class="flex flex-col min-w-0"><span class="font-headline-md text-body-lg font-bold tracking-tight text-on-surface truncate">FlowCRM</span><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary truncate">Operations Suite</span></div></div><div class="p-space-md"><nav class="flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary font-semibold shadow-sm"><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="truncate">Dashboard</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="clientes" href="#"><span class="material-symbols-outlined text-[20px]">corporate_fare</span><span class="truncate">Clientes</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="projetos" href="#"><span class="material-symbols-outlined text-[20px]">folder_managed</span><span class="truncate">Projetos</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="tarefas" href="#"><span class="material-symbols-outlined text-[20px]">check_circle</span><span class="truncate">Tarefas</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="reunioes" href="#"><span class="material-symbols-outlined text-[20px]">calendar_today</span><span class="truncate">Reuniões</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-2 rounded-lg transition-all bg-primary-container text-on-primary font-semibold shadow-sm" data-path="contatos" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span class="truncate">Contatos</span></a></nav></div></div><div class="p-space-md border-t border-outline-variant/40 flex flex-col gap-space-md bg-surface-container-low/40"><div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-lowest border border-outline-variant/40 hover:border-outline transition-colors cursor-pointer"><div class="flex items-center gap-2 min-w-0"><div class="w-6 h-6 rounded bg-primary text-on-primary flex items-center justify-center font-label-sm text-label-sm font-bold">AC</div><div class="flex flex-col min-w-0"><span class="font-label-md text-label-md text-on-surface truncate font-semibold">Acme Consulting</span><span class="font-label-sm text-label-sm text-secondary truncate">Enterprise Tier</span></div></div><span class="material-symbols-outlined text-secondary text-[18px]">unfold_more</span></div><div class="flex flex-col gap-1 px-1"><div class="flex items-center justify-between text-secondary font-label-sm text-label-sm"><span>Armazenamento</span><span class="font-data-mono text-data-mono text-on-surface font-medium">74.2 / 100 GB</span></div><div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden"><div class="h-full bg-primary-container rounded-full" style="width: 74%"></div></div></div></div></aside><div class="pl-64 flex flex-col min-h-screen"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/40 z-40 px-space-xl flex items-center justify-between"><div class="flex items-center gap-space-md flex-1 max-w-lg"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-[18px]">search</span><input class="w-full h-9 pl-9 pr-14 bg-surface-container-lowest border border-outline-variant/60 rounded-lg text-on-surface placeholder:text-secondary focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body-md text-body-md transition-all" placeholder="Pesquisar clientes, tarefas, propostas..." type="text"/><kbd class="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-semibold text-secondary bg-surface-container-low border border-outline-variant/60 rounded uppercase font-data-mono">⌘K</kbd></div></div><div class="flex items-center gap-space-md"><button class="h-9 px-space-md bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold rounded-lg flex items-center gap-1.5 shadow-sm transition-all" type="button"><span class="material-symbols-outlined text-[18px]">add</span><span>Novo</span><span class="material-symbols-outlined text-[16px]">expand_more</span></button><div class="h-5 w-[1px] bg-outline-variant/40 mx-1"></div><button aria-label="Notificações" class="relative w-9 h-9 flex items-center justify-center rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-container-lowest"></span></button><button aria-label="Ajuda" class="w-9 h-9 flex items-center justify-center rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">help</span></button><div class="flex items-center gap-space-sm pl-2 cursor-pointer"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant/60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4qJgODgUz7amb6TEc8tqfqjMlkfBHY-8kanXGVB717JZy3bpNS-u9ZlYQlhVeauMafsFsXoDHqOh2icIbzjt5Bflvd21dAgsRa5A8CZ-ZqFIbJgUlRXVKzeMDA4hoRlNQeVpccLf2jJg9QBoNMGhBB6vroyBLShV06UWzqF3QqDQvibWujM9rtF1i9VidsTJX_8ZvzjNypwyjAEh_GKwpox-WL9dxBHLfk1TV5fmqnshuWzXG_Mf5Fg"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-tertiary-container ring-2 ring-surface-container-lowest"></span></div><div class="hidden xl:flex flex-col text-left"><span class="font-label-md text-label-md font-semibold text-on-surface">Helena Ramos</span><span class="font-label-sm text-label-sm text-secondary">COO</span></div><span class="material-symbols-outlined text-secondary text-[18px]">keyboard_arrow_down</span></div></div></header><main class="w-full pt-16 bg-surface min-h-screen px-space-xl py-space-xl"><div class="flex flex-col w-full">
+<!-- Top Command & Header Block -->
+<section class="flex flex-col gap-space-lg mb-space-xl">
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg">
+<div class="flex flex-col gap-1 max-w-2xl">
+<div class="flex items-center gap-space-sm text-secondary font-label-sm text-label-sm uppercase tracking-wider">
+<span class="inline-block w-2 h-2 rounded-full bg-primary-container"></span>
+<span>CRM • Governança de Relacionamento</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">
+          Diretório de Contatos &amp; Stakeholders
+        </h1>
+<p class="font-body-md text-body-md text-on-surface-variant">
+          Todos os contatos-chave, decisores e patrocinadores de projetos em um só lugar com sincronização em tempo real de cadências operacionais.
+        </p>
+</div>
+<div class="flex items-center gap-space-sm self-start lg:self-auto">
+<button class="h-9 px-space-md bg-surface-container-lowest hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold rounded-lg shadow-sm flex items-center gap-2 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">file_download</span>
+<span>Exportar Dados</span>
+</button>
+<button class="h-9 px-space-lg bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold rounded-lg shadow-sm flex items-center gap-2 transition-all" id="btn-novo-contato" type="button">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+<span>+ Novo Contato</span>
+</button>
+</div>
+</div>
+<!-- Live Metrics Strip & Search Panel -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-md">
+<!-- Metric 1 -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Total Mapeado</span>
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface font-data-mono">84</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[22px]">contacts</span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">C-Level &amp; Decisores</span>
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface font-data-mono">31</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-secondary-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">military_tech</span>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Com Pendências</span>
+<span class="font-headline-lg text-headline-lg font-bold text-error font-data-mono">18</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[22px]">pending_actions</span>
+</div>
+</div>
+<!-- Metric 4: Direct Cadence Ratio SVG Mini Sparkline -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Cadência Semanal</span>
+<span class="font-label-sm text-label-sm text-tertiary font-semibold flex items-center">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +14%
+          </span>
+</div>
+<div class="flex items-end justify-between mt-1">
+<span class="font-headline-md text-headline-md font-bold text-on-surface font-data-mono">92.4%</span>
+<svg class="w-24 h-6 text-tertiary" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 100 24">
+<polyline points="0,20 18,14 36,18 54,9 72,12 90,4 100,2"></polyline>
+</svg>
+</div>
+</div>
+</div>
+<!-- Filter & Search Toolbar -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col lg:flex-row gap-space-md items-stretch lg:items-center justify-between">
+<!-- Search Input with Keyboard Indicator -->
+<div class="relative flex-1 max-w-lg">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-[18px]">manage_search</span>
+<input class="w-full h-10 pl-10 pr-24 bg-surface-container-low rounded-lg text-on-surface placeholder:text-secondary focus:outline-none focus:bg-surface-container-lowest font-body-md text-body-md transition-all" id="contact-search-input" placeholder="Pesquisar por nome, cargo, empresa ou e-mail corporativo..." type="text"/>
+<div class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+<kbd class="px-1.5 py-0.5 rounded bg-surface-container font-data-mono text-label-sm text-secondary shadow-sm">⌘F</kbd>
+<kbd class="px-1.5 py-0.5 rounded bg-surface-container font-data-mono text-label-sm text-secondary shadow-sm">/</kbd>
+</div>
+</div>
+<!-- Quick Segment Pills -->
+<div class="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
+<button class="h-8 px-3 rounded-full bg-primary-container text-on-primary font-label-md text-label-md font-semibold flex items-center gap-1 shadow-sm transition-all">
+<span>Todos</span>
+<span class="px-1.5 py-0.2 rounded-full bg-white/20 text-label-sm font-data-mono">84</span>
+</button>
+<button class="h-8 px-3 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-all flex items-center gap-1">
+<span>Decisores C-Level</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container-highest text-label-sm font-data-mono">31</span>
+</button>
+<button class="h-8 px-3 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-all flex items-center gap-1">
+<span>Técnicos / Operacionais</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container-highest text-label-sm font-data-mono">38</span>
+</button>
+<button class="h-8 px-3 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-all flex items-center gap-1">
+<span>Patrocinadores</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container-highest text-label-sm font-data-mono">15</span>
+</button>
+<button class="h-8 px-3 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-all flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span>Com Tarefas Pendentes</span>
+<span class="px-1.5 py-0.2 rounded-full bg-error-container text-on-error-container text-label-sm font-data-mono">18</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Contacts High-Density Directory Card Grid -->
+<section class="flex flex-col gap-space-md mb-space-xl">
+<!-- Table Column Headers Bar -->
+<div class="px-space-lg py-2 rounded-lg bg-surface-container-low text-secondary font-label-sm text-label-sm uppercase tracking-wider hidden xl:grid grid-cols-12 gap-space-md items-center">
+<div class="col-span-4 flex items-center gap-space-sm">
+<input class="w-4 h-4 rounded text-primary-container focus:ring-0 cursor-pointer" id="select-all" type="checkbox"/>
+<span>Stakeholder / Organização</span>
+</div>
+<div class="col-span-3">Comunicação Direta</div>
+<div class="col-span-3">Status Operacional / Pendências</div>
+<div class="col-span-2 text-right">Última Interação • Ações</div>
+</div>
+<!-- Contact Row 1: Dr. Roberto Meireles -->
+<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-md items-center">
+<!-- Profile Column -->
+<div class="xl:col-span-4 flex items-start gap-space-md min-w-0">
+<div class="pt-1 flex items-center">
+<input class="contact-checkbox w-4 h-4 rounded text-primary-container focus:ring-0 cursor-pointer" type="checkbox"/>
+</div>
+<div class="relative flex-shrink-0">
+<img class="w-12 h-12 rounded-xl object-cover" data-alt="Professional studio portrait of Dr. Roberto Meireles, a senior Brazilian chief technology officer in his late 40s wearing a dark tailored navy blazer and clean rimless glasses, illuminated with crisp cool corporate lighting against a minimal clean architectural slate background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCD-REFgf-oau7DBlXc3Jv8FENugnnQ3SeqPDMQQsdqn8S3X_YcK6svfAySEOtiKK7XNh7JXUt1kfkrZ14-3yhLp9C48KPozUJ7r2kEIzzOEE5_asseVNWZsJwCMKFDW_maen5SDPpkXuZ2A9Jddh-y8MGyY8u6zhnoAnCubjRU7DJ1LD4ZXHYCZ7PDdkXO1G9XvaHlIX_ArQiEmXjJpzFuCGVWMK6UvOOGJrW8tS2PRRmvPk9BqrlSOw"/>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary text-[10px]" title="Cliente Ativo">
+<span class="material-symbols-outlined text-[10px]">check</span>
+</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-body-lg font-bold text-on-surface truncate group-hover:text-primary-container transition-colors">
+                Dr. Roberto Meireles
+              </h3>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold">
+                Decisor C-Level
+              </span>
+</div>
+<span class="font-body-md text-body-md text-secondary truncate">
+              Diretor de Tecnologia (CTO)
+            </span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="material-symbols-outlined text-[15px] text-secondary">corporate_fare</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface-variant truncate">Banco Vértice S.A.</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">Cliente Ativo</span>
+</div>
+</div>
+</div>
+<!-- Direct Channels Column -->
+<div class="xl:col-span-3 flex flex-col gap-1 min-w-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">mail</span>
+<a class="font-body-md text-body-md text-on-surface hover:text-primary-container truncate underline-offset-2 hover:underline" href="mailto:roberto.meireles@verticebank.com.br">
+              roberto.meireles@verticebank.com.br
+            </a>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">call</span>
+<span class="font-data-mono text-data-mono text-secondary">(11) 98765-4321</span>
+<span class="px-1.5 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm">Comercial</span>
+</div>
+</div>
+<!-- Operational Status & Pending Tasks -->
+<div class="xl:col-span-3 flex flex-col gap-1.5">
+<div class="p-2 rounded-lg bg-error-container/40 flex items-start gap-2">
+<span class="material-symbols-outlined text-error text-[18px] flex-shrink-0 mt-0.5">warning</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md font-bold text-on-error-container">2 pendências críticas</span>
+<span class="font-body-sm text-body-sm text-on-error-container truncate">
+                Aprovação de escopo Fase 3 • Feedback de SLA
+              </span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-secondary font-label-sm text-label-sm">
+<span>Score de Engajamento:</span>
+<div class="w-16 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 88%"></div>
+</div>
+<span class="font-data-mono text-on-surface font-semibold">88%</span>
+</div>
+</div>
+<!-- Last Activity & Quick Actions -->
+<div class="xl:col-span-2 flex flex-col xl:items-end justify-between gap-2">
+<div class="flex items-center gap-1.5 text-secondary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[15px]">event</span>
+<span>Reunião em 18 Out (há 6 dias)</span>
+</div>
+<div class="flex items-center gap-1">
+<a class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors" href="tel:11987654321" title="Ligar">
+<span class="material-symbols-outlined text-[17px]">call</span>
+</a>
+<a class="h-8 px-2.5 rounded-lg bg-tertiary-container hover:bg-tertiary text-on-tertiary flex items-center gap-1 font-label-sm text-label-sm font-semibold transition-colors" href="https://wa.me/5511987654321" target="_blank" title="Conversar no WhatsApp">
+<span class="material-symbols-outlined text-[16px]">chat</span>
+<span>WhatsApp</span>
+</a>
+<button class="h-8 px-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">calendar_add_on</span>
+<span>Agendar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Contact Row 2: Camila Drummond -->
+<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-md items-center">
+<!-- Profile Column -->
+<div class="xl:col-span-4 flex items-start gap-space-md min-w-0">
+<div class="pt-1 flex items-center">
+<input class="contact-checkbox w-4 h-4 rounded text-primary-container focus:ring-0 cursor-pointer" type="checkbox"/>
+</div>
+<div class="relative flex-shrink-0">
+<img class="w-12 h-12 rounded-xl object-cover" data-alt="Editorial business portrait of Camila Drummond, a charismatic Brazilian executive female in her late 30s with styled brunette hair in a modern well-lit biotechnology boardroom setting, wearing a sophisticated neutral off-white blazer." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_S7BCkf4sCIk7CmCqwD2oWNYr8lsd3ABFqJjCuEsv5sdggRULcdH3hJlVhg2Q4GKR7fHbghdTLls9IQz6E4EkmwsN85iy8blEE4ZppBjSj-z6tdQ31_QTwMGvw04c4ioaKkpeh-gMMAJjgt3ItIlmXgWOA6eYWGGM5b7NnnYbphyQoPJQsr_uA-tKoPYM2hUF7Bq7LhK_HiXsCgS2A5FAUDDA4bKruyPiXefoC12SCZIbzlVRNXZ0ww"/>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary text-[10px]">
+<span class="material-symbols-outlined text-[10px]">check</span>
+</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-body-lg font-bold text-on-surface truncate group-hover:text-primary-container transition-colors">
+                Camila Drummond
+              </h3>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">
+                Patrocinadora
+              </span>
+</div>
+<span class="font-body-md text-body-md text-secondary truncate">
+              Head de Inovação &amp; Parcerias
+            </span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="material-symbols-outlined text-[15px] text-secondary">domain</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface-variant truncate">Biolab Farmacêutica</span>
+<span class="px-1.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm">Tier 1 Key Account</span>
+</div>
+</div>
+</div>
+<!-- Direct Channels Column -->
+<div class="xl:col-span-3 flex flex-col gap-1 min-w-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">mail</span>
+<a class="font-body-md text-body-md text-on-surface hover:text-primary-container truncate underline-offset-2 hover:underline" href="mailto:camila.drummond@biolab.com.br">
+              camila.drummond@biolab.com.br
+            </a>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">mark_chat_unread</span>
+<span class="font-data-mono text-data-mono text-secondary">(11) 99123-4567</span>
+<span class="px-1.5 py-0.5 rounded bg-tertiary-container text-on-tertiary font-label-sm text-label-sm">WhatsApp Ativo</span>
+</div>
+</div>
+<!-- Operational Status & Pending Tasks -->
+<div class="xl:col-span-3 flex flex-col gap-1.5">
+<div class="p-2 rounded-lg bg-surface-container-high flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] flex-shrink-0 mt-0.5">assignment_late</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md font-bold text-on-surface">1 pendência contratual</span>
+<span class="font-body-sm text-body-sm text-secondary truncate">
+                Envio de contrato assinado (Jurídico biolab)
+              </span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-secondary font-label-sm text-label-sm">
+<span>Score de Engajamento:</span>
+<div class="w-16 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container rounded-full" style="width: 95%"></div>
+</div>
+<span class="font-data-mono text-on-surface font-semibold">95%</span>
+</div>
+</div>
+<!-- Last Activity & Quick Actions -->
+<div class="xl:col-span-2 flex flex-col xl:items-end justify-between gap-2">
+<div class="flex items-center gap-1.5 text-secondary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[15px] text-tertiary">mail</span>
+<span>E-mail recebido ontem às 16:45</span>
+</div>
+<div class="flex items-center gap-1">
+<a class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors" href="tel:11991234567" title="Ligar">
+<span class="material-symbols-outlined text-[17px]">call</span>
+</a>
+<a class="h-8 px-2.5 rounded-lg bg-tertiary-container hover:bg-tertiary text-on-tertiary flex items-center gap-1 font-label-sm text-label-sm font-semibold transition-colors" href="https://wa.me/5511991234567" target="_blank" title="WhatsApp">
+<span class="material-symbols-outlined text-[16px]">chat</span>
+<span>WhatsApp</span>
+</a>
+<button class="h-8 px-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">calendar_add_on</span>
+<span>Agendar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Contact Row 3: Rodrigo Antunes -->
+<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-md items-center">
+<!-- Profile Column -->
+<div class="xl:col-span-4 flex items-start gap-space-md min-w-0">
+<div class="pt-1 flex items-center">
+<input class="contact-checkbox w-4 h-4 rounded text-primary-container focus:ring-0 cursor-pointer" type="checkbox"/>
+</div>
+<div class="relative flex-shrink-0">
+<div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center font-headline-md text-headline-md font-bold">
+              RA
+            </div>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary text-[10px]">
+<span class="material-symbols-outlined text-[10px]">check</span>
+</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-body-lg font-bold text-on-surface truncate group-hover:text-primary-container transition-colors">
+                Rodrigo Antunes
+              </h3>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold">
+                Decisor C-Level
+              </span>
+</div>
+<span class="font-body-md text-body-md text-secondary truncate">
+              Diretor de Operações (COO)
+            </span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="material-symbols-outlined text-[15px] text-secondary">bolt</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface-variant truncate">Solaris Energia Renovável</span>
+</div>
+</div>
+</div>
+<!-- Direct Channels Column -->
+<div class="xl:col-span-3 flex flex-col gap-1 min-w-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">mail</span>
+<a class="font-body-md text-body-md text-on-surface hover:text-primary-container truncate underline-offset-2 hover:underline" href="mailto:rodrigo@solarisenergia.com.br">
+              rodrigo@solarisenergia.com.br
+            </a>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">phone_iphone</span>
+<span class="font-data-mono text-data-mono text-secondary">(21) 98111-2020</span>
+</div>
+</div>
+<!-- Operational Status & Pending Tasks -->
+<div class="xl:col-span-3 flex flex-col gap-1.5">
+<div class="p-2 rounded-lg bg-tertiary-fixed/30 flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[18px]">verified</span>
+<span class="font-label-md text-label-md font-bold text-on-tertiary-fixed-variant">Em dia • Nenhuma pendência pendente</span>
+</div>
+<div class="flex items-center gap-2 text-secondary font-label-sm text-label-sm">
+<span>Score de Engajamento:</span>
+<div class="w-16 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container rounded-full" style="width: 76%"></div>
+</div>
+<span class="font-data-mono text-on-surface font-semibold">76%</span>
+</div>
+</div>
+<!-- Last Activity & Quick Actions -->
+<div class="xl:col-span-2 flex flex-col xl:items-end justify-between gap-2">
+<div class="flex items-center gap-1.5 text-secondary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[15px]">call</span>
+<span>Ligação realizada em 21 Out</span>
+</div>
+<div class="flex items-center gap-1">
+<a class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors" href="tel:21981112020" title="Ligar">
+<span class="material-symbols-outlined text-[17px]">call</span>
+</a>
+<a class="h-8 px-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center gap-1 font-label-sm text-label-sm font-semibold transition-colors" href="https://wa.me/5521981112020" target="_blank" title="WhatsApp">
+<span class="material-symbols-outlined text-[16px]">chat</span>
+<span>WhatsApp</span>
+</a>
+<button class="h-8 px-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">calendar_add_on</span>
+<span>Agendar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Contact Row 4: Fernanda Silveira -->
+<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-md items-center">
+<!-- Profile Column -->
+<div class="xl:col-span-4 flex items-start gap-space-md min-w-0">
+<div class="pt-1 flex items-center">
+<input class="contact-checkbox w-4 h-4 rounded text-primary-container focus:ring-0 cursor-pointer" type="checkbox"/>
+</div>
+<div class="relative flex-shrink-0">
+<img class="w-12 h-12 rounded-xl object-cover" data-alt="Modern candid corporate photograph of Fernanda Silveira, a tech product manager in her early 30s with modern styled black hair and friendly expression, standing against a high-tech glass office partitioned background with soft daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbQ6J3f1RhjM-TtUTvNs9lAZuJF4YwKeEOZaSkMcBCRFRhXoIkSCNtmqaoFy8TERLNUhlQYAhNFfDKoCgDJtNUiEYEpD9b1AQRZ871CMSR5FppncP3nkqDCydq8y5V80WUBTg2VhnnRXkHfWoGvxifkorKCrh_AdwzKJrsfxwOIB2j-w_AsXCCnJw3pAPDi3AaKuve4vV-983C_dBvsqXC8OMgSpk34N3_88fEyGOgnTZOfcTV4Yz_uw"/>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary text-[10px]">
+<span class="material-symbols-outlined text-[10px]">check</span>
+</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-body-lg font-bold text-on-surface truncate group-hover:text-primary-container transition-colors">
+                Fernanda Silveira
+              </h3>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">
+                Técnica / Operacional
+              </span>
+</div>
+<span class="font-body-md text-body-md text-secondary truncate">
+              Product Manager Lead
+            </span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="material-symbols-outlined text-[15px] text-secondary">hub</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface-variant truncate">Nexus Soluções Digitais</span>
+</div>
+</div>
+</div>
+<!-- Direct Channels Column -->
+<div class="xl:col-span-3 flex flex-col gap-1 min-w-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">mail</span>
+<a class="font-body-md text-body-md text-on-surface hover:text-primary-container truncate underline-offset-2 hover:underline" href="mailto:f.silveira@nexusdigital.io">
+              f.silveira@nexusdigital.io
+            </a>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">call</span>
+<span class="font-data-mono text-data-mono text-secondary">(41) 99876-1122</span>
+</div>
+</div>
+<!-- Operational Status & Pending Tasks -->
+<div class="xl:col-span-3 flex flex-col gap-1.5">
+<div class="p-2 rounded-lg bg-error-container/40 flex items-start gap-2">
+<span class="material-symbols-outlined text-error text-[18px] flex-shrink-0 mt-0.5">code_blocks</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md font-bold text-on-error-container">3 pendências de integração</span>
+<span class="font-body-sm text-body-sm text-on-error-container truncate">
+                Swagger v2 review • Webhook auth • Testes de carga
+              </span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-secondary font-label-sm text-label-sm">
+<span>Score de Engajamento:</span>
+<div class="w-16 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 82%"></div>
+</div>
+<span class="font-data-mono text-on-surface font-semibold">82%</span>
+</div>
+</div>
+<!-- Last Activity & Quick Actions -->
+<div class="xl:col-span-2 flex flex-col xl:items-end justify-between gap-2">
+<div class="flex items-center gap-1.5 text-secondary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[15px]">forum</span>
+<span>Mensagem no Slack há 3 horas</span>
+</div>
+<div class="flex items-center gap-1">
+<a class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors" href="tel:41998761122" title="Ligar">
+<span class="material-symbols-outlined text-[17px]">call</span>
+</a>
+<a class="h-8 px-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center gap-1 font-label-sm text-label-sm font-semibold transition-colors" href="https://wa.me/5541998761122" target="_blank" title="WhatsApp">
+<span class="material-symbols-outlined text-[16px]">chat</span>
+<span>WhatsApp</span>
+</a>
+<button class="h-8 px-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">calendar_add_on</span>
+<span>Agendar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Contact Row 5: Marcelo Guimarães -->
+<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-md items-center">
+<!-- Profile Column -->
+<div class="xl:col-span-4 flex items-start gap-space-md min-w-0">
+<div class="pt-1 flex items-center">
+<input class="contact-checkbox w-4 h-4 rounded text-primary-container focus:ring-0 cursor-pointer" type="checkbox"/>
+</div>
+<div class="relative flex-shrink-0">
+<div class="w-12 h-12 rounded-xl bg-secondary text-on-secondary flex items-center justify-center font-headline-md text-headline-md font-bold">
+              MG
+            </div>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary text-[10px]">
+<span class="material-symbols-outlined text-[10px]">check</span>
+</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-md text-body-lg font-bold text-on-surface truncate group-hover:text-primary-container transition-colors">
+                Marcelo Guimarães
+              </h3>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold">
+                Decisor C-Level
+              </span>
+</div>
+<span class="font-body-md text-body-md text-secondary truncate">
+              CFO &amp; Relações com Investidores
+            </span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="material-symbols-outlined text-[15px] text-secondary">storefront</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface-variant truncate">Apex Retail Group</span>
+</div>
+</div>
+</div>
+<!-- Direct Channels Column -->
+<div class="xl:col-span-3 flex flex-col gap-1 min-w-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">mail</span>
+<a class="font-body-md text-body-md text-on-surface hover:text-primary-container truncate underline-offset-2 hover:underline" href="mailto:marcelo.g@apexretail.com.br">
+              marcelo.g@apexretail.com.br
+            </a>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">call</span>
+<span class="font-data-mono text-data-mono text-secondary">(11) 97766-5544</span>
+</div>
+</div>
+<!-- Operational Status & Pending Tasks -->
+<div class="xl:col-span-3 flex flex-col gap-1.5">
+<div class="p-2 rounded-lg bg-surface-container-high flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] flex-shrink-0 mt-0.5">account_balance_wallet</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md font-bold text-on-surface">1 pendência financeira</span>
+<span class="font-body-sm text-body-sm text-secondary truncate">
+                Aprovação de aditivo de orçamento Q4
+              </span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-secondary font-label-sm text-label-sm">
+<span>Score de Engajamento:</span>
+<div class="w-16 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 90%"></div>
+</div>
+<span class="font-data-mono text-on-surface font-semibold">90%</span>
+</div>
+</div>
+<!-- Last Activity & Quick Actions -->
+<div class="xl:col-span-2 flex flex-col xl:items-end justify-between gap-2">
+<div class="flex items-center gap-1.5 text-secondary font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[15px]">description</span>
+<span>Proposta visualizada hoje às 09:12</span>
+</div>
+<div class="flex items-center gap-1">
+<a class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors" href="tel:11977665544" title="Ligar">
+<span class="material-symbols-outlined text-[17px]">call</span>
+</a>
+<a class="h-8 px-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center gap-1 font-label-sm text-label-sm font-semibold transition-colors" href="https://wa.me/5511977665544" target="_blank" title="WhatsApp">
+<span class="material-symbols-outlined text-[16px]">chat</span>
+<span>WhatsApp</span>
+</a>
+<button class="h-8 px-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">calendar_add_on</span>
+<span>Agendar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bulk Actions & Quick Export Floating / Sticky Bottom Bar -->
+<aside class="sticky bottom-4 z-30 p-space-md rounded-xl bg-surface-container-lowest/95 backdrop-blur-md shadow-xl flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md w-full md:w-auto">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary-container animate-pulse"></span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">
+<span class="font-data-mono font-bold text-primary-container" id="selected-count">0</span> contatos selecionados
+        </span>
+</div>
+<div class="h-4 w-px bg-surface-container-high hidden sm:block"></div>
+<div class="flex items-center gap-1">
+<button class="h-8 px-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+<span>E-mail em Massa</span>
+</button>
+<button class="h-8 px-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">label</span>
+<span>Aplicar Tag</span>
+</button>
+<button class="h-8 px-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">event_repeat</span>
+<span>Criar Cadência</span>
+</button>
+</div>
+</div>
+<!-- Export Options & Pagination Summary -->
+<div class="flex items-center justify-between md:justify-end gap-space-md w-full md:w-auto">
+<div class="flex items-center gap-2">
+<button class="h-8 px-3 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">download</span>
+<span>CSV</span>
+</button>
+<button class="h-8 px-3 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">contact_page</span>
+<span>vCard</span>
+</button>
+</div>
+<div class="flex items-center gap-2 font-data-mono text-label-sm text-secondary">
+<span>Exibindo 1-5 de 84</span>
+<div class="flex items-center gap-1">
+<button class="w-7 h-7 rounded bg-surface-container-low text-secondary flex items-center justify-center opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<button class="w-7 h-7 rounded bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+<!-- Interactive Search / Shortcut JavaScript -->
+<script>
+    (function() {
+      // Shortcut key handler for '/' and 'Cmd+F'
+      window.addEventListener('keydown', function(e) {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'f') {
+          e.preventDefault();
+          const search = document.getElementById('contact-search-input');
+          if (search) {
+            search.focus();
+            search.select();
+          }
+        } else if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+          e.preventDefault();
+          const search = document.getElementById('contact-search-input');
+          if (search) {
+            search.focus();
+          }
+        }
+      });
+
+      // Selection tracking logic
+      const selectAll = document.getElementById('select-all');
+      const checkboxes = document.querySelectorAll('.contact-checkbox');
+      const counter = document.getElementById('selected-count');
+
+      function updateCounter() {
+        const checkedCount = document.querySelectorAll('.contact-checkbox:checked').length;
+        if (counter) {
+          counter.textContent = checkedCount;
+        }
+        if (selectAll) {
+          selectAll.checked = checkedCount === checkboxes.length && checkboxes.length > 0;
+          selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+        }
+      }
+
+      if (selectAll) {
+        selectAll.addEventListener('change', function() {
+          checkboxes.forEach(cb => {
+            cb.checked = selectAll.checked;
+          });
+          updateCounter();
+        });
+      }
+
+      checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateCounter);
+      });
+    })();
+  </script>
+</div></main></div></body></html>

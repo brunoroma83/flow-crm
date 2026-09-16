@@ -1,0 +1,23 @@
+[project]
+name = "flow-crm"
+version = "0.1.0"
+description = "FlowCRM - CRM de operações B2B"
+readme = "README.md"
+authors = [
+    { name = "Bruno Roma", email = "bruuno@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.128.0",
+    "uvicorn[standard]>=0.34.0",
+    "sqlalchemy>=2.0.36",
+    "psycopg[binary]>=3.2.3",
+    "pydantic-settings>=2.7.0",
+]
+
+[project.scripts]
+flow-crm = "flow_crm.main:run"
+
+[build-system]
+requires = ["uv_build>=0.12.0,<0.13.0"]
+build-backend = "uv_build"

@@ -1,0 +1,21 @@
+# Sobreposição para desenvolvimento local. Não utilize em produção.
+services:
+  app:
+    environment:
+      # Garante que Python e StaticFiles usem o código montado do host,
+      # e não a cópia instalada na imagem durante o build.
+      PYTHONPATH: /app/src
+    volumes:
+      - ./src:/app/src
+    command:
+      - uv
+      - run
+      - uvicorn
+      - flow_crm.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload
+      - --reload-dir
+      - /app/src

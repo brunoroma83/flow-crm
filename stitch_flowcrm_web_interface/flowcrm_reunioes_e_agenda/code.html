@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>FlowCRM</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface": "#f8f9ff", "primary-fixed": "#dbe1ff", "primary-container": "#2563eb", "on-secondary": "#ffffff", "inverse-on-surface": "#eaf1ff", "outline": "#737686", "surface-bright": "#f8f9ff", "on-tertiary-fixed-variant": "#005236", "tertiary-fixed-dim": "#4edea3", "tertiary-fixed": "#6ffbbe", "surface-container-low": "#eff4ff", "secondary-fixed": "#dae2fd", "on-tertiary-container": "#bdffdb", "on-secondary-fixed-variant": "#3f465c", "surface-container": "#e5eeff", "on-error": "#ffffff", "primary": "#004ac6", "secondary-container": "#dae2fd", "tertiary-container": "#007d55", "surface-container-lowest": "#ffffff", "on-tertiary-fixed": "#002113", "surface-container-highest": "#d3e4fe", "on-primary": "#ffffff", "on-error-container": "#93000a", "on-primary-fixed": "#00174b", "surface-container-high": "#dce9ff", "on-surface": "#0b1c30", "on-background": "#0b1c30", "outline-variant": "#c3c6d7", "secondary": "#565e74", "on-surface-variant": "#434655", "inverse-surface": "#213145", "error-container": "#ffdad6", "on-secondary-container": "#5c647a", "on-tertiary": "#ffffff", "surface-tint": "#0053db", "background": "#f8f9ff", "surface-variant": "#d3e4fe", "surface-dim": "#cbdbf5", "inverse-primary": "#b4c5ff", "on-primary-container": "#eeefff", "secondary-fixed-dim": "#bec6e0", "error": "#ba1a1a", "tertiary": "#006242", "on-secondary-fixed": "#131b2e", "on-primary-fixed-variant": "#003ea8", "primary-fixed-dim": "#b4c5ff" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter": "1rem", "margin": "1.5rem", "space-xl": "1.5rem", "space-md": "0.75rem", "margin-mobile": "1rem", "space-lg": "1rem", "space-xs": "0.25rem", "space-sm": "0.5rem", "gutter-mobile": "0.75rem" }, "fontFamily": { "label-sm": ["Inter"], "label-md": ["Inter"], "headline-lg": ["Inter"], "headline-lg-mobile": ["Inter"], "body-md": ["Inter"], "body-lg": ["Inter"], "body-sm": ["Inter"], "headline-xl": ["Inter"], "headline-xl-mobile": ["Inter"], "headline-md": ["Inter"], "data-mono": ["Inter"] }, "fontSize": { "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-lg-mobile": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-md": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "body-lg": ["15px", { "lineHeight": "22px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700" }], "headline-xl-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-md": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "data-mono": ["13px", { "lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "500" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-outline-variant/40 z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center gap-space-sm border-b border-outline-variant/40"><img alt="FlowCRM Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1W2ogsWYGHT_q-6eFtXEk94qwUWuYtOTY7mJIynCPEjMhBWxVhpHTUVwgQqRYEBa_77X1K_DN7c8xfYWnra02Z5QxFvT_-BFlBSJGJieVJGVyU72kupqKLFxLLLmN6LKpscZmuMyrNmttkGjhCmjx-3LDHdT8HDwp6cDGWu_6MovSlh9z5luNegakpXoimaPYE9ekr-HRg2ff_3Jw4G6YGM40P8KjH_6r9O6SiOoVfH6IT_0CeSst4Omrk"/><div class="flex flex-col min-w-0"><span class="font-headline-md text-body-lg font-bold tracking-tight text-on-surface truncate">FlowCRM</span><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary truncate">Operations Suite</span></div></div><div class="p-space-md"><nav class="flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary font-semibold shadow-sm"><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="truncate">Dashboard</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="clientes" href="#"><span class="material-symbols-outlined text-[20px]">corporate_fare</span><span class="truncate">Clientes</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="projetos" href="#"><span class="material-symbols-outlined text-[20px]">folder_managed</span><span class="truncate">Projetos</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="tarefas" href="#"><span class="material-symbols-outlined text-[20px]">check_circle</span><span class="truncate">Tarefas</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="reunioes" href="#"><span class="material-symbols-outlined text-[20px]">calendar_today</span><span class="truncate">Reuniões</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="contatos" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span class="truncate">Contatos</span></a></nav></div></div><div class="p-space-md border-t border-outline-variant/40 flex flex-col gap-space-md bg-surface-container-low/40"><div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-lowest border border-outline-variant/40 hover:border-outline transition-colors cursor-pointer"><div class="flex items-center gap-2 min-w-0"><div class="w-6 h-6 rounded bg-primary text-on-primary flex items-center justify-center font-label-sm text-label-sm font-bold">AC</div><div class="flex flex-col min-w-0"><span class="font-label-md text-label-md text-on-surface truncate font-semibold">Acme Consulting</span><span class="font-label-sm text-label-sm text-secondary truncate">Enterprise Tier</span></div></div><span class="material-symbols-outlined text-secondary text-[18px]">unfold_more</span></div><div class="flex flex-col gap-1 px-1"><div class="flex items-center justify-between text-secondary font-label-sm text-label-sm"><span>Armazenamento</span><span class="font-data-mono text-data-mono text-on-surface font-medium">74.2 / 100 GB</span></div><div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden"><div class="h-full bg-primary-container rounded-full" style="width: 74%"></div></div></div></div></aside><div class="pl-64 flex flex-col min-h-screen"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/40 z-40 px-space-xl flex items-center justify-between"><div class="flex items-center gap-space-md flex-1 max-w-lg"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-[18px]">search</span><input class="w-full h-9 pl-9 pr-14 bg-surface-container-lowest border border-outline-variant/60 rounded-lg text-on-surface placeholder:text-secondary focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body-md text-body-md transition-all" placeholder="Pesquisar clientes, tarefas, propostas..." type="text"/><kbd class="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-semibold text-secondary bg-surface-container-low border border-outline-variant/60 rounded uppercase font-data-mono">⌘K</kbd></div></div><div class="flex items-center gap-space-md"><button class="h-9 px-space-md bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold rounded-lg flex items-center gap-1.5 shadow-sm transition-all" type="button"><span class="material-symbols-outlined text-[18px]">add</span><span>Novo</span><span class="material-symbols-outlined text-[16px]">expand_more</span></button><div class="h-5 w-[1px] bg-outline-variant/40 mx-1"></div><button aria-label="Notificações" class="relative w-9 h-9 flex items-center justify-center rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-container-lowest"></span></button><button aria-label="Ajuda" class="w-9 h-9 flex items-center justify-center rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">help</span></button><div class="flex items-center gap-space-sm pl-2 cursor-pointer"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant/60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4qJgODgUz7amb6TEc8tqfqjMlkfBHY-8kanXGVB717JZy3bpNS-u9ZlYQlhVeauMafsFsXoDHqOh2icIbzjt5Bflvd21dAgsRa5A8CZ-ZqFIbJgUlRXVKzeMDA4hoRlNQeVpccLf2jJg9QBoNMGhBB6vroyBLShV06UWzqF3QqDQvibWujM9rtF1i9VidsTJX_8ZvzjNypwyjAEh_GKwpox-WL9dxBHLfk1TV5fmqnshuWzXG_Mf5Fg"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-tertiary-container ring-2 ring-surface-container-lowest"></span></div><div class="hidden xl:flex flex-col text-left"><span class="font-label-md text-label-md font-semibold text-on-surface">Helena Ramos</span><span class="font-label-sm text-label-sm text-secondary">COO</span></div><span class="material-symbols-outlined text-secondary text-[18px]">keyboard_arrow_down</span></div></div></header><main class="w-full pt-16 bg-surface min-h-screen px-space-xl py-space-xl"><div class="flex flex-col w-full">
+<!-- Subheader / Action Bar -->
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-space-md mb-space-lg">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">Agenda &amp; Reuniões Estratégicas</span>
+<div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container-low shadow-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-tertiary font-semibold">Google Cal &amp; Outlook Sincronizados</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm text-secondary font-body-sm text-body-sm mt-0.5">
+<span>Gestão de pipeline consultivo e sincronização operacional de clientes</span>
+<span class="text-outline-variant">•</span>
+<span class="font-data-mono text-data-mono text-primary font-medium">5 reuniões agendadas hoje</span>
+</div>
+</div>
+<!-- Controls Toolbar -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<!-- Date Navigator -->
+<div class="flex items-center bg-surface-container-lowest shadow-sm rounded-lg p-1">
+<button aria-label="Semana Anterior" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-surface-container text-secondary hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="px-2.5 py-1 text-on-surface font-label-md text-label-md font-semibold hover:bg-surface-container-low rounded-lg transition-colors" type="button">
+          Hoje
+        </button>
+<button aria-label="Próxima Semana" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-surface-container text-secondary hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+<!-- Current Period Indicator -->
+<div class="flex items-center gap-1.5 bg-surface-container-lowest shadow-sm px-space-md py-1.5 rounded-lg">
+<span class="material-symbols-outlined text-primary text-[18px]">event</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Semana de 23 a 27 de Outubro</span>
+</div>
+<!-- View Switcher Tabs -->
+<div class="flex bg-surface-container-lowest shadow-sm rounded-lg p-1">
+<button class="px-space-md py-1 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md font-semibold shadow-sm transition-all" type="button">
+          Semanal
+        </button>
+<button class="px-space-md py-1 rounded-lg text-secondary hover:text-on-surface font-label-md text-label-md font-medium transition-all" type="button">
+          Diária
+        </button>
+<button class="px-space-md py-1 rounded-lg text-secondary hover:text-on-surface font-label-md text-label-md font-medium transition-all" type="button">
+          Mensal
+        </button>
+</div>
+<!-- Quick Action: New Meeting -->
+<button class="h-9 px-space-md bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold rounded-lg flex items-center gap-1.5 shadow-sm transition-all ml-1" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Agendar Reunião</span>
+</button>
+</div>
+</div>
+<!-- Main Split Layout (Calendar 50% / Meeting Cockpit 50%) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT PANEL: Weekly Calendar Grid (Col 1-6) -->
+<section class="xl:col-span-6 flex flex-col gap-space-md bg-surface-container-lowest rounded-xl p-space-lg shadow-sm">
+<!-- Calendar Header Filters -->
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Visão Semanal</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Fuso: GMT-3 (Brasília)</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg text-secondary hover:bg-surface-container-high transition-colors" title="Filtrar por consultor" type="button">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg text-secondary hover:bg-surface-container-high transition-colors" title="Expandir grade" type="button">
+<span class="material-symbols-outlined text-[18px]">fullscreen</span>
+</button>
+</div>
+</div>
+<!-- Timetable Container -->
+<div class="relative overflow-x-auto rounded-lg bg-surface-container-low/40 p-space-xs">
+<div class="min-w-[580px] flex flex-col">
+<!-- Days Header Row -->
+<div class="grid grid-cols-6 text-center py-2 bg-surface-container-lowest rounded-lg shadow-sm mb-2">
+<div class="font-label-sm text-label-sm text-secondary font-semibold uppercase flex items-center justify-center">Hora</div>
+<div class="flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-secondary uppercase">Seg</span>
+<span class="font-data-mono text-data-mono text-on-surface font-semibold">23</span>
+</div>
+<div class="flex flex-col items-center bg-primary-container/10 py-0.5 rounded-lg px-2">
+<span class="font-label-sm text-label-sm text-primary font-bold uppercase">Ter</span>
+<span class="font-data-mono text-data-mono text-primary font-bold">24</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-secondary uppercase">Qua</span>
+<span class="font-data-mono text-data-mono text-on-surface font-semibold">25</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-secondary uppercase">Qui</span>
+<span class="font-data-mono text-data-mono text-on-surface font-semibold">26</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-secondary uppercase">Sex</span>
+<span class="font-data-mono text-data-mono text-on-surface font-semibold">27</span>
+</div>
+</div>
+<!-- Time Slots Rows (09:00 - 18:00) -->
+<div class="relative flex flex-col gap-1.5">
+<!-- 09:00 Slot -->
+<div class="grid grid-cols-6 items-center min-h-[46px] rounded-lg bg-surface-container-lowest/70 px-1 py-1">
+<span class="font-data-mono text-label-sm text-secondary text-center">09:00</span>
+<div class="col-span-5 grid grid-cols-5 gap-1.5">
+<div class="h-9 rounded bg-surface-container/30"></div>
+<div class="h-9 rounded bg-surface-container/30"></div>
+<div class="h-9 rounded bg-surface-container/30"></div>
+<div class="h-9 rounded bg-surface-container/30"></div>
+<div class="h-9 rounded bg-surface-container/30"></div>
+</div>
+</div>
+<!-- 10:00 Slot (Includes Terça 10:00: Daily Standup Geral Operações) -->
+<div class="grid grid-cols-6 items-center min-h-[52px] rounded-lg bg-surface-container-lowest px-1 py-1 shadow-sm">
+<span class="font-data-mono text-label-sm text-secondary text-center">10:00</span>
+<div class="col-span-5 grid grid-cols-5 gap-1.5">
+<div class="h-10 rounded bg-surface-container/30"></div>
+<!-- Card: Daily Standup (Interna) -->
+<div class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant flex flex-col justify-between shadow-sm cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-[10px] text-secondary font-bold uppercase">Interna</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</div>
+<span class="font-label-sm text-label-sm font-semibold truncate text-on-surface">Daily Standup Geral</span>
+</div>
+<div class="h-10 rounded bg-surface-container/30"></div>
+<div class="h-10 rounded bg-surface-container/30"></div>
+<div class="h-10 rounded bg-surface-container/30"></div>
+</div>
+</div>
+<!-- 11:00 Slot (Includes Quarta 11:00: Orion Tech) -->
+<div class="grid grid-cols-6 items-center min-h-[52px] rounded-lg bg-surface-container-lowest/70 px-1 py-1">
+<span class="font-data-mono text-label-sm text-secondary text-center">11:00</span>
+<div class="col-span-5 grid grid-cols-5 gap-1.5">
+<div class="h-10 rounded bg-surface-container/30"></div>
+<div class="h-10 rounded bg-surface-container/30"></div>
+<!-- Card: Quarta 11:00 Proposta Orion Tech -->
+<div class="p-1.5 rounded-lg bg-secondary-container text-on-secondary-fixed-variant flex flex-col justify-between shadow-sm cursor-pointer hover:opacity-90 transition-opacity">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-[10px] text-primary font-bold uppercase truncate">Comercial</span>
+<span class="material-symbols-outlined text-[13px] text-primary">attach_money</span>
+</div>
+<span class="font-label-sm text-label-sm font-semibold truncate">Orion Tech - Proposta</span>
+</div>
+<div class="h-10 rounded bg-surface-container/30"></div>
+<div class="h-10 rounded bg-surface-container/30"></div>
+</div>
+</div>
+<!-- 12:00 Lunch break / interval -->
+<div class="grid grid-cols-6 items-center min-h-[36px] rounded-lg bg-surface-container-low px-1 py-1">
+<span class="font-data-mono text-label-sm text-outline text-center">12:00</span>
+<div class="col-span-5 text-center font-label-sm text-[10px] text-outline uppercase tracking-wider">Intervalo Operacional / Almoço</div>
+</div>
+<!-- 13:00 Slot -->
+<div class="grid grid-cols-6 items-center min-h-[46px] rounded-lg bg-surface-container-lowest/70 px-1 py-1">
+<span class="font-data-mono text-label-sm text-secondary text-center">13:00</span>
+<div class="col-span-5 grid grid-cols-5 gap-1.5">
+<div class="h-9 rounded bg-surface-container/30"></div>
+<div class="h-9 rounded bg-surface-container/30"></div>
+<div class="h-9 rounded bg-surface-container/30"></div>
+<div class="h-9 rounded bg-surface-container/30"></div>
+<div class="h-9 rounded bg-surface-container/30"></div>
+</div>
+</div>
+<!-- 14:00 - 15:00 Slot (Includes Active Card Terça + Quinta Biolab) -->
+<div class="grid grid-cols-6 items-center min-h-[64px] rounded-lg bg-surface-container-lowest px-1 py-1 shadow-sm">
+<span class="font-data-mono text-label-sm text-primary font-bold text-center">14:00</span>
+<div class="col-span-5 grid grid-cols-5 gap-1.5">
+<div class="h-14 rounded bg-surface-container/30"></div>
+<!-- ACTIVE CARD: Terça 14:30 - Banco Vértice -->
+<div class="relative p-2 rounded-lg bg-primary-container text-on-primary shadow-md flex flex-col justify-between cursor-pointer transform scale-[1.03] z-10 transition-transform">
+<div class="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-tertiary-fixed border-2 border-surface-container-lowest flex items-center justify-center shadow-sm" title="Em andamento / Próxima">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-[10px] bg-primary/40 px-1.5 py-0.5 rounded text-on-primary font-bold">14:30 - 15:15</span>
+<span class="material-symbols-outlined text-[14px]">videocam</span>
+</div>
+<div class="flex flex-col min-w-0 mt-0.5">
+<span class="font-label-md text-label-md font-bold truncate">Banco Vértice</span>
+<span class="font-label-sm text-[10px] text-primary-fixed truncate">Alinhamento Entregas</span>
+</div>
+</div>
+<div class="h-14 rounded bg-surface-container/30"></div>
+<!-- Card: Quinta 14:00 Biolab -->
+<div class="p-1.5 rounded-lg bg-surface-container-high text-on-surface flex flex-col justify-between shadow-sm cursor-pointer hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-[10px] text-tertiary font-bold uppercase truncate">Homologação</span>
+<span class="material-symbols-outlined text-[13px] text-tertiary">science</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm font-semibold truncate">Biolab - QA</span>
+<span class="font-data-mono text-[10px] text-secondary truncate">14:00 - 15:00</span>
+</div>
+</div>
+<div class="h-14 rounded bg-surface-container/30"></div>
+</div>
+</div>
+<!-- 16:00 Slot (Includes Terça 16:00 Nexus) -->
+<div class="grid grid-cols-6 items-center min-h-[52px] rounded-lg bg-surface-container-lowest px-1 py-1 shadow-sm">
+<span class="font-data-mono text-label-sm text-secondary text-center">16:00</span>
+<div class="col-span-5 grid grid-cols-5 gap-1.5">
+<div class="h-10 rounded bg-surface-container/30"></div>
+<!-- Card: Terça 16:00 Nexus Revisão Técnica -->
+<div class="p-1.5 rounded-lg bg-surface-container-highest text-on-surface flex flex-col justify-between shadow-sm cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-[10px] text-secondary font-bold uppercase truncate">Arquitetura</span>
+<span class="material-symbols-outlined text-[13px] text-primary">cloud</span>
+</div>
+<span class="font-label-sm text-label-sm font-semibold truncate">Nexus - Cloud Rev</span>
+</div>
+<div class="h-10 rounded bg-surface-container/30"></div>
+<div class="h-10 rounded bg-surface-container/30"></div>
+<div class="h-10 rounded bg-surface-container/30"></div>
+</div>
+</div>
+<!-- 17:00 & 18:00 Slots -->
+<div class="grid grid-cols-6 items-center min-h-[44px] rounded-lg bg-surface-container-lowest/70 px-1 py-1">
+<span class="font-data-mono text-label-sm text-secondary text-center">17:00</span>
+<div class="col-span-5 grid grid-cols-5 gap-1.5">
+<div class="h-8 rounded bg-surface-container/30"></div>
+<div class="h-8 rounded bg-surface-container/30"></div>
+<div class="h-8 rounded bg-surface-container/30"></div>
+<div class="h-8 rounded bg-surface-container/30"></div>
+<div class="h-8 rounded bg-surface-container/30"></div>
+</div>
+</div>
+<div class="grid grid-cols-6 items-center min-h-[44px] rounded-lg bg-surface-container-lowest/50 px-1 py-1">
+<span class="font-data-mono text-label-sm text-secondary text-center">18:00</span>
+<div class="col-span-5 grid grid-cols-5 gap-1.5">
+<div class="h-8 rounded bg-surface-container/20"></div>
+<div class="h-8 rounded bg-surface-container/20"></div>
+<div class="h-8 rounded bg-surface-container/20"></div>
+<div class="h-8 rounded bg-surface-container/20"></div>
+<div class="h-8 rounded bg-surface-container/20"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Metrics Ribbon below Calendar -->
+<div class="grid grid-cols-3 gap-space-sm pt-space-xs">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">Horas em Reunião</span>
+<span class="font-data-mono text-body-lg font-bold text-on-surface">14.5 h</span>
+</div>
+<span class="material-symbols-outlined text-primary text-[22px]">timer</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">Taxa Presença</span>
+<span class="font-data-mono text-body-lg font-bold text-tertiary">96%</span>
+</div>
+<span class="material-symbols-outlined text-tertiary text-[22px]">check_circle</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">Itens de Ação Abertos</span>
+<span class="font-data-mono text-body-lg font-bold text-on-surface">9 pendentes</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-[22px]">task_alt</span>
+</div>
+</div>
+</section>
+<!-- RIGHT PANEL: Selected Meeting Detail & Execution Cockpit (Col 7-12) -->
+<section class="xl:col-span-6 flex flex-col gap-space-md">
+<!-- Card: Meeting Hero & Video Launchpad -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md relative overflow-hidden">
+<!-- Ambient Decorative gradient backdrop -->
+<div class="absolute -right-16 -top-16 w-52 h-52 rounded-full bg-primary-container/10 blur-3xl pointer-events-none"></div>
+<!-- Top Header & Direct Meet Launcher -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-space-sm pb-space-sm border-b border-surface-container-high">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-tertiary-container/15 text-tertiary font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Em andamento em 10m
+              </span>
+<span class="font-data-mono text-data-mono text-secondary font-medium">Hoje, 14:30 - 15:15 (45 min)</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface mt-1 tracking-tight">
+              Alinhamento Semanal de Entregas - Banco Vértice
+            </h1>
+</div>
+<!-- Video Actions -->
+<div class="flex items-center gap-2 shrink-0">
+<a class="h-10 px-space-md bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-bold rounded-lg flex items-center gap-2 shadow-md hover:shadow-lg transition-all" href="https://meet.google.com" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-[20px]">videocam</span>
+<span>Entrar no Google Meet</span>
+</a>
+<button class="h-10 px-3 bg-surface-container text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center gap-1.5 font-label-sm text-label-sm transition-colors" title="Gravação configurada via Flow AI Bot" type="button">
+<span class="material-symbols-outlined text-[16px] text-error">fiber_manual_record</span>
+<span class="font-semibold">Gravação Ativa</span>
+</button>
+</div>
+</div>
+<!-- Client & Project Context Chips -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<div class="flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low">
+<div class="w-9 h-9 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold text-label-md">
+              BV
+            </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Cliente Vinculado</span>
+<span class="font-label-md text-label-md font-bold text-on-surface truncate">Banco Vértice S.A.</span>
+</div>
+<span class="material-symbols-outlined text-secondary ml-auto text-[18px]">open_in_new</span>
+</div>
+<div class="flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low">
+<div class="w-9 h-9 rounded-lg bg-surface-container-high text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">folder_special</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Projeto Ativo</span>
+<span class="font-label-md text-label-md font-bold text-on-surface truncate">Implantação OpenFinance Core</span>
+</div>
+<span class="font-data-mono text-label-sm text-tertiary font-bold ml-auto">Fase 2</span>
+</div>
+</div>
+<!-- Confirmed Attendees Section (6 confirmados) -->
+<div class="flex flex-col gap-space-xs pt-1">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">
+              Participantes Confirmados (5 de 6)
+            </span>
+<button class="text-primary hover:underline font-label-sm text-label-sm font-semibold flex items-center gap-0.5" type="button">
+<span class="material-symbols-outlined text-[14px]">person_add</span> Convidar outro
+            </button>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<!-- Helena Ramos -->
+<div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-container shadow-sm">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="Portrait of Helena Ramos, COO of boutique consulting firm, professional executive photo, natural soft office lighting, confident and clear demeanor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9AUKRo7DuzUwHQP3m-GBOzILTR6TXcJitZ9Zy1xOaVrRHuvjPd3Ou2n9E2crZZkM0B5jPiVOmt32dSyDNgWotcm7Z2HGyeiGNuc2vkY_yTXQmkHbQqCT22jUmHroKnaNkjbAneheWywsJXitnL6lwxMuBZQWC3_BXao7GcTUfC6RpOUervpwXmPjAJSomyHa_8A31Hg0QTTAnBYzYUm6Dra4UY_VKqpRx_-MsQUxHr8Pkxqf4uVh-AA"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm font-bold text-on-surface truncate">Helena Ramos</span>
+<span class="font-label-sm text-[10px] text-primary">Organizador</span>
+</div>
+</div>
+<!-- Carlos Meireles -->
+<div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-container-low shadow-sm">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="Portrait of Carlos Meireles, Chief Technology Officer at major digital financial bank, business attire, sharp focus, modern fintech corporate backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARDZaMq1LhD1FNgiYlaCfC8hCQTkqQttGAD90N8wK100F_rUCKQrniFPtExVh5ig2cML-9tLtDJ8uRFQ8oOB2wKz1nOFv3gkgRMnAKgz0Gv7v0hJaClN6Wj7PUu--H6knj7j5qElXry5SeaM6PgrGDU_KkRgKsRw_8U02vaBZUJrD160TU5b22MzFVcegnDeBt5FXbxuytiYj5_B_zYHN3-kQCqvE5Rr1kDQV6PZnFpfAxDwoTVaol0g"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface truncate">Carlos Meireles</span>
+<span class="font-label-sm text-[10px] text-secondary">CTO Vértice</span>
+</div>
+</div>
+<!-- Camila Drummond -->
+<div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-container-low shadow-sm">
+<img class="w-6 h-6 rounded-full object-cover" data-alt="Portrait of Camila Drummond, Head of Financial Innovation, modern tech executive look, warm lighting, architectural background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMFbdIYmsCM1AoJOjK-ipov6PEiCUhfXOXD3S6V5wpvMk7J1SV1D5oyB_0IVYc3sGKpUv8CboHvohv34t2B3k0BsX0fFfJfyk2Z4PawGozv983O3lI9NqPvJ8ghHsmN7D-M6CQnerGRUdmn6AVni8H16w7NZ3yc2cEVjbmYvJGZhJjDh0y7CeCKXxGl1DMqC0SMZ8KQa96swV1VhKLyChY5Wm5eGzZFsF_imwdm14GFjkoJfyRDwSypg"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface truncate">Camila Drummond</span>
+<span class="font-label-sm text-[10px] text-secondary">Inovação Vértice</span>
+</div>
+</div>
+<!-- Lucas T. -->
+<div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-container-low shadow-sm">
+<div class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-[10px] font-bold">
+                LT
+              </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface truncate">Lucas T.</span>
+<span class="font-label-sm text-[10px] text-secondary">Tech Lead Flow</span>
+</div>
+</div>
+<!-- Mariana S. -->
+<div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-container-low shadow-sm">
+<div class="w-6 h-6 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-label-sm text-[10px] font-bold">
+                MS
+              </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface truncate">Mariana S.</span>
+<span class="font-label-sm text-[10px] text-secondary">PM FlowCRM</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-medium px-1">+1 pendente</span>
+</div>
+</div>
+<!-- Meeting Agenda / Pauta -->
+<div class="flex flex-col gap-space-sm pt-2">
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">
+            Pauta da Reunião (45 min cronometrados)
+          </span>
+<div class="space-y-1.5">
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-2.5">
+<span class="w-5 h-5 rounded-full bg-primary text-on-primary text-[11px] font-bold flex items-center justify-center font-data-mono">1</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Status do deploy do ambiente Sandbox</span>
+</div>
+<span class="font-data-mono text-label-sm text-secondary font-semibold">15 min</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-2.5">
+<span class="w-5 h-5 rounded-full bg-surface-container-high text-on-surface text-[11px] font-bold flex items-center justify-center font-data-mono">2</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Validação da integração do endpoint Pix</span>
+</div>
+<span class="font-data-mono text-label-sm text-secondary font-semibold">15 min</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-2.5">
+<span class="w-5 h-5 rounded-full bg-surface-container-high text-on-surface text-[11px] font-bold flex items-center justify-center font-data-mono">3</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Próximos passos e homologação final BACEN</span>
+</div>
+<span class="font-data-mono text-label-sm text-secondary font-semibold">15 min</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card: Synchronized Live Notes & AI Action Items -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<!-- Editor Header -->
+<div class="flex items-center justify-between pb-space-sm border-b border-surface-container-high">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">edit_note</span>
+<span class="font-headline-md text-body-lg font-bold text-on-surface">Anotações Colaborativas em Tempo Real</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed/50 text-on-primary-fixed font-label-sm text-[10px] font-semibold">AI Copilot</span>
+</div>
+<div class="flex items-center gap-1.5">
+<button class="px-2 py-1 rounded hover:bg-surface-container text-secondary text-label-sm font-semibold" title="Negrito" type="button"><b>B</b></button>
+<button class="px-2 py-1 rounded hover:bg-surface-container text-secondary text-label-sm font-semibold" title="Itálico" type="button"><i>I</i></button>
+<button class="px-2 py-1 rounded hover:bg-surface-container text-secondary text-label-sm font-semibold" title="Lista numerada" type="button">
+<span class="material-symbols-outlined text-[16px]">format_list_bulleted</span>
+</button>
+<div class="w-[1px] h-4 bg-surface-container mx-1"></div>
+<span class="font-label-sm text-[10px] text-tertiary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Salvo na nuvem
+            </span>
+</div>
+</div>
+<!-- Simulated Rich Text Content -->
+<div class="p-space-sm rounded-lg bg-surface-container-low/60 flex flex-col gap-2 text-on-surface">
+<p class="font-body-md text-body-md leading-relaxed text-on-surface">
+            • <b>Sandbox OpenFinance:</b> Carlos confirmou que o cluster AWS de homologação já recebeu os certificados mTLS exigidos. Resta apenas liberar as portas de telemetria no firewall corporativo.<br/>
+            • <b>Endpoints Pix:</b> Latência média aferida em 142ms durante a simulação de carga de 2.000 requisições simultâneas. Satisfatório para a validação da Fase 2.
+          </p>
+<!-- Discussion Tags -->
+<div class="flex flex-wrap items-center gap-1.5 pt-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-secondary font-label-sm text-[10px]">#OpenFinance</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-secondary font-label-sm text-[10px]">#mTLS</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-secondary font-label-sm text-[10px]">#BacenCompliance</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-secondary font-label-sm text-[10px]">#AWS</span>
+</div>
+</div>
+<!-- AI Action Items Box -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">auto_awesome</span>
+<span class="font-label-md text-label-md font-bold text-on-surface">Itens de Ação Extraídos (Action Items)</span>
+</div>
+<span class="font-label-sm text-[11px] text-primary font-semibold">2 detectados pela IA</span>
+</div>
+<!-- Checklist items -->
+<div class="flex flex-col gap-2">
+<!-- Item 1 -->
+<div class="flex items-start gap-space-sm p-2 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow transition-shadow">
+<input class="mt-0.5 w-4 h-4 rounded text-primary-container focus:ring-primary-container cursor-pointer" id="action-1" type="checkbox"/>
+<label class="flex flex-col min-w-0 cursor-pointer flex-1" for="action-1">
+<span class="font-body-md text-body-md font-medium text-on-surface">
+                  Lucas enviar credenciais atualizadas da VPN até 18:00
+                </span>
+<div class="flex items-center gap-2 mt-0.5 font-label-sm text-[10px] text-secondary">
+<span>Responsável: <b>Lucas T.</b></span>
+<span>•</span>
+<span class="text-error font-medium">Prazo: Hoje, 18:00</span>
+</div>
+</label>
+</div>
+<!-- Item 2 -->
+<div class="flex items-start gap-space-sm p-2 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow transition-shadow">
+<input class="mt-0.5 w-4 h-4 rounded text-primary-container focus:ring-primary-container cursor-pointer" id="action-2" type="checkbox"/>
+<label class="flex flex-col min-w-0 cursor-pointer flex-1" for="action-2">
+<span class="font-body-md text-body-md font-medium text-on-surface">
+                  Carlos aprovar documento de escopo da Fase 3
+                </span>
+<div class="flex items-center gap-2 mt-0.5 font-label-sm text-[10px] text-secondary">
+<span>Responsável: <b>Carlos Meireles (CTO)</b></span>
+<span>•</span>
+<span>Prazo: Sexta-feira, 27/10</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Bottom Trigger: Create CRM Task -->
+<div class="pt-1 flex items-center justify-between">
+<button class="h-8 px-space-md bg-surface-container-lowest hover:bg-surface-container text-primary font-label-md text-label-md font-semibold rounded-lg flex items-center gap-1.5 shadow-sm transition-all" type="button">
+<span class="material-symbols-outlined text-[16px]">add_task</span>
+<span>+ Criar tarefa no FlowCRM a partir deste item</span>
+</button>
+<span class="font-label-sm text-[11px] text-secondary font-data-mono">Automação ativa</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div></main></div></body></html>

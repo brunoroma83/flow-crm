@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>FlowCRM</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface": "#f8f9ff", "primary-fixed": "#dbe1ff", "primary-container": "#2563eb", "on-secondary": "#ffffff", "inverse-on-surface": "#eaf1ff", "outline": "#737686", "surface-bright": "#f8f9ff", "on-tertiary-fixed-variant": "#005236", "tertiary-fixed-dim": "#4edea3", "tertiary-fixed": "#6ffbbe", "surface-container-low": "#eff4ff", "secondary-fixed": "#dae2fd", "on-tertiary-container": "#bdffdb", "on-secondary-fixed-variant": "#3f465c", "surface-container": "#e5eeff", "on-error": "#ffffff", "primary": "#004ac6", "secondary-container": "#dae2fd", "tertiary-container": "#007d55", "surface-container-lowest": "#ffffff", "on-tertiary-fixed": "#002113", "surface-container-highest": "#d3e4fe", "on-primary": "#ffffff", "on-error-container": "#93000a", "on-primary-fixed": "#00174b", "surface-container-high": "#dce9ff", "on-surface": "#0b1c30", "on-background": "#0b1c30", "outline-variant": "#c3c6d7", "secondary": "#565e74", "on-surface-variant": "#434655", "inverse-surface": "#213145", "error-container": "#ffdad6", "on-secondary-container": "#5c647a", "on-tertiary": "#ffffff", "surface-tint": "#0053db", "background": "#f8f9ff", "surface-variant": "#d3e4fe", "surface-dim": "#cbdbf5", "inverse-primary": "#b4c5ff", "on-primary-container": "#eeefff", "secondary-fixed-dim": "#bec6e0", "error": "#ba1a1a", "tertiary": "#006242", "on-secondary-fixed": "#131b2e", "on-primary-fixed-variant": "#003ea8", "primary-fixed-dim": "#b4c5ff" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter": "1rem", "margin": "1.5rem", "space-xl": "1.5rem", "space-md": "0.75rem", "margin-mobile": "1rem", "space-lg": "1rem", "space-xs": "0.25rem", "space-sm": "0.5rem", "gutter-mobile": "0.75rem" }, "fontFamily": { "label-sm": ["Inter"], "label-md": ["Inter"], "headline-lg": ["Inter"], "headline-lg-mobile": ["Inter"], "body-md": ["Inter"], "body-lg": ["Inter"], "body-sm": ["Inter"], "headline-xl": ["Inter"], "headline-xl-mobile": ["Inter"], "headline-md": ["Inter"], "data-mono": ["Inter"] }, "fontSize": { "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-lg-mobile": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-md": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "body-lg": ["15px", { "lineHeight": "22px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700" }], "headline-xl-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-md": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "data-mono": ["13px", { "lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "500" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-outline-variant/40 z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center gap-space-sm border-b border-outline-variant/40"><img alt="FlowCRM Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1W2ogsWYGHT_q-6eFtXEk94qwUWuYtOTY7mJIynCPEjMhBWxVhpHTUVwgQqRYEBa_77X1K_DN7c8xfYWnra02Z5QxFvT_-BFlBSJGJieVJGVyU72kupqKLFxLLLmN6LKpscZmuMyrNmttkGjhCmjx-3LDHdT8HDwp6cDGWu_6MovSlh9z5luNegakpXoimaPYE9ekr-HRg2ff_3Jw4G6YGM40P8KjH_6r9O6SiOoVfH6IT_0CeSst4Omrk"/><div class="flex flex-col min-w-0"><span class="font-headline-md text-body-lg font-bold tracking-tight text-on-surface truncate">FlowCRM</span><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary truncate">Operations Suite</span></div></div><div class="p-space-md"><nav class="flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary font-semibold shadow-sm"><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="truncate">Dashboard</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-2 rounded-lg transition-all bg-primary-container text-on-primary font-semibold shadow-sm" data-path="clientes" href="#"><span class="material-symbols-outlined text-[20px]">corporate_fare</span><span class="truncate">Clientes</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="projetos" href="#"><span class="material-symbols-outlined text-[20px]">folder_managed</span><span class="truncate">Projetos</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="tarefas" href="#"><span class="material-symbols-outlined text-[20px]">check_circle</span><span class="truncate">Tarefas</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="reunioes" href="#"><span class="material-symbols-outlined text-[20px]">calendar_today</span><span class="truncate">Reuniões</span></a><a class="flex items-center gap-space-sm px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-md text-body-md" data-path="contatos" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span class="truncate">Contatos</span></a></nav></div></div><div class="p-space-md border-t border-outline-variant/40 flex flex-col gap-space-md bg-surface-container-low/40"><div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-lowest border border-outline-variant/40 hover:border-outline transition-colors cursor-pointer"><div class="flex items-center gap-2 min-w-0"><div class="w-6 h-6 rounded bg-primary text-on-primary flex items-center justify-center font-label-sm text-label-sm font-bold">AC</div><div class="flex flex-col min-w-0"><span class="font-label-md text-label-md text-on-surface truncate font-semibold">Acme Consulting</span><span class="font-label-sm text-label-sm text-secondary truncate">Enterprise Tier</span></div></div><span class="material-symbols-outlined text-secondary text-[18px]">unfold_more</span></div><div class="flex flex-col gap-1 px-1"><div class="flex items-center justify-between text-secondary font-label-sm text-label-sm"><span>Armazenamento</span><span class="font-data-mono text-data-mono text-on-surface font-medium">74.2 / 100 GB</span></div><div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden"><div class="h-full bg-primary-container rounded-full" style="width: 74%"></div></div></div></div></aside><div class="pl-64 flex flex-col min-h-screen"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/40 z-40 px-space-xl flex items-center justify-between"><div class="flex items-center gap-space-md flex-1 max-w-lg"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-[18px]">search</span><input class="w-full h-9 pl-9 pr-14 bg-surface-container-lowest border border-outline-variant/60 rounded-lg text-on-surface placeholder:text-secondary focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body-md text-body-md transition-all" placeholder="Pesquisar clientes, tarefas, propostas..." type="text"/><kbd class="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-semibold text-secondary bg-surface-container-low border border-outline-variant/60 rounded uppercase font-data-mono">⌘K</kbd></div></div><div class="flex items-center gap-space-md"><button class="h-9 px-space-md bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold rounded-lg flex items-center gap-1.5 shadow-sm transition-all" type="button"><span class="material-symbols-outlined text-[18px]">add</span><span>Novo</span><span class="material-symbols-outlined text-[16px]">expand_more</span></button><div class="h-5 w-[1px] bg-outline-variant/40 mx-1"></div><button aria-label="Notificações" class="relative w-9 h-9 flex items-center justify-center rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-surface-container-lowest"></span></button><button aria-label="Ajuda" class="w-9 h-9 flex items-center justify-center rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">help</span></button><div class="flex items-center gap-space-sm pl-2 cursor-pointer"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant/60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4qJgODgUz7amb6TEc8tqfqjMlkfBHY-8kanXGVB717JZy3bpNS-u9ZlYQlhVeauMafsFsXoDHqOh2icIbzjt5Bflvd21dAgsRa5A8CZ-ZqFIbJgUlRXVKzeMDA4hoRlNQeVpccLf2jJg9QBoNMGhBB6vroyBLShV06UWzqF3QqDQvibWujM9rtF1i9VidsTJX_8ZvzjNypwyjAEh_GKwpox-WL9dxBHLfk1TV5fmqnshuWzXG_Mf5Fg"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-tertiary-container ring-2 ring-surface-container-lowest"></span></div><div class="hidden xl:flex flex-col text-left"><span class="font-label-md text-label-md font-semibold text-on-surface">Helena Ramos</span><span class="font-label-sm text-label-sm text-secondary">COO</span></div><span class="material-symbols-outlined text-secondary text-[18px]">keyboard_arrow_down</span></div></div></header><main class="w-full pt-16 bg-surface min-h-screen px-space-xl py-space-xl"><div class="flex flex-col w-full gap-space-lg">
+<!-- Top Banner / Metrics Pulse Strip -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-md">
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Contas Gerenciadas</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">48</span>
+<span class="font-label-sm text-label-sm text-tertiary font-semibold flex items-center">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> +4 este mês
+          </span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[22px]">corporate_fare</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">ARR sob Gestão</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">R$ 8.42M</span>
+<span class="font-label-sm text-label-sm text-tertiary font-semibold flex items-center">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +12.4%
+          </span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[22px]">account_balance</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Índice Médio Saúde</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">88.6%</span>
+<span class="font-label-sm text-label-sm text-tertiary font-semibold flex items-center">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Seguro
+          </span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">vital_signs</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Contas em Risco</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">3</span>
+<span class="font-label-sm text-label-sm text-error font-semibold flex items-center">
+<span class="material-symbols-outlined text-[14px]">warning</span> Atenção crítica
+          </span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-error-container/60 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[22px]">flag</span>
+</div>
+</div>
+</div>
+<!-- Header Action & Filter Bar -->
+<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md bg-surface-container-lowest p-space-md rounded-xl shadow-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">Diretório de Clientes</h1>
+</div>
+<p class="font-body-sm text-body-sm text-secondary mt-0.5">Gerencie contas ativas, contratos, saúde do cliente e projetos vinculados com precisão operacional.</p>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm">
+<!-- Search Within Filter -->
+<div class="relative min-w-[220px]">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-secondary text-[17px]">filter_list</span>
+<input class="w-full h-8 pl-8 pr-3 bg-surface-container-low rounded-lg text-on-surface placeholder:text-secondary text-body-sm font-body-sm focus:outline-none focus:bg-surface-container-lowest transition-colors" placeholder="Filtrar por nome ou CNPJ..." type="text"/>
+</div>
+<!-- Quick Status Pills Filter -->
+<div class="flex items-center bg-surface-container-low p-0.5 rounded-lg">
+<button class="px-2.5 py-1 text-label-sm font-label-sm rounded-md bg-surface-container-lowest text-on-surface font-semibold shadow-xs" type="button">Todos</button>
+<button class="px-2.5 py-1 text-label-sm font-label-sm rounded-md text-secondary hover:text-on-surface transition-colors" type="button">Ativos (42)</button>
+<button class="px-2.5 py-1 text-label-sm font-label-sm rounded-md text-secondary hover:text-on-surface transition-colors" type="button">Onboarding (3)</button>
+<button class="px-2.5 py-1 text-label-sm font-label-sm rounded-md text-error hover:bg-error-container/40 transition-colors" type="button">Em Risco (3)</button>
+</div>
+<!-- Sector Selector Dropdown Trigger -->
+<button class="h-8 px-2.5 bg-surface-container-low hover:bg-surface-container text-on-surface rounded-lg text-label-sm font-label-sm flex items-center gap-1.5 transition-colors" type="button">
+<span class="text-secondary">Setor:</span>
+<span class="font-semibold">Todos</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">expand_more</span>
+</button>
+<!-- View Switcher -->
+<div class="flex items-center bg-surface-container-low p-0.5 rounded-lg">
+<button class="h-7 w-7 rounded-md bg-surface-container-lowest text-primary-container flex items-center justify-center shadow-xs" title="Tabela Detalhada" type="button">
+<span class="material-symbols-outlined text-[17px]">table_rows</span>
+</button>
+<button class="h-7 w-7 rounded-md text-secondary hover:text-on-surface flex items-center justify-center transition-colors" title="Grid de Cards" type="button">
+<span class="material-symbols-outlined text-[17px]">grid_view</span>
+</button>
+</div>
+<!-- Primary Action -->
+<button class="h-8 px-space-md bg-primary-container hover:bg-primary text-on-primary rounded-lg font-label-md text-label-md font-semibold flex items-center gap-1.5 shadow-sm transition-all ml-1" type="button">
+<span class="material-symbols-outlined text-[17px]">add</span>
+<span>Adicionar Cliente</span>
+</button>
+</div>
+</div>
+<!-- Workspace Area: Table + Sliding Quick-View Drawer -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md items-start">
+<!-- Main Client Table (Occupies 7 cols when Drawer is open) -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="px-space-md py-2.5 bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-on-surface">Clientes Listados</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface-container-high text-secondary text-label-sm font-data-mono">6 de 48</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-secondary hover:text-on-surface text-label-sm font-label-sm flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[15px]">file_download</span> Exportar CSV
+          </button>
+<button class="text-secondary hover:text-on-surface text-label-sm font-label-sm flex items-center gap-1 ml-2" type="button">
+<span class="material-symbols-outlined text-[15px]">view_column</span> Colunas
+          </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50 text-secondary font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-2.5 px-3 font-semibold">Cliente / Empresa</th>
+<th class="py-2.5 px-3 font-semibold">Contato-Chave</th>
+<th class="py-2.5 px-3 font-semibold">Setor</th>
+<th class="py-2.5 px-3 font-semibold">Contrato / Tier</th>
+<th class="py-2.5 px-3 font-semibold">Saúde</th>
+<th class="py-2.5 px-3 font-semibold text-right">Ações</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Row 1: Active Selected Client (Banco Vértice S.A.) -->
+<tr class="bg-primary-fixed/30 hover:bg-primary-fixed/40 transition-colors cursor-pointer group" onclick="toggleDrawer(true)">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-primary-container text-on-primary flex items-center justify-center font-bold text-[12px] shrink-0 shadow-xs">
+                    BV
+                  </div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md font-semibold text-primary truncate flex items-center gap-1">
+                      Banco Vértice S.A.
+                      <span class="material-symbols-outlined text-primary text-[14px]">arrow_forward</span>
+</span>
+<span class="font-label-sm text-label-sm text-secondary truncate font-data-mono">CNPJ: 14.892.401/0001-92</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover shrink-0" data-alt="Portrait photo of Dr. Roberto Meireles, professional corporate headshot of a Brazilian tech executive with glasses in a modern office with natural light and sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqC2zbB2jqnxRHEEK7ActWY1nizhgFElF8eHStN1XFu3dF2PE1kTq2N35GTLaBNqOOJq35l-T-sGdW8WKOCFDsO01sYfNn8meOSPX2fiFrH2mKa2IisW5-UDM7EG2SGOJGD9Iox0SbSr88ycEdXpIxY1zRMzxBSJ8nIHbxsVaZ1vDjefzbO_BZPO7rIVNPE811MYxg6P6WPcgrr7ZmjmIB0vJLs6Zmm0wkRQ4gDQHTdINOKL-Wumetkg"/>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm font-medium text-on-surface truncate">Dr. Roberto Meireles</span>
+<span class="font-label-sm text-label-sm text-secondary truncate">CTO &amp; Head de Core</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">Fintech</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">R$ 240k<span class="text-secondary font-normal">/ano</span></span>
+<span class="font-label-sm text-label-sm text-primary font-medium">Enterprise Tier</span>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-container/20 text-tertiary-fixed-variant font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                  Saudável (92%)
+                </span>
+</td>
+<td class="py-3 px-3 text-right">
+<div class="inline-flex items-center gap-1">
+<button class="w-7 h-7 rounded hover:bg-surface-container-highest text-secondary hover:text-on-surface flex items-center justify-center transition-colors" title="Ver 360" type="button">
+<span class="material-symbols-outlined text-[17px]">visibility</span>
+</button>
+<button class="w-7 h-7 rounded hover:bg-surface-container-highest text-secondary hover:text-on-surface flex items-center justify-center transition-colors" title="Opções" type="button">
+<span class="material-symbols-outlined text-[17px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Nexus Soluções Digitais -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high text-on-surface flex items-center justify-center font-bold text-[12px] shrink-0">
+                    NX
+                  </div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md font-semibold text-on-surface truncate">Nexus Soluções Digitais</span>
+<span class="font-label-sm text-label-sm text-secondary truncate font-data-mono">CNPJ: 08.213.910/0001-44</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover shrink-0" data-alt="Portrait photograph of Camila Drummond, corporate female leader in a high tech consultancy workspace, navy blazer, confident and analytical expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJbrV1m9o1Awwwboh4inr7UPNBcjtvaReLiMsKPHpOxIu2Q81D48nEHLjN0RVBS6eK5ultO8w3VVv6wZISMR2boN8hHzrSyQXWdLlPxwYEiwWuv7wUFKFfT8Fbfb-zmNa645_9KZ45aiNuyoQiKQdrzyXSCMDym6iFixL695s_ZKGV-v-Dk12kFAy1mwEuPQ8XXd6wyKJIivs_uOWiT4fI3eJkNmS2lnM04fJ6AlX4bp1lAGa6FcsvLQ"/>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm font-medium text-on-surface truncate">Camila Drummond</span>
+<span class="font-label-sm text-label-sm text-secondary truncate">Head de Inovação</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">SaaS B2B</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">R$ 180k<span class="text-secondary font-normal">/ano</span></span>
+<span class="font-label-sm text-label-sm text-secondary font-medium">Growth Tier</span>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed/30 text-on-tertiary-fixed-variant font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                  Excelente (98%)
+                </span>
+</td>
+<td class="py-3 px-3 text-right">
+<div class="inline-flex items-center gap-1">
+<button class="w-7 h-7 rounded hover:bg-surface-container-high text-secondary hover:text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px]">visibility</span>
+</button>
+<button class="w-7 h-7 rounded hover:bg-surface-container-high text-secondary hover:text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Biolab Farmacêutica -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high text-on-surface flex items-center justify-center font-bold text-[12px] shrink-0">
+                    BL
+                  </div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md font-semibold text-on-surface truncate">Biolab Farmacêutica</span>
+<span class="font-label-sm text-label-sm text-secondary truncate font-data-mono">CNPJ: 33.102.551/0003-88</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover shrink-0" data-alt="Portrait photography of Rodrigo Antunes, Director of Operations in a pharmaceutical executive setting, wearing a sharp grey suit with focused analytical gaze." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQRy5GR4meAgft6Jr7vqDq-2AcDCOfBQjwZhnpepfTBHHEHC01Ri-jPfQWEwh2QTjKz58eWOkUfCSHQB9xzGDvVRmZFuUa4GUidtmJUfUPnGxv3FJ3S1PziSVvN2FcyPoS-4dG7dWhZID82ea71uu-_8mu_y1uBPDACJderoUncEhjN-3awkZCw2vEKhufJgZ_n4sMQcp79notT8bLwJXynOkTQNPUabu3Mb6tDiHxL2s2PHiaeH4bqg"/>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm font-medium text-on-surface truncate">Rodrigo Antunes</span>
+<span class="font-label-sm text-label-sm text-secondary truncate">Dir. de Operações</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">Saúde</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">R$ 310k<span class="text-secondary font-normal">/ano</span></span>
+<span class="font-label-sm text-label-sm text-primary font-medium">Enterprise Tier</span>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Atenção (72%)
+                </span>
+</td>
+<td class="py-3 px-3 text-right">
+<div class="inline-flex items-center gap-1">
+<button class="w-7 h-7 rounded hover:bg-surface-container-high text-secondary hover:text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px]">visibility</span>
+</button>
+<button class="w-7 h-7 rounded hover:bg-surface-container-high text-secondary hover:text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Solaris Energia Renovável -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high text-on-surface flex items-center justify-center font-bold text-[12px] shrink-0">
+                    SE
+                  </div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md font-semibold text-on-surface truncate">Solaris Energia Renovável</span>
+<span class="font-label-sm text-label-sm text-secondary truncate font-data-mono">CNPJ: 50.392.119/0001-15</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover shrink-0" data-alt="Portrait photograph of Mariana Albuquerque, VP of Strategy in clean energy enterprise, modern sustainable architecture background, calm confident demeanor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnSCxM-PhwM1Iv-qmH5f9AUUT7K6lRDa6SeUoCcT-10As2pC5jf9EasxTD8uJsyakh2rPFKZgctdEVwFX0fiWcca2LunFLKb2_gCooTmvXoa9OtN3rbwu8f0XMcuz1A3MmDCcsmvwW2_5MwsuMPpycRoLlrrSmBiN8wgLdHzgDT_0_Ah8pZnzGIC-BMn6JDXsVQxJI12O2exA77Rl7QmwwCD0wzFTD3jkLmpgie4DKqtDLzKmyLuTYMQ"/>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm font-medium text-on-surface truncate">Mariana Albuquerque</span>
+<span class="font-label-sm text-label-sm text-secondary truncate">VP de Estratégia</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">Energia</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">R$ 145k<span class="text-secondary font-normal">/ano</span></span>
+<span class="font-label-sm text-label-sm text-secondary font-medium">Growth Tier</span>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-container/20 text-tertiary-fixed-variant font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                  Saudável (88%)
+                </span>
+</td>
+<td class="py-3 px-3 text-right">
+<div class="inline-flex items-center gap-1">
+<button class="w-7 h-7 rounded hover:bg-surface-container-high text-secondary hover:text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px]">visibility</span>
+</button>
+<button class="w-7 h-7 rounded hover:bg-surface-container-high text-secondary hover:text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5: Apex Retail Group (At Risk) -->
+<tr class="hover:bg-error-container/20 transition-colors cursor-pointer group">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-error-container text-error font-bold text-[12px] flex items-center justify-center shrink-0">
+                    AR
+                  </div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md font-semibold text-on-surface truncate">Apex Retail Group</span>
+<span class="font-label-sm text-label-sm text-secondary truncate font-data-mono">CNPJ: 18.094.200/0002-10</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover shrink-0" data-alt="Portrait photograph of Lucas Siqueira, retail logistics executive, crisp corporate portrait in modern glass building, high detail." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtrJ7qw3bFZUPmFcjwW11ICo9r7BQ9tuvvyj9Q9_gifOOFcp1o9dyFoF7-7eAyGssEIq5omLlEOoM72IFyFc6QahONyao_93whp9gLdP8BGSj_EuMEOyXQ4rBA_EdSJwviUYMnPuUO2e2igAjpl7iSZuEMLOgPmK1jmi0TjK89ebCCi3FWBN3sLJzDprO3CMVI5SKcpTM_rAbPwCQFNK6Hr9rWTZ1VcFYC7CsIPr3LonV05EucY56b5Q"/>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm font-medium text-on-surface truncate">Lucas Siqueira</span>
+<span class="font-label-sm text-label-sm text-secondary truncate">Head de Supply</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">Varejo</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">R$ 290k<span class="text-secondary font-normal">/ano</span></span>
+<span class="font-label-sm text-label-sm text-primary font-medium">Enterprise Tier</span>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                  Em Risco (55%)
+                </span>
+</td>
+<td class="py-3 px-3 text-right">
+<div class="inline-flex items-center gap-1">
+<button class="w-7 h-7 rounded hover:bg-surface-container-high text-secondary hover:text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px]">visibility</span>
+</button>
+<button class="w-7 h-7 rounded hover:bg-surface-container-high text-secondary hover:text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 6: CloudVibe Tech -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high text-on-surface flex items-center justify-center font-bold text-[12px] shrink-0">
+                    CV
+                  </div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md font-semibold text-on-surface truncate">CloudVibe Tech</span>
+<span class="font-label-sm text-label-sm text-secondary truncate font-data-mono">CNPJ: 41.552.880/0001-09</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover shrink-0" data-alt="Portrait photography of Beatriz Fontes, software engineering manager, minimalist studio lighting, clean background, sharp professional look." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDs3Bh-v-nQZZwlqnkIoshoGAu9kPbOYe97LdSAGRDo7n4_UbPoCTAL9e1TihYuxZC501ywdGCN5Dz29B0lMuS_VrM23cmVmdDIpj1ZLX69war1kyblmapQZbgbt5Nf-OCfFR4OCP6ZAk1fhKipX914Mq_SBvKbEDRnc9VUf9jKmfR98CJHMDHI8PSCqBZqHkmdDaTP2KI2_ixb27gxMT_FAYS1px7dzCZfEUylfPFd-YhbVFE6zganzg"/>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm font-medium text-on-surface truncate">Beatriz Fontes</span>
+<span class="font-label-sm text-label-sm text-secondary truncate">VP de Engenharia</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">Tecnologia</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="font-data-mono text-data-mono font-bold text-on-surface">R$ 160k<span class="text-secondary font-normal">/ano</span></span>
+<span class="font-label-sm text-label-sm text-secondary font-medium">Growth Tier</span>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-container/20 text-tertiary-fixed-variant font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                  Saudável (89%)
+                </span>
+</td>
+<td class="py-3 px-3 text-right">
+<div class="inline-flex items-center gap-1">
+<button class="w-7 h-7 rounded hover:bg-surface-container-high text-secondary hover:text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px]">visibility</span>
+</button>
+<button class="w-7 h-7 rounded hover:bg-surface-container-high text-secondary hover:text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[17px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Compact Footer Pagination -->
+<div class="px-space-md py-2.5 bg-surface-container-low/40 flex items-center justify-between text-body-sm font-body-sm text-secondary">
+<span>Mostrando 1 a 6 de 48 registros</span>
+<div class="flex items-center gap-1">
+<button class="px-2 py-1 rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors font-label-sm text-label-sm" disabled="" type="button">Anterior</button>
+<button class="px-2.5 py-1 rounded bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold" type="button">1</button>
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors font-label-sm text-label-sm" type="button">2</button>
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors font-label-sm text-label-sm" type="button">3</button>
+<button class="px-2 py-1 rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors font-label-sm text-label-sm" type="button">Próxima</button>
+</div>
+</div>
+</div>
+<!-- Sliding Quick View / 360° Client Drawer (5 cols on Desktop) -->
+<div class="lg:col-span-5 bg-surface-container-lowest rounded-xl shadow-md p-space-md flex flex-col gap-space-md transition-all duration-300 relative" id="clientDrawer">
+<!-- Drawer Header Bar -->
+<div class="flex items-start justify-between pb-space-sm bg-surface-container-low/50 -m-space-md p-space-md rounded-t-xl mb-0">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-xl bg-primary-container text-on-primary flex items-center justify-center font-bold text-headline-md shadow-sm">
+            BV
+          </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Banco Vértice S.A.</h2>
+<span class="px-1.5 py-0.5 rounded bg-primary text-on-primary font-label-sm text-label-sm">Tier Enterprise</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-data-mono">ID: CLT-2024-0012 • São Paulo, SP</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 rounded-lg bg-surface-container-high hover:bg-surface-container text-on-surface flex items-center justify-center transition-colors" title="Compartilhar Ficha" type="button">
+<span class="material-symbols-outlined text-[17px]">share</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center transition-colors" title="Editar Informações" type="button">
+<span class="material-symbols-outlined text-[17px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded-lg text-secondary hover:bg-surface-container-high hover:text-on-surface flex items-center justify-center transition-colors" onclick="toggleDrawer(false)" title="Minimizar" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- Health Score Gauge & KPI Ribbon -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<!-- Mini Circular Health Gauge SVG -->
+<div class="relative w-12 h-12 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-container-highest" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-tertiary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="92, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute font-data-mono text-label-md font-bold text-tertiary">92%</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Status de Saúde</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Conta Muito Saudável</span>
+<span class="font-label-sm text-label-sm text-tertiary">Risco de Churn: Mínimo (&lt; 2%)</span>
+</div>
+</div>
+<div class="flex flex-col text-right">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">NPS Recente</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">10<span class="text-secondary text-body-sm font-normal">/10</span></span>
+<span class="font-label-sm text-label-sm text-tertiary font-semibold">Promotor Ativo</span>
+</div>
+</div>
+<!-- Quick Action Pills Strip -->
+<div class="flex items-center gap-2">
+<button class="flex-1 h-8 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px] text-primary-container">add_task</span> Nova Tarefa
+        </button>
+<button class="flex-1 h-8 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px] text-primary-container">event</span> Agendar Reunião
+        </button>
+<button class="flex-1 h-8 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px] text-primary-container">receipt_long</span> Novo Contrato
+        </button>
+</div>
+<!-- Section: Metadados & Contrato -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-secondary font-bold">Metadados &amp; Governança</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold cursor-pointer">Histórico Contratual</span>
+</div>
+<div class="grid grid-cols-2 gap-2 bg-surface-container-low/50 p-space-sm rounded-xl">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">CNPJ</span>
+<span class="font-data-mono text-body-sm text-on-surface font-semibold">14.892.401/0001-92</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">Início da Parceria</span>
+<span class="font-data-mono text-body-sm text-on-surface font-semibold">15 de Março, 2022</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">Valor Contratual (ARR)</span>
+<span class="font-data-mono text-body-sm text-primary font-bold">R$ 240.000,00</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">Ciclo de Renovação</span>
+<span class="font-data-mono text-body-sm text-on-surface font-semibold">Dezembro / 2025</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">SLA Contratual</span>
+<span class="font-data-mono text-body-sm text-tertiary font-bold">99.9% 24/7 Dedicated</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary">Gerente de Conta (Flow)</span>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">Helena Ramos</span>
+</div>
+</div>
+</div>
+<!-- Section: Projetos Ativos Vinculados -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-secondary font-bold">Projetos Ativos Vinculados</span>
+<span class="font-label-sm text-label-sm text-secondary font-data-mono">2 em andamento</span>
+</div>
+<div class="flex flex-col gap-2">
+<!-- Project Card 1 -->
+<div class="p-space-sm bg-surface-container-low rounded-xl flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Implantação OpenFinance Core</span>
+</div>
+<span class="font-data-mono text-label-sm font-bold text-primary">75% Concluído</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 75%"></div>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-sm text-label-sm">
+<span>Fase 3: Validação de Certificados mTLS</span>
+<span class="font-data-mono">Prazo: 28/Nov</span>
+</div>
+</div>
+<!-- Project Card 2 -->
+<div class="p-space-sm bg-surface-container-low rounded-xl flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Audit de Segurança SOC2 Type II</span>
+</div>
+<span class="font-data-mono text-label-sm font-bold text-tertiary">30% Concluído</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary rounded-full" style="width: 30%"></div>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-sm text-label-sm">
+<span>Coleta de Evidências Automatizadas</span>
+<span class="font-data-mono">Prazo: 15/Dez</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Contatos Associados -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-secondary font-bold">Stakeholders &amp; Contatos</span>
+<button class="text-primary font-label-sm text-label-sm font-semibold flex items-center gap-0.5" type="button">
+<span class="material-symbols-outlined text-[14px]">add</span> Adicionar
+          </button>
+</div>
+<div class="flex flex-col gap-1.5">
+<!-- Stakeholder 1 -->
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low/60 hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-2 min-w-0">
+<img class="w-7 h-7 rounded-full object-cover shrink-0" data-alt="Portrait photography of Roberto Meireles, CTO in banking technology, professional lighting, corporate look." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfLLXz5JPwJFSMIb0Vq4ROvRBzS1Q_yNW4H2r8xowJBliKbrxpQDs4GBwo-Xygqs97N9xrLKfQ_mTsHYUFKiTVQfuu6OLTipNr7UZIsdcEBlN_DwspeRdZnqCjh71U-PSW0vP-QaTLk1DkpC96vue-W32QC16nJ7EfgHIFByHWNGtYhYdNLeDl567tacS5rYuMXU98ZLeCuaGJbpeDTy6dmqfPPemF5rwoh5gCEnM2PPM6blLsoCVYrA"/>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface truncate">Dr. Roberto Meireles</span>
+<span class="font-label-sm text-label-sm text-secondary truncate">CTO (Decisor Técnico)</span>
+</div>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<a class="w-7 h-7 rounded bg-surface-container-highest hover:bg-surface-container text-secondary hover:text-on-surface flex items-center justify-center transition-colors" href="mailto:roberto@vertice.com.br" title="Enviar Email">
+<span class="material-symbols-outlined text-[15px]">mail</span>
+</a>
+<button class="w-7 h-7 rounded bg-surface-container-highest hover:bg-surface-container text-tertiary flex items-center justify-center transition-colors" title="WhatsApp Corporativo" type="button">
+<span class="material-symbols-outlined text-[15px]">chat</span>
+</button>
+</div>
+</div>
+<!-- Stakeholder 2 -->
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low/60 hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-2 min-w-0">
+<img class="w-7 h-7 rounded-full object-cover shrink-0" data-alt="Portrait photo of Juliana Costa, legal compliance director at bank, smart business attire, bright clear image." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5C48sKaKzF_JMxx1d-aBsdgoGEIFYmIRNFtalpopgF0T2cvtcKHCQ0RnkS0E4iFYvHtDwd2k2OMJnOW1AD7eklYERYF--0Qy09RP1oAGwXjJQo-ixSnKyrl0VnjkEmW86YBzIU_autkan8RFAMW9ovm3AvmqimXPP_QlZyv-Lal9A_ctxPeRrBEpaSunwj9_eXwxYJUajxNTjRzlG8eTXqsofcVdE6J2aLohWDcFpxiCzcxrSLUZVPA"/>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface truncate">Juliana Costa</span>
+<span class="font-label-sm text-label-sm text-secondary truncate">Diretora de Compliance</span>
+</div>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<a class="w-7 h-7 rounded bg-surface-container-highest hover:bg-surface-container text-secondary hover:text-on-surface flex items-center justify-center transition-colors" href="mailto:j.costa@vertice.com.br">
+<span class="material-symbols-outlined text-[15px]">mail</span>
+</a>
+<button class="w-7 h-7 rounded bg-surface-container-highest hover:bg-surface-container text-tertiary flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[15px]">chat</span>
+</button>
+</div>
+</div>
+<!-- Stakeholder 3 -->
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low/60 hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-2 min-w-0">
+<img class="w-6 h-6 rounded-full object-cover shrink-0" data-alt="Corporate headshot of Marcos Prado, Lead DevOps architect at finance company, friendly confident expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2T--r1qPP2C1Q6HcnN6S3NAUZuiOP98h4Ghxjc6QUk7otGkUOuR9sxpE6r8B8P_xMr4RxBj-YechP6Ssdp3WIF3F5YMYDeuM38I71b9DCzFGCWfMzy9lAuuBfkNldKFQBLSwwtaXeV1djXyVxM53tNBc5Kt0tpOXf6C2yAwZ6EiBq-q0EzhL0qbQ5DtUu9GnbU2QdTj1DCMWC1VsEqETEiL24Pls4FsEr_FcHqRX012xT_sc__DlVlA"/>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface truncate">Marcos Prado</span>
+<span class="font-label-sm text-label-sm text-secondary truncate">Lead Cloud Architect</span>
+</div>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<a class="w-7 h-7 rounded bg-surface-container-highest hover:bg-surface-container text-secondary hover:text-on-surface flex items-center justify-center transition-colors" href="mailto:marcos.prado@vertice.com.br">
+<span class="material-symbols-outlined text-[15px]">mail</span>
+</a>
+<button class="w-7 h-7 rounded bg-surface-container-highest hover:bg-surface-container text-tertiary flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[15px]">chat</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Próximos Marcos & Timeline -->
+<div class="flex flex-col gap-2 pt-1 border-t border-surface-container">
+<span class="font-label-md text-label-md uppercase tracking-wider text-secondary font-bold">Próximos Marcos Operacionais</span>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-start gap-2.5">
+<div class="w-7 h-7 rounded bg-primary-container text-on-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[15px]">flag</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm font-bold text-on-surface">Entrega Sprint mTLS</span>
+<span class="font-label-sm text-label-sm text-secondary">Em 3 dias • Quinta-feira</span>
+</div>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-start gap-2.5">
+<div class="w-7 h-7 rounded bg-tertiary text-on-tertiary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[15px]">video_call</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm font-bold text-on-surface">Steering QBR Mensal</span>
+<span class="font-label-sm text-label-sm text-secondary">Amanhã às 14h30 (Google Meet)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function toggleDrawer(show) {
+    const drawer = document.getElementById('clientDrawer');
+    if (!drawer) return;
+    if (show) {
+      drawer.classList.remove('hidden');
+    } else {
+      drawer.classList.toggle('hidden');
+    }
+  }
+</script></main></div></body></html>

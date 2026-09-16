@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FlowCRM</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/app.css"></head>
+<body>
+    <aside>
+    <div class="brand"><i>F</i><span>FlowCRM<small>OPERATIONS SUITE</small></span></div>
+    <nav id="nav"></nav>
+    <div class="workspace"><b id="user-initials">--</b><span id="current-user">Carregando…<small id="current-role">Sessão</small></span></div>
+</aside>
+<div class="shell">
+    <header><input id="search" placeholder="Pesquisar registros…" autocomplete="off">
+    <div class="header-actions">
+        <button class="secondary" id="logout">Sair</button>
+        <button id="new">+ Novo</button>
+    </div>
+</header>
+<main><div id="view"></div></main></div><dialog id="modal"><form id="form" method="dialog"><div class="modal-head"><h2 id="form-title">Novo registro</h2><button type="button" class="icon" id="close">×</button></div><div id="fields"></div><p id="error"></p><div class="actions"><button type="button" class="secondary" id="cancel">Cancelar</button><button>Salvar</button></div></form></dialog><script src="/app.js"></script></body></html>

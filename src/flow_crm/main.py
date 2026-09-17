@@ -149,7 +149,7 @@ def get_current_user(
     token = authorization.removeprefix("Bearer ") if authorization else ""
     user_id = token_subject(token)
     user = db.get(User, user_id) if user_id else None
-    if not user or not user.is_active:
+    if not user or not user.is_active or user.is_deleted:
         raise HTTPException(401, "Autenticação necessária")
     return user
 
@@ -162,7 +162,7 @@ def require_admin(user: User = Depends(get_current_user)) -> User:
 
 @app.post("/api/auth/login")
 def login(payload: LoginIn, db: Session = Depends(get_db)):
-    user = db.scalar(select(User).where(User.email == payload.email.lower()))
+    user = db.scalar(select(User).where(User.email == payload.email.lower(), User.is_deleted.is_(False)))
     if not user or not user.is_active or not verify_password(payload.password, user.password_hash):
         raise HTTPException(401, "E-mail ou senha inválidos")
     return {"access_token": create_token(user.id), "user": UserOut.model_validate(user)}
@@ -230,7 +230,7 @@ def delete_user(
 
 def get_or_404(db: Session, model: type[ModelT], item_id: int) -> ModelT:
     record = db.get(model, item_id)
-    if not record:
+    if not record or getattr(record, "is_deleted", False):
         raise HTTPException(404, "Registro não encontrado")
     return record
 
@@ -270,7 +270,10 @@ def delete_record(db: Session, model: type[ModelT], item_id: int, actor: User) -
 def dashboard(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     today = date.today()
     total_value = db.scalar(
-        select(func.coalesce(func.sum(Client.monthly_value), 0)).where(Client.status == ClientStatus.active)
+        select(func.coalesce(func.sum(Client.monthly_value), 0)).where(
+            Client.status == ClientStatus.active,
+            Client.is_deleted.is_(False),
+        )
     )
     project_rows = db.scalars(
         select(Project)
@@ -286,7 +289,7 @@ def dashboard(db: Session = Depends(get_db), _: User = Depends(get_current_user)
     ).all()
 
     def project_summary(project: Project) -> dict[str, Any]:
-        client = project.client
+        client = project.client if (project.client and not project.client.is_deleted) else None
         tasks = [task for task in project.tasks if not task.is_deleted]
         return {
             "id": project.id,
@@ -328,18 +331,37 @@ def dashboard(db: Session = Depends(get_db), _: User = Depends(get_current_user)
 
     return {
         "active_clients": db.scalar(
-            select(func.count()).select_from(Client).where(Client.status == ClientStatus.active)
+            select(func.count())
+            .select_from(Client)
+            .where(
+                Client.status == ClientStatus.active,
+                Client.is_deleted.is_(False),
+            )
         ),
         "active_projects": db.scalar(
-            select(func.count()).select_from(Project).where(Project.status == ProjectStatus.active)
+            select(func.count())
+            .select_from(Project)
+            .where(
+                Project.status == ProjectStatus.active,
+                Project.is_deleted.is_(False),
+            )
         ),
         "tasks_today": db.scalar(
             select(func.count())
             .select_from(Task)
-            .where(Task.due_date == today, Task.status != TaskStatus.done)
+            .where(
+                Task.due_date == today,
+                Task.status != TaskStatus.done,
+                Task.is_deleted.is_(False),
+            )
         ),
         "meetings_today": db.scalar(
-            select(func.count()).select_from(Meeting).where(func.date(Meeting.starts_at) == today)
+            select(func.count())
+            .select_from(Meeting)
+            .where(
+                func.date(Meeting.starts_at) == today,
+                Meeting.is_deleted.is_(False),
+            )
         ),
         "monthly_value": float(total_value or 0),
         "in_progress_projects": [

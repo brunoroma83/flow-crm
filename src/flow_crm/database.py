@@ -19,11 +19,17 @@ def ensure_schema() -> None:
     existentes. Isto mantém bancos criados antes da adoção do soft delete
     compatíveis com os modelos atuais.
     """
-    table_names = ("users", "clients", "contacts", "projects", "tasks", "meetings")
+    table_names = ("users", "clients", "contacts", "projects", "tasks", "meetings", "api_keys")
     inspector = inspect(engine)
     existing_tables = set(inspector.get_table_names())
 
     with engine.begin() as connection:
+        # Garante que o enum de role no Postgres suporte o novo papel 'agent'
+        try:
+            connection.execute(text("ALTER TYPE userrole ADD VALUE IF NOT EXISTS 'agent'"))
+        except Exception:
+            pass
+
         for table_name in table_names:
             if table_name not in existing_tables:
                 continue
@@ -33,7 +39,7 @@ def ensure_schema() -> None:
                     f"ALTER TABLE {table_name} "
                     "ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE"
                 ))
-            if table_name != "users" and "created_by_id" not in columns:
+            if table_name not in ("users", "api_keys") and "created_by_id" not in columns:
                 connection.execute(text(
                     f"ALTER TABLE {table_name} "
                     "ADD COLUMN created_by_id INTEGER"

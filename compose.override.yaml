@@ -1,9 +1,7 @@
-# Sobreposição para desenvolvimento local. Não utilize em produção.
+# Sobreposição automática de desenvolvimento para Docker Compose.
 services:
   app:
     environment:
-      # Garante que Python e StaticFiles usem o código montado do host,
-      # e não a cópia instalada na imagem durante o build.
       PYTHONPATH: /app/src
     volumes:
       - ./src:/app/src

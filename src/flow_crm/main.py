@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from .database import Base, engine, ensure_schema, get_db
 from .models import (
+    ApiKey,
     Client,
     ClientStatus,
     Contact,
@@ -24,6 +25,9 @@ from .models import (
     UserRole,
 )
 from .schemas import (
+    ApiKeyCreatedOut,
+    ApiKeyIn,
+    ApiKeyOut,
     ClientIn,
     ClientOut,
     ContactIn,
@@ -39,7 +43,15 @@ from .schemas import (
     UserOut,
     UserUpdate,
 )
-from .security import create_token, hash_password, token_subject, verify_password
+from .security import (
+    create_token,
+    generate_api_key,
+    hash_api_key,
+    hash_password,
+    token_subject,
+    verify_password,
+)
+import secrets
 
 ModelT = TypeVar("ModelT")
 
@@ -122,12 +134,28 @@ def ensure_admin(db: Session) -> None:
         db.commit()
 
 
+def ensure_agent_user(db: Session) -> User:
+    agent_user = db.scalar(select(User).where(User.role == UserRole.agent, User.is_deleted.is_(False)))
+    if not agent_user:
+        agent_user = User(
+            name="Agente IA",
+            email="agente@flowcrm.local",
+            password_hash=hash_password(secrets.token_urlsafe(32)),
+            role=UserRole.agent,
+        )
+        db.add(agent_user)
+        db.commit()
+        db.refresh(agent_user)
+    return agent_user
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     Base.metadata.create_all(bind=engine)
     ensure_schema()
     with Session(bind=engine) as db:
         ensure_admin(db)
+        ensure_agent_user(db)
         seed_data(db)
     yield
 
@@ -144,9 +172,40 @@ app.add_middleware(
 
 def get_current_user(
     authorization: str | None = Header(default=None),
+    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
     db: Session = Depends(get_db),
 ) -> User:
-    token = authorization.removeprefix("Bearer ") if authorization else ""
+    # 1. Autenticação por API Key (via header X-API-Key ou Bearer fc_live_...)
+    api_token = x_api_key
+    if not api_token and authorization:
+        candidate = authorization.removeprefix("Bearer ").strip()
+        if candidate.startswith("fc_live_"):
+            api_token = candidate
+
+    if api_token:
+        hashed = hash_api_key(api_token)
+        key_record = db.scalar(
+            select(ApiKey).where(
+                ApiKey.hashed_key == hashed,
+                ApiKey.is_active.is_(True),
+                ApiKey.is_deleted.is_(False),
+            )
+        )
+        if not key_record:
+            raise HTTPException(401, "API Key inválida ou inativa")
+        if key_record.expires_at and key_record.expires_at < datetime.now():
+            raise HTTPException(401, "API Key expirada")
+
+        key_record.last_used_at = datetime.now()
+        db.commit()
+
+        user = db.get(User, key_record.user_id)
+        if not user or not user.is_active or user.is_deleted:
+            raise HTTPException(401, "Usuário associado à API Key está inativo")
+        return user
+
+    # 2. Autenticação tradicional por JWT
+    token = authorization.removeprefix("Bearer ").strip() if authorization else ""
     user_id = token_subject(token)
     user = db.get(User, user_id) if user_id else None
     if not user or not user.is_active or user.is_deleted:
@@ -226,6 +285,85 @@ def delete_user(
     if item_id == admin.id:
         raise HTTPException(400, "O administrador atual não pode excluir a si mesmo")
     return delete_record(db, User, item_id, admin)
+
+
+@app.get("/api/api-keys", response_model=list[ApiKeyOut])
+def list_api_keys(
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    keys = db.scalars(
+        select(ApiKey)
+        .options(selectinload(ApiKey.user))
+        .where(ApiKey.is_deleted.is_(False))
+        .order_by(ApiKey.id.desc())
+    ).all()
+    return [
+        ApiKeyOut(
+            id=key.id,
+            name=key.name,
+            key_prefix=key.key_prefix,
+            user_id=key.user_id,
+            is_active=key.is_active,
+            created_at=key.created_at,
+            last_used_at=key.last_used_at,
+            user_name=key.user.name if key.user else None,
+        )
+        for key in keys
+    ]
+
+
+@app.post("/api/api-keys", response_model=ApiKeyCreatedOut, status_code=201)
+def create_api_key_endpoint(
+    payload: ApiKeyIn,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    target_user_id = payload.user_id
+    if target_user_id:
+        target_user = db.get(User, target_user_id)
+        if not target_user or target_user.is_deleted:
+            raise HTTPException(404, "Usuário especificado não encontrado")
+    else:
+        target_user = ensure_agent_user(db)
+        target_user_id = target_user.id
+
+    raw_key, prefix, hashed = generate_api_key()
+    record = ApiKey(
+        name=payload.name,
+        key_prefix=prefix,
+        hashed_key=hashed,
+        user_id=target_user_id,
+        is_active=True,
+    )
+    db.add(record)
+    db.commit()
+    db.refresh(record)
+
+    return ApiKeyCreatedOut(
+        id=record.id,
+        name=record.name,
+        key_prefix=record.key_prefix,
+        user_id=record.user_id,
+        is_active=record.is_active,
+        created_at=record.created_at,
+        last_used_at=record.last_used_at,
+        user_name=target_user.name,
+        raw_key=raw_key,
+    )
+
+
+@app.delete("/api/api-keys/{item_id}", status_code=204)
+def delete_api_key_endpoint(
+    item_id: int,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    record = get_or_404(db, ApiKey, item_id)
+    record.is_deleted = True
+    db.commit()
+    return Response(status_code=204)
+
 
 
 def get_or_404(db: Session, model: type[ModelT], item_id: int) -> ModelT:
@@ -541,6 +679,10 @@ def delete_meeting(
 ):
     return delete_record(db, Meeting, item_id, actor)
 
+
+# Servidor MCP (Model Context Protocol) via SSE para agentes de IA
+from .mcp import create_mcp_app
+app.mount("/mcp", create_mcp_app())
 
 static_dir = Path(__file__).parent / "static"
 app.mount("/", StaticFiles(directory=static_dir, html=True), name="frontend")

@@ -36,6 +36,7 @@ class Priority(StrEnum):
 class UserRole(StrEnum):
     admin = "admin"
     member = "member"
+    agent = "agent"
 
 
 class TimestampMixin:
@@ -123,3 +124,19 @@ class Meeting(TimestampMixin, Base):
     created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     client: Mapped[Client | None] = relationship(back_populates="meetings")
     is_deleted: Mapped[bool] = mapped_column(SQLBool, default=False)
+
+
+class ApiKey(TimestampMixin, Base):
+    __tablename__ = "api_keys"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    key_prefix: Mapped[str] = mapped_column(String(16))
+    hashed_key: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    is_active: Mapped[bool] = mapped_column(default=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(SQLBool, default=False)
+
+    user: Mapped[User] = relationship()

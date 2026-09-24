@@ -13,10 +13,12 @@ dependencies = [
     "sqlalchemy>=2.0.36",
     "psycopg[binary]>=3.2.3",
     "pydantic-settings>=2.7.0",
+    "mcp>=2.2.0",
 ]
 
 [project.scripts]
 flow-crm = "flow_crm.main:run"
+flow-crm-mcp = "flow_crm.mcp.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.12.0,<0.13.0"]

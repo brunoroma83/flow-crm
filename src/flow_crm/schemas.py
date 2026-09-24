@@ -104,3 +104,24 @@ class MeetingIn(BaseModel):
 class MeetingOut(MeetingIn, ORMModel):
     id: int
     created_by_id: int | None
+
+
+class ApiKeyIn(BaseModel):
+    name: str = Field(min_length=2, max_length=100)
+    user_id: int | None = None
+
+
+class ApiKeyOut(ORMModel):
+    id: int
+    name: str
+    key_prefix: str
+    user_id: int
+    is_active: bool
+    created_at: datetime
+    last_used_at: datetime | None = None
+    user_name: str | None = None
+
+
+class ApiKeyCreatedOut(ApiKeyOut):
+    raw_key: str
+

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema.json",
+  "description": "Exemplos de configuração para conectar agentes e clientes ao FlowCRM MCP",
+  "mcpServers": {
+    "flowcrm-sse": {
+      "name": "FlowCRM (Modo SSE / Docker)",
+      "url": "http://localhost:8000/mcp/sse",
+      "headers": {
+        "X-API-Key": "COLE_SUA_API_KEY_AQUI_fc_live_..."
+      }
+    },
+    "flowcrm-stdio": {
+      "name": "FlowCRM (Modo STDIO Local)",
+      "command": "uv",
+      "args": [
+        "run",
+        "flow-crm-mcp"
+      ],
+      "env": {
+        "DATABASE_URL": "postgresql+psycopg://flowcrm:flowcrm_dev_password@localhost:5433/flowcrm"
+      }
+    }
+  }
+}

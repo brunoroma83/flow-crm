@@ -36,3 +36,24 @@ def token_subject(token: str) -> int | None:
         return int(payload["sub"]) if payload["exp"] > datetime.now(UTC).timestamp() else None
     except (ValueError, KeyError, json.JSONDecodeError):
         return None
+
+
+def hash_api_key(raw_key: str) -> str:
+    """Calcula o hash SHA-256 seguro da chave crua para persistência e busca."""
+    return hashlib.sha256(raw_key.strip().encode("utf-8")).hexdigest()
+
+
+def generate_api_key() -> tuple[str, str, str]:
+    """Gera uma nova chave de API segura no formato fc_live_<hex>.
+    
+    Retorna uma tupla contendo:
+    - raw_key: chave completa (exibida apenas uma vez ao usuário/admin)
+    - key_prefix: prefixo visível para identificação futura (ex: 'fc_live_a1b2c3')
+    - hashed_key: hash SHA-256 para ser salvo no banco
+    """
+    token = secrets.token_hex(24)
+    raw_key = f"fc_live_{token}"
+    key_prefix = raw_key[:14]
+    hashed_key = hash_api_key(raw_key)
+    return raw_key, key_prefix, hashed_key
+

@@ -19,7 +19,8 @@ def ensure_schema() -> None:
     existentes. Isto mantém bancos criados antes da adoção do soft delete
     compatíveis com os modelos atuais.
     """
-    table_names = ("users", "clients", "contacts", "projects", "tasks", "meetings", "api_keys", "invoices")
+    Base.metadata.create_all(bind=engine)
+    table_names = ("users", "clients", "contacts", "projects", "tasks", "meetings", "api_keys", "invoices", "project_monthly_values")
     inspector = inspect(engine)
     existing_tables = set(inspector.get_table_names())
 
@@ -64,6 +65,26 @@ def ensure_schema() -> None:
                 connection.execute(
                     text("ALTER TABLE projects ADD COLUMN contract_type VARCHAR(20) NOT NULL DEFAULT 'mensal'")
                 )
+
+        if "projects" in existing_tables and "project_monthly_values" in existing_tables:
+            try:
+                connection.execute(text("""
+                    UPDATE projects
+                    SET project_value = (
+                        SELECT COALESCE(SUM(amount), 0)
+                        FROM project_monthly_values
+                        WHERE project_monthly_values.project_id = projects.id
+                          AND project_monthly_values.is_deleted = FALSE
+                    )
+                    WHERE EXISTS (
+                        SELECT 1 FROM project_monthly_values
+                        WHERE project_monthly_values.project_id = projects.id
+                          AND project_monthly_values.is_deleted = FALSE
+                    )
+                """))
+            except Exception:
+                pass
+
 
 
 def get_db():

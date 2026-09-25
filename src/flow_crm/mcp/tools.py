@@ -15,6 +15,7 @@ from flow_crm.models import (
     Meeting,
     Priority,
     Project,
+    ProjectMonthlyValue,
     ProjectStatus,
     Task,
     TaskStatus,
@@ -874,3 +875,109 @@ def update_invoice_status(
             "payment_date": invoice.payment_date.isoformat() if invoice.payment_date else None,
             "message": f"Fatura '{invoice.invoice_number}' atualizada para o status '{invoice.status.value}'.",
         }
+
+
+def list_project_monthly_values(project_id: int) -> list[dict[str, Any]]:
+    """Lista o histórico de valores mensais cadastrados para um projeto.
+    
+    Args:
+        project_id: ID do projeto no CRM.
+    """
+    with SessionLocal() as db:
+        records = db.scalars(
+            select(ProjectMonthlyValue)
+            .where(
+                ProjectMonthlyValue.project_id == project_id,
+                ProjectMonthlyValue.is_deleted.is_(False),
+            )
+            .order_by(ProjectMonthlyValue.year_month.desc())
+        ).all()
+        return [
+            {
+                "id": r.id,
+                "project_id": r.project_id,
+                "year_month": r.year_month,
+                "amount": float(r.amount),
+                "notes": r.notes,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+            }
+            for r in records
+        ]
+
+
+def sync_project_value(db: Session, project_id: int) -> Decimal:
+    total = db.scalar(
+        select(func.coalesce(func.sum(ProjectMonthlyValue.amount), 0)).where(
+            ProjectMonthlyValue.project_id == project_id,
+            ProjectMonthlyValue.is_deleted.is_(False),
+        )
+    ) or Decimal("0")
+    project = db.get(Project, project_id)
+    if project:
+        project.project_value = total
+        db.commit()
+    return total
+
+
+def set_project_monthly_value(
+    project_id: int,
+    year_month: str,
+    amount: float,
+    notes: str | None = None,
+) -> dict[str, Any]:
+    """Cadastra ou atualiza o valor mensal atribuído a um projeto para uma competência específica (mês/ano).
+    
+    Args:
+        project_id: ID do projeto no CRM.
+        year_month: Ano e mês no formato AAAA-MM (ex: '2026-09').
+        amount: Valor em reais (ex: 5000.00).
+        notes: Observações adicionais sobre a competência (opcional).
+    """
+    with SessionLocal() as db:
+        actor = get_current_actor(db)
+        project = db.get(Project, project_id)
+        if not project or project.is_deleted:
+            return {"error": f"Projeto ID {project_id} não encontrado."}
+
+        existing = db.scalar(
+            select(ProjectMonthlyValue).where(
+                ProjectMonthlyValue.project_id == project.id,
+                ProjectMonthlyValue.year_month == year_month.strip(),
+                ProjectMonthlyValue.is_deleted.is_(False),
+            )
+        )
+        if existing:
+            existing.amount = Decimal(str(amount))
+            existing.notes = notes.strip() if notes else None
+            db.commit()
+            sync_project_value(db, project.id)
+            return {
+                "success": True,
+                "id": existing.id,
+                "project_id": project.id,
+                "year_month": existing.year_month,
+                "amount": float(existing.amount),
+                "message": f"Valor mensal de {existing.year_month} para o projeto '{project.name}' atualizado para R$ {amount:,.2f}.",
+            }
+
+        record = ProjectMonthlyValue(
+            project_id=project.id,
+            year_month=year_month.strip(),
+            amount=Decimal(str(amount)),
+            notes=notes.strip() if notes else None,
+            created_by_id=actor.id,
+        )
+        db.add(record)
+        db.commit()
+        sync_project_value(db, project.id)
+        db.refresh(record)
+        return {
+            "success": True,
+            "id": record.id,
+            "project_id": project.id,
+            "year_month": record.year_month,
+            "amount": float(record.amount),
+            "message": f"Valor mensal de {record.year_month} para o projeto '{project.name}' registrado com sucesso (R$ {amount:,.2f}).",
+        }
+
+

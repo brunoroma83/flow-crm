@@ -53,7 +53,33 @@ function projectArea(title, description, projects, kind) {
 function projectCard(p) {
   let contacts = p.contacts.length ? p.contacts.map(c => `<span>${c.name}${c.role ? ' · ' + c.role : ''}</span>`).join('') : 'Sem contatos vinculados';
   let tasks = p.tasks.length ? p.tasks.map(t => `<li>${t.title} ${status(t.status)}</li>`).join('') : '<li>Sem tarefas vinculadas</li>';
-  return `<article class="project-card"><div class="project-top"><div><h3>${p.name}</h3><p>${p.client?.name || 'Sem cliente'}</p></div>${p.due_date ? `<span class="due">Prazo: ${new Date(p.due_date + 'T12:00').toLocaleDateString('pt-BR')}</span>` : ''}</div><div class="project-data"><div><b>Valor do projeto</b><span>${money(p.project_value)}</span></div><div><b>Tipo de contrato</b><span>${p.contract_type === 'avulso' ? 'Avulso' : 'Mensal'}</span></div><div><b>Tarefas</b><span>${p.task_summary.done}/${p.task_summary.total} concluídas · ${p.task_summary.in_progress} em andamento</span></div><div><b>Contatos</b><span>${contacts}</span></div></div><ul class="project-tasks">${tasks}</ul></article>`;
+  return `<article class="project-card">
+  <div class="project-top">
+    <div>
+      <h3>
+        ${p.name}
+      </h3>
+      <p>
+        ${p.client?.name || 'Sem cliente'}
+      </p>
+    </div>
+    ${p.due_date ? `<span class="due">Prazo: ${new Date(p.due_date + 'T12:00').toLocaleDateString('pt-BR')}</span>` : ''}
+    </div>
+    <div class="project-data">
+      <div>
+        <b>Valor do projeto</b><span>${money(p.project_value)}</span>
+      </div>
+      <div>
+        <b>Tipo de contrato</b><span>${p.contract_type === 'avulso' ? 'Avulso' : 'Mensal'}</span>
+      </div>
+      <div>
+        <b>Tarefas</b><span>${p.task_summary.done}/${p.task_summary.total} concluídas · ${p.task_summary.in_progress} em andamento</span>
+      </div>
+      <div>
+        <b>Contatos</b><span>${contacts}</span>
+      </div>
+    </div>
+    <ul class="project-tasks">${tasks}</ul></article>`;
 }
 
 async function dashboard() {
@@ -136,6 +162,7 @@ async function table() {
   let rows = records.map(r => `<tr>
     ${cols.map(([k]) => `<td>${cell(r, k)}</td>`).join('')}
     <td class="actions-cell">
+      ${section === 'projects' ? `<button class="link monthly-values-btn" data-id="${r.id}" data-name="${r.name}" style="color:#0284c7;font-weight:600">💰 Valores</button>` : ''}
       ${section === 'users' && currentUser?.role === 'admin' ? `<button class="link generate-key-user" data-user-id="${r.id}" data-user-name="${r.name}" style="color:#16a34a;font-weight:600">🔑 Gerar Chave</button>` : ''}
       ${section !== 'api_keys' ? `<button class="link edit" data-id="${r.id}">Editar</button>` : ''}
       ${canDelete(r) ? `<button class="link danger remove" data-id="${r.id}">${section === 'api_keys' ? 'Revogar' : 'Excluir'}</button>` : ''}
@@ -151,6 +178,11 @@ async function render() {
     $('#view').innerHTML = section === 'dashboard' ? await dashboard() : await table();
     $('#create')?.addEventListener('click', () => openForm());
     document.querySelectorAll('.edit').forEach(x => x.onclick = () => openForm(records.find(r => r.id == x.dataset.id)));
+    document.querySelectorAll('.monthly-values-btn').forEach(btn => {
+      btn.onclick = () => {
+        openMonthlyValuesModal(Number(btn.dataset.id), btn.dataset.name);
+      };
+    });
     document.querySelectorAll('.generate-key-user').forEach(btn => {
       btn.onclick = () => {
         openApiKeyModal(Number(btn.dataset.userId), btn.dataset.userName);
@@ -283,6 +315,96 @@ $('#copy-key-btn')?.addEventListener('click', () => {
 
 $('#close-key-modal')?.addEventListener('click', () => $('#key-modal').close());
 $('#done-key-btn')?.addEventListener('click', () => $('#key-modal').close());
+
+let currentMonthlyProjectId = null;
+
+async function openMonthlyValuesModal(projectId, projectName) {
+  currentMonthlyProjectId = projectId;
+  $('#monthly-modal-title').textContent = `💰 Valores Mensais — ${projectName}`;
+  $('#monthly-year-month').value = new Date().toISOString().slice(0, 7);
+  $('#monthly-amount').value = '';
+  $('#monthly-notes').value = '';
+  let errEl = $('#monthly-error');
+  if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+  $('#monthly-modal').showModal();
+  await loadMonthlyValues(projectId);
+}
+
+async function loadMonthlyValues(projectId) {
+  let body = $('#monthly-table-body');
+  if (!body) return;
+  body.innerHTML = '<tr><td colspan="4" style="padding: 14px; text-align: center; color: var(--muted);">Carregando...</td></tr>';
+  try {
+    let items = await api(`projects/${projectId}/monthly-values`);
+    if (!items || !items.length) {
+      body.innerHTML = '<tr><td colspan="4" style="padding: 14px; text-align: center; color: var(--muted);">Nenhum valor mensal lançado para este projeto.</td></tr>';
+      return;
+    }
+    body.innerHTML = items.map(item => {
+      let parts = item.year_month.split('-');
+      let dateStr = `${parts[1]}/${parts[0]}`;
+      return `<tr>
+        <td style="padding: 8px 12px; font-weight: 600;">${dateStr}</td>
+        <td style="padding: 8px 12px; color: #047857; font-weight: 600;">${money(item.amount)}</td>
+        <td style="padding: 8px 12px; color: var(--muted); font-size: 12px;">${item.notes || '—'}</td>
+        <td style="padding: 8px 12px; text-align: right;">
+          <button type="button" class="link danger remove-monthly-item" data-id="${item.id}" style="font-size: 12px; padding: 2px 6px;">Excluir</button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    document.querySelectorAll('.remove-monthly-item').forEach(btn => {
+      btn.onclick = async (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        if (confirm('Excluir este lançamento mensal?')) {
+          await api(`project-monthly-values/${btn.dataset.id}`, { method: 'DELETE' });
+          await loadMonthlyValues(projectId);
+          if (section === 'projects') render();
+        }
+      };
+    });
+  } catch (err) {
+    body.innerHTML = `<tr><td colspan="4" style="padding: 14px; text-align: center; color: var(--red);">${err.message}</td></tr>`;
+  }
+}
+
+$('#monthly-form')?.addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!currentMonthlyProjectId) return;
+  let yearMonth = $('#monthly-year-month').value;
+  let amount = Number($('#monthly-amount').value);
+  let notes = $('#monthly-notes').value;
+  let errEl = $('#monthly-error');
+
+  try {
+    if (errEl) errEl.style.display = 'none';
+    await api(`projects/${currentMonthlyProjectId}/monthly-values`, {
+      method: 'POST',
+      body: JSON.stringify({ year_month: yearMonth, amount: amount, notes: notes || null })
+    });
+    $('#monthly-amount').value = '';
+    $('#monthly-notes').value = '';
+    await loadMonthlyValues(currentMonthlyProjectId);
+    if (section === 'projects') render();
+  } catch (err) {
+    if (errEl) {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+    }
+  }
+});
+
+$('#close-monthly-modal')?.addEventListener('click', () => {
+  $('#monthly-modal').close();
+  if (section === 'projects') render();
+});
+$('#done-monthly-btn')?.addEventListener('click', () => {
+  $('#monthly-modal').close();
+  if (section === 'projects') render();
+});
+
+
 
 $('#new').onclick = () => {
   if (section === 'dashboard') {

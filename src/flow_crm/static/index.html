@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FlowCRM</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/app.css?v=4"></head>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FlowCRM</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><link rel="stylesheet" href="/app.css?v=9"></head>
 <body>
     <aside>
     <div class="brand"><i>F</i><span>FlowCRM<small>OPERATIONS SUITE</small></span></div>
@@ -37,4 +37,54 @@
     </div>
 </dialog>
 
-<script src="/app.js?v=4"></script></body></html>
+<dialog id="monthly-modal">
+    <div class="modal-head">
+        <h2 id="monthly-modal-title">💰 Valores Mensais do Projeto</h2>
+        <button type="button" class="icon" id="close-monthly-modal">×</button>
+    </div>
+    <div style="padding: 20px; display: grid; gap: 16px;">
+        <form id="monthly-form" style="display: grid; gap: 10px; background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-weight: 600; font-size: 13px; color: var(--ink);">Lançar / Atualizar Mês</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="font-size: 11px; font-weight: 600; display: block; margin-bottom: 4px;">Mês/Ano (Competência)</label>
+                    <input type="month" id="monthly-year-month" required style="padding: 6px 8px; font-size: 13px;">
+                </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: 600; display: block; margin-bottom: 4px;">Valor no Mês (R$)</label>
+                    <input type="number" step="any" min="0" id="monthly-amount" required placeholder="0,00" style="padding: 6px 8px; font-size: 13px;">
+                </div>
+            </div>
+            <div>
+                <label style="font-size: 11px; font-weight: 600; display: block; margin-bottom: 4px;">Observações (opcional)</label>
+                <input type="text" id="monthly-notes" placeholder="Ex: Reajuste contratual, valor extra de entrega..." style="padding: 6px 8px; font-size: 13px;">
+            </div>
+            <p id="monthly-error" style="color: var(--red); margin: 0; font-size: 12px; display: none;"></p>
+            <button type="submit" style="justify-self: start; padding: 7px 16px; font-size: 12px;">+ Salvar Mês</button>
+        </form>
+
+        <div>
+            <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">Histórico de Valores Lançados</div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                <table style="width: 100%; font-size: 13px;">
+                    <thead>
+                        <tr style="background: #f1f5f9; text-align: left;">
+                            <th style="padding: 8px 12px; font-size: 11px;">Mês/Ano</th>
+                            <th style="padding: 8px 12px; font-size: 11px;">Valor</th>
+                            <th style="padding: 8px 12px; font-size: 11px;">Obs</th>
+                            <th style="padding: 8px 12px; text-align: right; font-size: 11px;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthly-table-body">
+                        <tr><td colspan="4" style="padding: 14px; text-align: center; color: var(--muted);">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="actions">
+        <button type="button" class="secondary" id="done-monthly-btn">Fechar</button>
+    </div>
+</dialog>
+
+<script src="/app.js?v=9"></script></body></html>

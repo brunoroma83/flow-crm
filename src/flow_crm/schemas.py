@@ -155,3 +155,17 @@ class ApiKeyOut(ORMModel):
 
 class ApiKeyCreatedOut(ApiKeyOut):
     raw_key: str
+
+
+class ProjectMonthlyValueIn(BaseModel):
+    year_month: str = Field(pattern=r"^\d{4}-\d{2}$", description="Ano e mês no formato YYYY-MM, ex: 2026-09")
+    amount: Decimal = Field(ge=0)
+    notes: str | None = None
+
+
+class ProjectMonthlyValueOut(ProjectMonthlyValueIn, ORMModel):
+    id: int
+    project_id: int
+    created_by_id: int | None = None
+    created_at: datetime | None = None
+

@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 from datetime import date, datetime, time
+from decimal import Decimal
 from pathlib import Path
 from typing import Any, TypeVar
 
@@ -20,6 +21,7 @@ from .models import (
     InvoiceStatus,
     Meeting,
     Project,
+    ProjectMonthlyValue,
     ProjectStatus,
     Task,
     TaskStatus,
@@ -39,6 +41,8 @@ from .schemas import (
     MeetingIn,
     MeetingOut,
     ProjectIn,
+    ProjectMonthlyValueIn,
+    ProjectMonthlyValueOut,
     ProjectOut,
     TaskIn,
     TaskOut,
@@ -733,6 +737,90 @@ def delete_project(
     actor: User = Depends(get_current_user),
 ):
     return delete_record(db, Project, item_id, actor)
+
+
+def sync_project_value(db: Session, project_id: int) -> Decimal:
+    total = db.scalar(
+        select(func.coalesce(func.sum(ProjectMonthlyValue.amount), 0)).where(
+            ProjectMonthlyValue.project_id == project_id,
+            ProjectMonthlyValue.is_deleted.is_(False),
+        )
+    ) or Decimal("0")
+    project = db.get(Project, project_id)
+    if project:
+        project.project_value = total
+        db.commit()
+    return total
+
+
+@app.get("/api/projects/{project_id}/monthly-values", response_model=list[ProjectMonthlyValueOut])
+def list_project_monthly_values(
+    project_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    project = get_or_404(db, Project, project_id)
+    records = db.scalars(
+        select(ProjectMonthlyValue)
+        .where(
+            ProjectMonthlyValue.project_id == project.id,
+            ProjectMonthlyValue.is_deleted.is_(False),
+        )
+        .order_by(ProjectMonthlyValue.year_month.desc())
+    ).all()
+    return list(records)
+
+
+@app.post("/api/projects/{project_id}/monthly-values", response_model=ProjectMonthlyValueOut, status_code=201)
+def create_or_update_project_monthly_value(
+    project_id: int,
+    payload: ProjectMonthlyValueIn,
+    db: Session = Depends(get_db),
+    actor: User = Depends(get_current_user),
+):
+    project = get_or_404(db, Project, project_id)
+    existing = db.scalar(
+        select(ProjectMonthlyValue).where(
+            ProjectMonthlyValue.project_id == project.id,
+            ProjectMonthlyValue.year_month == payload.year_month,
+            ProjectMonthlyValue.is_deleted.is_(False),
+        )
+    )
+    if existing:
+        existing.amount = payload.amount
+        existing.notes = payload.notes
+        db.commit()
+        sync_project_value(db, project.id)
+        db.refresh(existing)
+        return existing
+
+    record = ProjectMonthlyValue(
+        project_id=project.id,
+        year_month=payload.year_month,
+        amount=payload.amount,
+        notes=payload.notes,
+        created_by_id=actor.id,
+    )
+    db.add(record)
+    db.commit()
+    sync_project_value(db, project.id)
+    db.refresh(record)
+    return record
+
+
+@app.delete("/api/project-monthly-values/{item_id}", status_code=204)
+def delete_project_monthly_value(
+    item_id: int,
+    db: Session = Depends(get_db),
+    actor: User = Depends(get_current_user),
+):
+    record = get_or_404(db, ProjectMonthlyValue, item_id)
+    pid = record.project_id
+    res = delete_record(db, ProjectMonthlyValue, item_id, actor)
+    sync_project_value(db, pid)
+    return res
+
+
 
 
 @app.get("/api/invoices", response_model=list[InvoiceOut])

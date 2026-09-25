@@ -123,7 +123,27 @@ class Project(TimestampMixin, Base):
         cascade="all, delete-orphan",
         foreign_keys="Invoice.project_id",
     )
+    monthly_values: Mapped[list["ProjectMonthlyValue"]] = relationship(
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
     is_deleted: Mapped[bool] = mapped_column(SQLBool, default=False)
+
+
+class ProjectMonthlyValue(TimestampMixin, Base):
+    __tablename__ = "project_monthly_values"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    year_month: Mapped[str] = mapped_column(String(7), index=True)  # ex: "2026-09"
+    amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=Decimal("0"))
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(SQLBool, default=False)
+
+    project: Mapped[Project] = relationship(back_populates="monthly_values")
+    created_by: Mapped[User | None] = relationship(foreign_keys=[created_by_id])
+
 
 class Task(TimestampMixin, Base):
     __tablename__ = "tasks"

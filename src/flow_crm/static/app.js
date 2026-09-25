@@ -84,7 +84,96 @@ function projectCard(p) {
 
 async function dashboard() {
   let d = await api('dashboard');
-  return title() + `<section class="metrics"><div class="card"><div class="metric-label">Clientes ativos</div><div class="metric">${d.active_clients}</div></div><div class="card"><div class="metric-label">Projetos em andamento</div><div class="metric">${d.active_projects}</div></div><div class="card"><div class="metric-label">Faturas a receber</div><div class="metric">${money(d.invoices_pending_value)}</div><p style="font-size:12px;margin-top:4px">${d.invoices_pending_count} faturas pendentes · ${d.invoices_overdue_count} vencidas</p></div><div class="card"><div class="metric-label">Tarefas para hoje</div><div class="metric">${d.tasks_today}</div></div></section><div class="card revenue"><div class="metric-label">Receita mensal sob gestão</div><div class="metric">${money(d.monthly_value)}</div><p>Dados calculados a partir das contas ativas.</p></div><section class="project-areas">${projectArea('Projetos em andamento', 'Execução e entregas ativas', d.in_progress_projects, 'active')}${projectArea('Projetos em prospecção', 'Oportunidades em planejamento', d.prospecting_projects, 'planning')}</section>`;
+  let y = d.year_metrics;
+  let m = d.month_metrics;
+
+  let monthName = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  monthName = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+  return title() + `
+  <div style="display:grid;gap:24px;">
+    <!-- 1. Visão Geral (Ano Corrente) -->
+    <section>
+      <div style="font-weight:700;font-size:16px;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <span>📅</span> Visão Geral — Ano Corrente (${y.year})
+      </div>
+      <div class="metrics" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+        <div class="card">
+          <div class="metric-label">👥 Clientes</div>
+          <div class="metric">${y.total_clients}</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:4px">Total cadastrado no sistema</p>
+        </div>
+
+        <div class="card">
+          <div class="metric-label">🚀 Projetos</div>
+          <div class="metric" style="font-size:22px;margin-top:6px">
+            <span style="color:#0284c7" title="Ativos">${y.projects.active} ativos</span>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:6px;display:flex;gap:8px">
+            <span>✅ ${y.projects.completed} finalizados</span> · <span>📊 ${y.projects.total} total</span>
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="metric-label">💰 Valores (Ano)</div>
+          <div class="metric" style="font-size:20px;color:#047857;margin-top:6px" title="Faturas Pagas no Ano">
+            ${money(y.values.paid_invoices)}
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:6px">
+            Soma Projetos: <b>${money(y.values.total_projects)}</b>
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="metric-label">📋 Tarefas</div>
+          <div class="metric" style="font-size:22px;margin-top:6px">
+            <span style="color:#d97706">${y.tasks.pending} pendentes</span>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:6px">
+            <span>✅ ${y.tasks.completed} concluídas</span> · <span>Total: ${y.tasks.total}</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Visão do Mês Corrente -->
+    <section>
+      <div style="font-weight:700;font-size:16px;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <span>🗓️</span> Visão do Mês — ${monthName}
+      </div>
+      <div class="metrics" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+        <div class="card" style="border-left: 4px solid #059669;">
+          <div class="metric-label">💳 Faturas Pagas no Mês</div>
+          <div class="metric" style="color:#059669;font-size:24px;margin-top:6px">${money(m.values.paid_invoices)}</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:4px">Faturamento já recebido neste mês</p>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #2563eb;">
+          <div class="metric-label">📈 Projetado no Mês</div>
+          <div class="metric" style="color:#2563eb;font-size:24px;margin-top:6px">${money(m.values.projected_values)}</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:4px">Lançamentos mensais previstos</p>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #d97706;">
+          <div class="metric-label">📌 Tarefas do Mês</div>
+          <div class="metric" style="color:#d97706;font-size:24px;margin-top:6px">${m.tasks_count}</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:4px">Tarefas com vencimento este mês</p>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #7c3aed;">
+          <div class="metric-label">🤝 Reuniões do Mês</div>
+          <div class="metric" style="color:#7c3aed;font-size:24px;margin-top:6px">${m.meetings_count}</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:4px">Compromissos agendados no mês</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Prospecção & Projetos em Andamento -->
+    <section class="project-areas">
+      ${projectArea('Oportunidades em Prospecção', 'Projetos em fase de planejamento e negociação comercial', d.prospecting_projects, 'planning')}
+      ${projectArea('Projetos em Andamento', 'Execução e entregas ativas', d.in_progress_projects, 'active')}
+    </section>
+  </div>`;
 }
 
 function canDelete(record) {

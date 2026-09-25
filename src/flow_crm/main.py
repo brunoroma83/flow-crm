@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from contextlib import asynccontextmanager
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, TypeVar
@@ -435,12 +435,105 @@ def delete_record(db: Session, model: type[ModelT], item_id: int, actor: User) -
 @app.get("/api/dashboard")
 def dashboard(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     today = date.today()
-    total_value = db.scalar(
-        select(func.coalesce(func.sum(Client.monthly_value), 0)).where(
-            Client.status == ClientStatus.active,
-            Client.is_deleted.is_(False),
+    current_year = today.year
+    start_of_year = date(current_year, 1, 1)
+    end_of_year = date(current_year, 12, 31)
+
+    current_month_str = today.strftime("%Y-%m")
+    start_of_month = date(today.year, today.month, 1)
+    if today.month == 12:
+        end_of_month = date(today.year, 12, 31)
+    else:
+        end_of_month = date(today.year, today.month + 1, 1) - timedelta(days=1)
+
+    # 1. Visão Geral (Ano Corrente)
+    total_clients = db.scalar(
+        select(func.count()).select_from(Client).where(Client.is_deleted.is_(False))
+    ) or 0
+
+    active_projects_count = db.scalar(
+        select(func.count()).select_from(Project).where(
+            Project.status == ProjectStatus.active, Project.is_deleted.is_(False)
         )
+    ) or 0
+    completed_projects_count = db.scalar(
+        select(func.count()).select_from(Project).where(
+            Project.status == ProjectStatus.completed, Project.is_deleted.is_(False)
+        )
+    ) or 0
+    total_projects_count = db.scalar(
+        select(func.count()).select_from(Project).where(Project.is_deleted.is_(False))
+    ) or 0
+
+    paid_invoices_year = float(
+        db.scalar(
+            select(func.coalesce(func.sum(Invoice.amount), 0)).where(
+                Invoice.status == InvoiceStatus.paid,
+                Invoice.is_deleted.is_(False),
+                Invoice.payment_date >= start_of_year,
+                Invoice.payment_date <= end_of_year,
+            )
+        ) or 0
     )
+    total_projects_value = float(
+        db.scalar(
+            select(func.coalesce(func.sum(Project.project_value), 0)).where(
+                Project.is_deleted.is_(False)
+            )
+        ) or 0
+    )
+
+    tasks_pending_count = db.scalar(
+        select(func.count()).select_from(Task).where(
+            Task.status.in_([TaskStatus.todo, TaskStatus.in_progress]),
+            Task.is_deleted.is_(False),
+        )
+    ) or 0
+    tasks_done_count = db.scalar(
+        select(func.count()).select_from(Task).where(
+            Task.status == TaskStatus.done,
+            Task.is_deleted.is_(False),
+        )
+    ) or 0
+    total_tasks_count = db.scalar(
+        select(func.count()).select_from(Task).where(Task.is_deleted.is_(False))
+    ) or 0
+
+    # 2. Visão do Mês Corrente
+    paid_invoices_month = float(
+        db.scalar(
+            select(func.coalesce(func.sum(Invoice.amount), 0)).where(
+                Invoice.status == InvoiceStatus.paid,
+                Invoice.is_deleted.is_(False),
+                Invoice.payment_date >= start_of_month,
+                Invoice.payment_date <= end_of_month,
+            )
+        ) or 0
+    )
+    projected_monthly_value = float(
+        db.scalar(
+            select(func.coalesce(func.sum(ProjectMonthlyValue.amount), 0)).where(
+                ProjectMonthlyValue.year_month == current_month_str,
+                ProjectMonthlyValue.is_deleted.is_(False),
+            )
+        ) or 0
+    )
+    tasks_this_month = db.scalar(
+        select(func.count()).select_from(Task).where(
+            Task.due_date >= start_of_month,
+            Task.due_date <= end_of_month,
+            Task.is_deleted.is_(False),
+        )
+    ) or 0
+    meetings_this_month = db.scalar(
+        select(func.count()).select_from(Meeting).where(
+            func.date(Meeting.starts_at) >= start_of_month,
+            func.date(Meeting.starts_at) <= end_of_month,
+            Meeting.is_deleted.is_(False),
+        )
+    ) or 0
+
+    # Resumo dos projetos para o grid de prospecção e execução
     project_rows = db.scalars(
         select(Project)
         .options(
@@ -498,66 +591,33 @@ def dashboard(db: Session = Depends(get_db), _: User = Depends(get_current_user)
         }
 
     return {
-        "active_clients": db.scalar(
-            select(func.count())
-            .select_from(Client)
-            .where(
-                Client.status == ClientStatus.active,
-                Client.is_deleted.is_(False),
-            )
-        ),
-        "active_projects": db.scalar(
-            select(func.count())
-            .select_from(Project)
-            .where(
-                Project.status == ProjectStatus.active,
-                Project.is_deleted.is_(False),
-            )
-        ),
-        "tasks_today": db.scalar(
-            select(func.count())
-            .select_from(Task)
-            .where(
-                Task.due_date == today,
-                Task.status != TaskStatus.done,
-                Task.is_deleted.is_(False),
-            )
-        ),
-        "meetings_today": db.scalar(
-            select(func.count())
-            .select_from(Meeting)
-            .where(
-                func.date(Meeting.starts_at) == today,
-                Meeting.is_deleted.is_(False),
-            )
-        ),
-        "monthly_value": float(total_value or 0),
-        "invoices_pending_count": db.scalar(
-            select(func.count())
-            .select_from(Invoice)
-            .where(
-                Invoice.status == InvoiceStatus.pending,
-                Invoice.is_deleted.is_(False),
-            )
-        ) or 0,
-        "invoices_pending_value": float(
-            db.scalar(
-                select(func.coalesce(func.sum(Invoice.amount), 0))
-                .where(
-                    Invoice.status == InvoiceStatus.pending,
-                    Invoice.is_deleted.is_(False),
-                )
-            ) or 0
-        ),
-        "invoices_overdue_count": db.scalar(
-            select(func.count())
-            .select_from(Invoice)
-            .where(
-                Invoice.status == InvoiceStatus.pending,
-                Invoice.due_date < today,
-                Invoice.is_deleted.is_(False),
-            )
-        ) or 0,
+        "year_metrics": {
+            "year": current_year,
+            "total_clients": total_clients,
+            "projects": {
+                "active": active_projects_count,
+                "completed": completed_projects_count,
+                "total": total_projects_count,
+            },
+            "values": {
+                "paid_invoices": paid_invoices_year,
+                "total_projects": total_projects_value,
+            },
+            "tasks": {
+                "pending": tasks_pending_count,
+                "completed": tasks_done_count,
+                "total": total_tasks_count,
+            },
+        },
+        "month_metrics": {
+            "year_month": current_month_str,
+            "values": {
+                "paid_invoices": paid_invoices_month,
+                "projected_values": projected_monthly_value,
+            },
+            "tasks_count": tasks_this_month,
+            "meetings_count": meetings_this_month,
+        },
         "in_progress_projects": [
             project_summary(project)
             for project in project_rows

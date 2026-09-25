@@ -21,6 +21,11 @@ class ProjectStatus(StrEnum):
     completed = "completed"
 
 
+class ProjectContractType(StrEnum):
+    mensal = "mensal"
+    avulso = "avulso"
+
+
 class TaskStatus(StrEnum):
     todo = "todo"
     in_progress = "in_progress"
@@ -100,6 +105,13 @@ class Project(TimestampMixin, Base):
     status: Mapped[ProjectStatus] = mapped_column(Enum(ProjectStatus), default=ProjectStatus.planning)
     start_date: Mapped[date | None] = mapped_column(Date)
     due_date: Mapped[date | None] = mapped_column(Date)
+    project_value: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), default=Decimal("0"), server_default="0", nullable=False
+    )
+    contract_type: Mapped[str] = mapped_column(
+        String(20), default=ProjectContractType.mensal.value,
+        server_default=ProjectContractType.mensal.value, nullable=False,
+    )
     client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"))
     invoice_contact_id: Mapped[int | None] = mapped_column(ForeignKey("contacts.id"), nullable=True)
     created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)

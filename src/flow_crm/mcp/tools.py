@@ -604,6 +604,8 @@ def get_project_details(project_id: int) -> dict[str, Any]:
             "name": project.name,
             "description": project.description,
             "status": project.status.value,
+            "project_value": float(project.project_value or 0),
+            "contract_type": project.contract_type,
             "start_date": project.start_date.isoformat() if project.start_date else None,
             "due_date": project.due_date.isoformat() if project.due_date else None,
             "cliente": {

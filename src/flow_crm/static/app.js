@@ -1,7 +1,7 @@
 const config = {
   dashboard: { label: 'Dashboard', title: 'Visão geral das operações', description: 'Acompanhamento em tempo real de clientes, faturamento, entregas e compromissos.' },
   clients: { label: 'Clientes', title: 'Diretório de clientes', description: 'Contas, dados fiscais, saúde e valor mensal sob gestão.', fields: [['name', 'Nome da Empresa *'], ['cnpj', 'CNPJ'], ['address', 'Endereço Completo de Cobrança', 'textarea'], ['industry', 'Segmento'], ['status', 'Status', 'select', 'prospect,active,inactive'], ['health_score', 'Health score', 'number'], ['monthly_value', 'Valor mensal (R$)', 'number']] },
-  projects: { label: 'Projetos', title: 'Projetos', description: 'Entregas organizadas por cliente, contato de cobrança e fase.', fields: [['name', 'Nome do Projeto *'], ['client_id', 'Cliente *', 'select-api', 'clients'], ['invoice_contact_id', 'Contato Designado para Faturas', 'select-api', 'contacts'], ['status', 'Status', 'select', 'planning,active,paused,completed'], ['description', 'Descrição', 'textarea'], ['start_date', 'Início', 'date'], ['due_date', 'Prazo', 'date']] },
+  projects: { label: 'Projetos', title: 'Projetos', description: 'Entregas organizadas por cliente, contato de cobrança e fase.', fields: [['name', 'Nome do Projeto *'], ['client_id', 'Cliente *', 'select-api', 'clients'], ['invoice_contact_id', 'Contato Designado para Faturas', 'select-api', 'contacts'], ['status', 'Status', 'select', 'planning,active,paused,completed'], ['project_value', 'Valor do projeto (R$)', 'number'], ['contract_type', 'Tipo de contrato', 'select', 'mensal,avulso'], ['description', 'Descrição', 'textarea'], ['start_date', 'Início', 'date'], ['due_date', 'Prazo', 'date']] },
   invoices: { label: 'Faturas', title: 'Faturas & Cobranças', description: 'Controle de faturamento, prazos de vencimento e recebimento por projeto.', fields: [['invoice_number', 'Número da Fatura *'], ['project_id', 'Projeto *', 'select-api', 'projects'], ['contact_id', 'Para quem foi enviada (Contato)', 'select-api', 'contacts'], ['amount', 'Valor (R$) *', 'number'], ['issue_date', 'Data de Emissão', 'date'], ['due_date', 'Data de Vencimento *', 'date'], ['payment_date', 'Data de Pagamento', 'date'], ['status', 'Status', 'select', 'pending,paid,overdue,draft,cancelled'], ['description', 'Descrição / Serviços Faturados *', 'textarea']] },
   tasks: { label: 'Tarefas', title: 'Central de tarefas', description: 'Priorize a execução e acompanhe prazos.', fields: [['title', 'Título'], ['project_id', 'Projeto', 'select-api', 'projects'], ['status', 'Status', 'select', 'todo,in_progress,done'], ['priority', 'Prioridade', 'select', 'low,medium,high'], ['due_date', 'Prazo', 'date'], ['description', 'Descrição', 'textarea']] },
   meetings: { label: 'Reuniões', title: 'Reuniões e agenda', description: 'Registre compromissos e decisões com os clientes.', fields: [['title', 'Título'], ['client_id', 'Cliente', 'select-api', 'clients'], ['starts_at', 'Data e hora', 'datetime-local'], ['duration_minutes', 'Duração (minutos)', 'number'], ['notes', 'Notas', 'textarea']] },
@@ -53,7 +53,7 @@ function projectArea(title, description, projects, kind) {
 function projectCard(p) {
   let contacts = p.contacts.length ? p.contacts.map(c => `<span>${c.name}${c.role ? ' · ' + c.role : ''}</span>`).join('') : 'Sem contatos vinculados';
   let tasks = p.tasks.length ? p.tasks.map(t => `<li>${t.title} ${status(t.status)}</li>`).join('') : '<li>Sem tarefas vinculadas</li>';
-  return `<article class="project-card"><div class="project-top"><div><h3>${p.name}</h3><p>${p.client?.name || 'Sem cliente'}</p></div>${p.due_date ? `<span class="due">Prazo: ${new Date(p.due_date + 'T12:00').toLocaleDateString('pt-BR')}</span>` : ''}</div><div class="project-data"><div><b>Valor mensal</b><span>${money(p.client?.monthly_value)}</span></div><div><b>Tarefas</b><span>${p.task_summary.done}/${p.task_summary.total} concluídas · ${p.task_summary.in_progress} em andamento</span></div><div><b>Contatos</b><span>${contacts}</span></div></div><ul class="project-tasks">${tasks}</ul></article>`;
+  return `<article class="project-card"><div class="project-top"><div><h3>${p.name}</h3><p>${p.client?.name || 'Sem cliente'}</p></div>${p.due_date ? `<span class="due">Prazo: ${new Date(p.due_date + 'T12:00').toLocaleDateString('pt-BR')}</span>` : ''}</div><div class="project-data"><div><b>Valor do projeto</b><span>${money(p.project_value)}</span></div><div><b>Tipo de contrato</b><span>${p.contract_type === 'avulso' ? 'Avulso' : 'Mensal'}</span></div><div><b>Tarefas</b><span>${p.task_summary.done}/${p.task_summary.total} concluídas · ${p.task_summary.in_progress} em andamento</span></div><div><b>Contatos</b><span>${contacts}</span></div></div><ul class="project-tasks">${tasks}</ul></article>`;
 }
 
 async function dashboard() {
@@ -69,7 +69,7 @@ function columns() {
   return {
     users: [['name', 'Nome'], ['email', 'E-mail'], ['role', 'Perfil'], ['is_active', 'Status']],
     clients: [['name', 'Cliente'], ['cnpj', 'CNPJ'], ['industry', 'Segmento'], ['status', 'Status'], ['health_score', 'Health'], ['monthly_value', 'Valor mensal']],
-    projects: [['name', 'Projeto'], ['client_name', 'Cliente'], ['invoice_contact_name', 'Contato Faturamento'], ['status', 'Status'], ['due_date', 'Prazo']],
+    projects: [['name', 'Projeto'], ['client_name', 'Cliente'], ['project_value', 'Valor do projeto'], ['contract_type', 'Tipo de contrato'], ['invoice_contact_name', 'Contato Faturamento'], ['status', 'Status'], ['due_date', 'Prazo']],
     invoices: [['invoice_number', 'Fatura'], ['project_name', 'Projeto'], ['client_name', 'Cliente'], ['contact_name', 'Destinatário'], ['amount', 'Valor'], ['issue_date', 'Emissão'], ['due_date', 'Vencimento'], ['status', 'Status']],
     tasks: [['title', 'Tarefa'], ['project_id', 'Projeto'], ['status', 'Status'], ['priority', 'Prioridade'], ['due_date', 'Prazo']],
     meetings: [['title', 'Reunião'], ['client_id', 'Cliente'], ['starts_at', 'Data'], ['duration_minutes', 'Duração']],
@@ -90,7 +90,8 @@ function cell(r, k) {
   }
   if (k === 'role') return `<span class="pill ${v}">${v === 'agent' ? 'Agente IA' : (v === 'admin' ? 'Administrador' : 'Membro')}</span>`;
   if (k === 'is_active') return status(v ? 'active' : 'inactive');
-  if (k === 'monthly_value' || k === 'amount') return money(v);
+  if (k === 'monthly_value' || k === 'amount' || k === 'project_value') return money(v);
+  if (k === 'contract_type') return v === 'avulso' ? 'Avulso' : 'Mensal';
   if (k === 'health_score') return `${v}%`;
   if (k === 'starts_at' || k === 'created_at') return v ? new Date(v).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
   if (k === 'due_date' || k === 'issue_date' || k === 'payment_date' || k === 'start_date') return v ? new Date(v + 'T12:00').toLocaleDateString('pt-BR') : '—';
@@ -231,6 +232,8 @@ function defaults(name) {
   return {
     health_score: 100,
     status: section === 'clients' ? 'prospect' : (section === 'projects' ? 'planning' : (section === 'tasks' ? 'todo' : (section === 'invoices' ? 'pending' : undefined))),
+    project_value: 0,
+    contract_type: 'mensal',
     priority: 'medium',
     duration_minutes: 30,
     role: 'member'
@@ -246,7 +249,7 @@ $('#form').addEventListener('submit', async e => {
   let targetSection = forcedTargetSection || section;
   let data = Object.fromEntries(new FormData(e.target));
   for (let k of Object.keys(data)) if (data[k] === '') data[k] = null;
-  ['health_score', 'monthly_value', 'client_id', 'project_id', 'contact_id', 'invoice_contact_id', 'duration_minutes', 'user_id', 'amount'].forEach(k => {
+  ['health_score', 'monthly_value', 'project_value', 'client_id', 'project_id', 'contact_id', 'invoice_contact_id', 'duration_minutes', 'user_id', 'amount'].forEach(k => {
     if (data[k] !== undefined && data[k] !== null) data[k] = Number(data[k]);
   });
   if (data.is_active !== undefined) data.is_active = data.is_active === 'true';

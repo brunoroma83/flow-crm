@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .models import ClientStatus, InvoiceStatus, Priority, ProjectStatus, TaskStatus, UserRole
+from .models import ClientStatus, InvoiceStatus, Priority, ProjectContractType, ProjectStatus, TaskStatus, UserRole
 
 
 class ORMModel(BaseModel):
@@ -73,6 +73,8 @@ class ProjectIn(BaseModel):
     status: ProjectStatus = ProjectStatus.planning
     start_date: date | None = None
     due_date: date | None = None
+    project_value: Decimal = Field(default=Decimal("0"), ge=0)
+    contract_type: ProjectContractType = ProjectContractType.mensal
     client_id: int
     invoice_contact_id: int | None = None
 
@@ -153,4 +155,3 @@ class ApiKeyOut(ORMModel):
 
 class ApiKeyCreatedOut(ApiKeyOut):
     raw_key: str
-

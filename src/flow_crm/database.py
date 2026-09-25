@@ -56,6 +56,14 @@ def ensure_schema() -> None:
             project_cols = {col["name"] for col in inspector.get_columns("projects")}
             if "invoice_contact_id" not in project_cols:
                 connection.execute(text("ALTER TABLE projects ADD COLUMN invoice_contact_id INTEGER REFERENCES contacts(id)"))
+            if "project_value" not in project_cols:
+                connection.execute(
+                    text("ALTER TABLE projects ADD COLUMN project_value NUMERIC(12, 2) NOT NULL DEFAULT 0")
+                )
+            if "contract_type" not in project_cols:
+                connection.execute(
+                    text("ALTER TABLE projects ADD COLUMN contract_type VARCHAR(20) NOT NULL DEFAULT 'mensal'")
+                )
 
 
 def get_db():

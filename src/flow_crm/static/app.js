@@ -30,10 +30,22 @@ async function api(path, options = {}) {
 }
 
 function nav() {
+  const icons = {
+    dashboard: '📊 ',
+    clients: '🏢 ',
+    projects: '🚀 ',
+    invoices: '📄 ',
+    tasks: '📋 ',
+    meetings: '🤝 ',
+    contacts: '📇 ',
+    users: '👥 ',
+    api_keys: '🤖 '
+  };
+
   $('#nav').innerHTML = Object.entries(config)
     .filter(([key]) => (key !== 'users' && key !== 'api_keys') || currentUser?.role === 'admin')
     .map(([key, x]) => {
-      let icon = key === 'api_keys' ? '🤖 ' : (key === 'users' ? '👥 ' : (key === 'invoices' ? '📄 ' : ''));
+      let icon = icons[key] || '';
       return `<button class="nav ${key === section ? 'active' : ''}" data-go="${key}">${icon}${x.label}</button>`;
     })
     .join('');

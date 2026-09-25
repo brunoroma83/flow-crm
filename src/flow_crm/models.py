@@ -56,11 +56,21 @@ class User(TimestampMixin, Base):
     is_active: Mapped[bool] = mapped_column(default=True)
     is_deleted: Mapped[bool] = mapped_column(SQLBool, default=False)
 
+class InvoiceStatus(StrEnum):
+    draft = "draft"
+    pending = "pending"
+    paid = "paid"
+    overdue = "overdue"
+    cancelled = "cancelled"
+
+
 class Client(TimestampMixin, Base):
     __tablename__ = "clients"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(160), unique=True)
     industry: Mapped[str | None] = mapped_column(String(100))
+    cnpj: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    address: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[ClientStatus] = mapped_column(Enum(ClientStatus), default=ClientStatus.prospect)
     health_score: Mapped[int] = mapped_column(default=100)
     monthly_value: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
@@ -91,9 +101,16 @@ class Project(TimestampMixin, Base):
     start_date: Mapped[date | None] = mapped_column(Date)
     due_date: Mapped[date | None] = mapped_column(Date)
     client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"))
+    invoice_contact_id: Mapped[int | None] = mapped_column(ForeignKey("contacts.id"), nullable=True)
     created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     client: Mapped[Client] = relationship(back_populates="projects")
+    invoice_contact: Mapped[Contact | None] = relationship(foreign_keys=[invoice_contact_id])
     tasks: Mapped[list["Task"]] = relationship(back_populates="project", cascade="all, delete-orphan")
+    invoices: Mapped[list["Invoice"]] = relationship(
+        back_populates="project",
+        cascade="all, delete-orphan",
+        foreign_keys="Invoice.project_id",
+    )
     is_deleted: Mapped[bool] = mapped_column(SQLBool, default=False)
 
 class Task(TimestampMixin, Base):
@@ -124,6 +141,28 @@ class Meeting(TimestampMixin, Base):
     created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     client: Mapped[Client | None] = relationship(back_populates="meetings")
     is_deleted: Mapped[bool] = mapped_column(SQLBool, default=False)
+
+
+class Invoice(TimestampMixin, Base):
+    __tablename__ = "invoices"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    invoice_number: Mapped[str] = mapped_column(String(60), unique=True, index=True)
+    description: Mapped[str] = mapped_column(Text)
+    amount: Mapped[Decimal] = mapped_column(Numeric(12, 2))
+    issue_date: Mapped[date] = mapped_column(Date, default=date.today)
+    due_date: Mapped[date] = mapped_column(Date)
+    payment_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    status: Mapped[InvoiceStatus] = mapped_column(Enum(InvoiceStatus), default=InvoiceStatus.pending)
+
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    contact_id: Mapped[int | None] = mapped_column(ForeignKey("contacts.id"), nullable=True)
+    created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(SQLBool, default=False)
+
+    project: Mapped[Project] = relationship(back_populates="invoices", foreign_keys=[project_id])
+    contact: Mapped[Contact | None] = relationship(foreign_keys=[contact_id])
+    created_by: Mapped[User | None] = relationship(foreign_keys=[created_by_id])
 
 
 class ApiKey(TimestampMixin, Base):

@@ -16,6 +16,8 @@ from .models import (
     Client,
     ClientStatus,
     Contact,
+    Invoice,
+    InvoiceStatus,
     Meeting,
     Project,
     ProjectStatus,
@@ -32,6 +34,8 @@ from .schemas import (
     ClientOut,
     ContactIn,
     ContactOut,
+    InvoiceIn,
+    InvoiceOut,
     MeetingIn,
     MeetingOut,
     ProjectIn,
@@ -63,6 +67,8 @@ def seed_data(db: Session) -> None:
     client = Client(
         name="Acme Consulting",
         industry="Consultoria",
+        cnpj="12.345.678/0001-90",
+        address="Av. Paulista, 1000, Bela Vista, São Paulo - SP, CEP 01310-100",
         status=ClientStatus.active,
         health_score=94,
         monthly_value=8500,
@@ -70,6 +76,8 @@ def seed_data(db: Session) -> None:
     second = Client(
         name="Norte Tecnologia",
         industry="Tecnologia",
+        cnpj="98.765.432/0001-10",
+        address="Rua dos Andradas, 500, Centro, Porto Alegre - RS, CEP 90020-002",
         status=ClientStatus.prospect,
         health_score=78,
         monthly_value=4200,
@@ -77,9 +85,25 @@ def seed_data(db: Session) -> None:
     db.add_all([client, second])
     db.flush()
 
+    contact_marina = Contact(
+        name="Marina Costa",
+        email="marina@acme.example",
+        role="Diretora de Operações",
+        client_id=client.id,
+    )
+    contact_joao = Contact(
+        name="João Pereira",
+        email="joao@norte.example",
+        role="Head de Produto",
+        client_id=second.id,
+    )
+    db.add_all([contact_marina, contact_joao])
+    db.flush()
+
     project = Project(
         name="Transformação Comercial",
         client_id=client.id,
+        invoice_contact_id=contact_marina.id,
         status=ProjectStatus.active,
         start_date=date.today(),
         due_date=date.today().replace(day=min(date.today().day, 28)),
@@ -87,19 +111,19 @@ def seed_data(db: Session) -> None:
     db.add(project)
     db.flush()
 
+    invoice = Invoice(
+        invoice_number="FAT-2026-001",
+        description="Honorários mensais de consultoria em transformação comercial",
+        amount=8500,
+        issue_date=date.today(),
+        due_date=date.today().replace(day=min(date.today().day, 28)),
+        status=InvoiceStatus.pending,
+        project_id=project.id,
+        contact_id=contact_marina.id,
+    )
+
     db.add_all([
-        Contact(
-            name="Marina Costa",
-            email="marina@acme.example",
-            role="Diretora de Operações",
-            client_id=client.id,
-        ),
-        Contact(
-            name="João Pereira",
-            email="joao@norte.example",
-            role="Head de Produto",
-            client_id=second.id,
-        ),
+        invoice,
         Task(
             title="Revisar plano da fase 2",
             project_id=project.id,
@@ -502,6 +526,32 @@ def dashboard(db: Session = Depends(get_db), _: User = Depends(get_current_user)
             )
         ),
         "monthly_value": float(total_value or 0),
+        "invoices_pending_count": db.scalar(
+            select(func.count())
+            .select_from(Invoice)
+            .where(
+                Invoice.status == InvoiceStatus.pending,
+                Invoice.is_deleted.is_(False),
+            )
+        ) or 0,
+        "invoices_pending_value": float(
+            db.scalar(
+                select(func.coalesce(func.sum(Invoice.amount), 0))
+                .where(
+                    Invoice.status == InvoiceStatus.pending,
+                    Invoice.is_deleted.is_(False),
+                )
+            ) or 0
+        ),
+        "invoices_overdue_count": db.scalar(
+            select(func.count())
+            .select_from(Invoice)
+            .where(
+                Invoice.status == InvoiceStatus.pending,
+                Invoice.due_date < today,
+                Invoice.is_deleted.is_(False),
+            )
+        ) or 0,
         "in_progress_projects": [
             project_summary(project)
             for project in project_rows
@@ -583,7 +633,33 @@ def delete_contact(
 
 @app.get("/api/projects", response_model=list[ProjectOut])
 def projects(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    return list_records(db, Project)
+    stmt = (
+        select(Project)
+        .options(
+            selectinload(Project.client),
+            selectinload(Project.invoice_contact),
+        )
+        .where(Project.is_deleted.is_(False))
+        .order_by(Project.id.desc())
+    )
+    project_rows = db.scalars(stmt).all()
+    return [
+        ProjectOut(
+            id=p.id,
+            name=p.name,
+            description=p.description,
+            status=p.status,
+            start_date=p.start_date,
+            due_date=p.due_date,
+            client_id=p.client_id,
+            invoice_contact_id=p.invoice_contact_id,
+            created_by_id=p.created_by_id,
+            client_name=p.client.name if p.client else None,
+            invoice_contact_name=p.invoice_contact.name if p.invoice_contact else None,
+            invoice_contact_email=p.invoice_contact.email if p.invoice_contact else None,
+        )
+        for p in project_rows
+    ]
 
 
 @app.post("/api/projects", response_model=ProjectOut, status_code=201)
@@ -592,7 +668,25 @@ def create_project(
     db: Session = Depends(get_db),
     actor: User = Depends(get_current_user),
 ):
-    return create_record(db, Project, payload, actor)
+    project = Project(**payload.model_dump(), created_by_id=actor.id)
+    db.add(project)
+    db.commit()
+    db.refresh(project)
+    db.refresh(project, ["client", "invoice_contact"])
+    return ProjectOut(
+        id=project.id,
+        name=project.name,
+        description=project.description,
+        status=project.status,
+        start_date=project.start_date,
+        due_date=project.due_date,
+        client_id=project.client_id,
+        invoice_contact_id=project.invoice_contact_id,
+        created_by_id=project.created_by_id,
+        client_name=project.client.name if project.client else None,
+        invoice_contact_name=project.invoice_contact.name if project.invoice_contact else None,
+        invoice_contact_email=project.invoice_contact.email if project.invoice_contact else None,
+    )
 
 
 @app.put("/api/projects/{item_id}", response_model=ProjectOut)
@@ -602,7 +696,26 @@ def update_project(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ):
-    return update_record(db, Project, item_id, payload)
+    project = get_or_404(db, Project, item_id)
+    for key, value in payload.model_dump().items():
+        setattr(project, key, value)
+    db.commit()
+    db.refresh(project)
+    db.refresh(project, ["client", "invoice_contact"])
+    return ProjectOut(
+        id=project.id,
+        name=project.name,
+        description=project.description,
+        status=project.status,
+        start_date=project.start_date,
+        due_date=project.due_date,
+        client_id=project.client_id,
+        invoice_contact_id=project.invoice_contact_id,
+        created_by_id=project.created_by_id,
+        client_name=project.client.name if project.client else None,
+        invoice_contact_name=project.invoice_contact.name if project.invoice_contact else None,
+        invoice_contact_email=project.invoice_contact.email if project.invoice_contact else None,
+    )
 
 
 @app.delete("/api/projects/{item_id}", status_code=204)
@@ -612,6 +725,194 @@ def delete_project(
     actor: User = Depends(get_current_user),
 ):
     return delete_record(db, Project, item_id, actor)
+
+
+@app.get("/api/invoices", response_model=list[InvoiceOut])
+def get_invoices(
+    project_id: int | None = None,
+    status: InvoiceStatus | None = None,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    stmt = (
+        select(Invoice)
+        .options(
+            selectinload(Invoice.project).selectinload(Project.client),
+            selectinload(Invoice.contact),
+        )
+        .where(Invoice.is_deleted.is_(False))
+        .order_by(Invoice.id.desc())
+    )
+    if project_id:
+        stmt = stmt.where(Invoice.project_id == project_id)
+    if status:
+        stmt = stmt.where(Invoice.status == status)
+
+    invoices = db.scalars(stmt).all()
+    return [
+        InvoiceOut(
+            id=inv.id,
+            invoice_number=inv.invoice_number,
+            description=inv.description,
+            amount=inv.amount,
+            issue_date=inv.issue_date,
+            due_date=inv.due_date,
+            payment_date=inv.payment_date,
+            status=inv.status,
+            project_id=inv.project_id,
+            contact_id=inv.contact_id,
+            created_by_id=inv.created_by_id,
+            created_at=inv.created_at,
+            project_name=inv.project.name if inv.project else None,
+            client_name=inv.project.client.name if inv.project and inv.project.client else None,
+            client_cnpj=inv.project.client.cnpj if inv.project and inv.project.client else None,
+            contact_name=inv.contact.name if inv.contact else None,
+            contact_email=inv.contact.email if inv.contact else None,
+        )
+        for inv in invoices
+    ]
+
+
+@app.post("/api/invoices", response_model=InvoiceOut, status_code=201)
+def create_invoice_endpoint(
+    payload: InvoiceIn,
+    db: Session = Depends(get_db),
+    actor: User = Depends(get_current_user),
+):
+    existing = db.scalar(
+        select(Invoice).where(
+            Invoice.invoice_number == payload.invoice_number,
+        )
+    )
+    if existing:
+        raise HTTPException(409, f"Já existe uma fatura cadastrada com o número {payload.invoice_number}")
+
+    project = get_or_404(db, Project, payload.project_id)
+    contact_id = payload.contact_id or project.invoice_contact_id
+
+    invoice = Invoice(
+        invoice_number=payload.invoice_number,
+        description=payload.description,
+        amount=payload.amount,
+        issue_date=payload.issue_date,
+        due_date=payload.due_date,
+        payment_date=payload.payment_date,
+        status=payload.status,
+        project_id=payload.project_id,
+        contact_id=contact_id,
+        created_by_id=actor.id,
+    )
+    db.add(invoice)
+    db.commit()
+    db.refresh(invoice)
+    db.refresh(invoice, ["project", "contact"])
+    client = invoice.project.client if invoice.project else None
+
+    return InvoiceOut(
+        id=invoice.id,
+        invoice_number=invoice.invoice_number,
+        description=invoice.description,
+        amount=invoice.amount,
+        issue_date=invoice.issue_date,
+        due_date=invoice.due_date,
+        payment_date=invoice.payment_date,
+        status=invoice.status,
+        project_id=invoice.project_id,
+        contact_id=invoice.contact_id,
+        created_by_id=invoice.created_by_id,
+        created_at=invoice.created_at,
+        project_name=invoice.project.name if invoice.project else None,
+        client_name=client.name if client else None,
+        client_cnpj=client.cnpj if client else None,
+        contact_name=invoice.contact.name if invoice.contact else None,
+        contact_email=invoice.contact.email if invoice.contact else None,
+    )
+
+
+@app.get("/api/invoices/{item_id}", response_model=InvoiceOut)
+def get_invoice_endpoint(
+    item_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    invoice = get_or_404(db, Invoice, item_id)
+    db.refresh(invoice, ["project", "contact"])
+    client = invoice.project.client if invoice.project else None
+    return InvoiceOut(
+        id=invoice.id,
+        invoice_number=invoice.invoice_number,
+        description=invoice.description,
+        amount=invoice.amount,
+        issue_date=invoice.issue_date,
+        due_date=invoice.due_date,
+        payment_date=invoice.payment_date,
+        status=invoice.status,
+        project_id=invoice.project_id,
+        contact_id=invoice.contact_id,
+        created_by_id=invoice.created_by_id,
+        created_at=invoice.created_at,
+        project_name=invoice.project.name if invoice.project else None,
+        client_name=client.name if client else None,
+        client_cnpj=client.cnpj if client else None,
+        contact_name=invoice.contact.name if invoice.contact else None,
+        contact_email=invoice.contact.email if invoice.contact else None,
+    )
+
+
+@app.put("/api/invoices/{item_id}", response_model=InvoiceOut)
+def update_invoice_endpoint(
+    item_id: int,
+    payload: InvoiceIn,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    invoice = get_or_404(db, Invoice, item_id)
+    if payload.invoice_number != invoice.invoice_number:
+        existing = db.scalar(
+            select(Invoice).where(
+                Invoice.invoice_number == payload.invoice_number,
+                Invoice.id != item_id,
+            )
+        )
+        if existing:
+            raise HTTPException(409, f"Já existe uma fatura cadastrada com o número {payload.invoice_number}")
+
+    get_or_404(db, Project, payload.project_id)
+    for key, value in payload.model_dump().items():
+        setattr(invoice, key, value)
+    db.commit()
+    db.refresh(invoice)
+    db.refresh(invoice, ["project", "contact"])
+    client = invoice.project.client if invoice.project else None
+
+    return InvoiceOut(
+        id=invoice.id,
+        invoice_number=invoice.invoice_number,
+        description=invoice.description,
+        amount=invoice.amount,
+        issue_date=invoice.issue_date,
+        due_date=invoice.due_date,
+        payment_date=invoice.payment_date,
+        status=invoice.status,
+        project_id=invoice.project_id,
+        contact_id=invoice.contact_id,
+        created_by_id=invoice.created_by_id,
+        created_at=invoice.created_at,
+        project_name=invoice.project.name if invoice.project else None,
+        client_name=client.name if client else None,
+        client_cnpj=client.cnpj if client else None,
+        contact_name=invoice.contact.name if invoice.contact else None,
+        contact_email=invoice.contact.email if invoice.contact else None,
+    )
+
+
+@app.delete("/api/invoices/{item_id}", status_code=204)
+def delete_invoice_endpoint(
+    item_id: int,
+    db: Session = Depends(get_db),
+    actor: User = Depends(get_current_user),
+):
+    return delete_record(db, Invoice, item_id, actor)
 
 
 @app.get("/api/tasks", response_model=list[TaskOut])

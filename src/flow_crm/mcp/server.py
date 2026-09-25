@@ -100,12 +100,19 @@ def create_mcp_server() -> MCPServer:
     server.add_tool(tools.list_clients)
     server.add_tool(tools.get_client_details)
     server.add_tool(tools.create_client)
+    server.add_tool(tools.get_project_details)
     server.add_tool(tools.list_tasks)
     server.add_tool(tools.create_task)
     server.add_tool(tools.update_task_status)
     server.add_tool(tools.delete_task)
     server.add_tool(tools.schedule_meeting)
+    server.add_tool(tools.list_contacts)
+    server.add_tool(tools.get_contact_details)
     server.add_tool(tools.add_contact)
+    server.add_tool(tools.list_invoices)
+    server.add_tool(tools.get_invoice_details)
+    server.add_tool(tools.create_invoice)
+    server.add_tool(tools.update_invoice_status)
 
     # Registro de Recursos (Resources)
     @server.resource("crm://dashboard")
@@ -117,6 +124,16 @@ def create_mcp_server() -> MCPServer:
     def active_clients_resource() -> str:
         """Lista rápida das empresas com status ativo no CRM."""
         return json.dumps(tools.list_clients(status="active"), ensure_ascii=False)
+
+    @server.resource("crm://contacts")
+    def contacts_resource() -> str:
+        """Lista rápida de pessoas de contato cadastradas no CRM."""
+        return json.dumps(tools.list_contacts(), ensure_ascii=False)
+
+    @server.resource("crm://invoices/pending")
+    def pending_invoices_resource() -> str:
+        """Lista faturas em aberto e vencidas aguardando pagamento."""
+        return json.dumps(tools.list_invoices(status="pending"), ensure_ascii=False)
 
     return server
 

@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .models import ClientStatus, Priority, ProjectStatus, TaskStatus, UserRole
+from .models import ClientStatus, InvoiceStatus, Priority, ProjectStatus, TaskStatus, UserRole
 
 
 class ORMModel(BaseModel):
@@ -42,6 +42,8 @@ class UserOut(ORMModel):
 class ClientIn(BaseModel):
     name: str = Field(min_length=2, max_length=160)
     industry: str | None = None
+    cnpj: str | None = None
+    address: str | None = None
     status: ClientStatus = ClientStatus.prospect
     health_score: int = Field(default=100, ge=0, le=100)
     monthly_value: Decimal | None = Field(default=None, ge=0)
@@ -72,11 +74,38 @@ class ProjectIn(BaseModel):
     start_date: date | None = None
     due_date: date | None = None
     client_id: int
+    invoice_contact_id: int | None = None
 
 
 class ProjectOut(ProjectIn, ORMModel):
     id: int
     created_by_id: int | None
+    client_name: str | None = None
+    invoice_contact_name: str | None = None
+    invoice_contact_email: str | None = None
+
+
+class InvoiceIn(BaseModel):
+    invoice_number: str = Field(min_length=1, max_length=60)
+    description: str = Field(min_length=3)
+    amount: Decimal = Field(gt=0)
+    issue_date: date = Field(default_factory=date.today)
+    due_date: date
+    payment_date: date | None = None
+    status: InvoiceStatus = InvoiceStatus.pending
+    project_id: int
+    contact_id: int | None = None
+
+
+class InvoiceOut(InvoiceIn, ORMModel):
+    id: int
+    created_by_id: int | None
+    created_at: datetime | None = None
+    project_name: str | None = None
+    client_name: str | None = None
+    client_cnpj: str | None = None
+    contact_name: str | None = None
+    contact_email: str | None = None
 
 
 class TaskIn(BaseModel):

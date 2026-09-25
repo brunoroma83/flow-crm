@@ -1,7 +1,8 @@
 const config = {
-  dashboard: { label: 'Dashboard', title: 'Visão geral das operações', description: 'Acompanhamento em tempo real de clientes, entregas e compromissos.' },
-  clients: { label: 'Clientes', title: 'Diretório de clientes', description: 'Contas, saúde e valor mensal sob gestão.', fields: [['name', 'Nome'], ['industry', 'Segmento'], ['status', 'Status', 'select', 'prospect,active,inactive'], ['health_score', 'Health score', 'number'], ['monthly_value', 'Valor mensal (R$)', 'number']] },
-  projects: { label: 'Projetos', title: 'Projetos', description: 'Entregas organizadas por cliente e fase.', fields: [['name', 'Nome'], ['client_id', 'Cliente', 'select-api', 'clients'], ['status', 'Status', 'select', 'planning,active,paused,completed'], ['description', 'Descrição', 'textarea'], ['start_date', 'Início', 'date'], ['due_date', 'Prazo', 'date']] },
+  dashboard: { label: 'Dashboard', title: 'Visão geral das operações', description: 'Acompanhamento em tempo real de clientes, faturamento, entregas e compromissos.' },
+  clients: { label: 'Clientes', title: 'Diretório de clientes', description: 'Contas, dados fiscais, saúde e valor mensal sob gestão.', fields: [['name', 'Nome da Empresa *'], ['cnpj', 'CNPJ'], ['address', 'Endereço Completo de Cobrança', 'textarea'], ['industry', 'Segmento'], ['status', 'Status', 'select', 'prospect,active,inactive'], ['health_score', 'Health score', 'number'], ['monthly_value', 'Valor mensal (R$)', 'number']] },
+  projects: { label: 'Projetos', title: 'Projetos', description: 'Entregas organizadas por cliente, contato de cobrança e fase.', fields: [['name', 'Nome do Projeto *'], ['client_id', 'Cliente *', 'select-api', 'clients'], ['invoice_contact_id', 'Contato Designado para Faturas', 'select-api', 'contacts'], ['status', 'Status', 'select', 'planning,active,paused,completed'], ['description', 'Descrição', 'textarea'], ['start_date', 'Início', 'date'], ['due_date', 'Prazo', 'date']] },
+  invoices: { label: 'Faturas', title: 'Faturas & Cobranças', description: 'Controle de faturamento, prazos de vencimento e recebimento por projeto.', fields: [['invoice_number', 'Número da Fatura *'], ['project_id', 'Projeto *', 'select-api', 'projects'], ['contact_id', 'Para quem foi enviada (Contato)', 'select-api', 'contacts'], ['amount', 'Valor (R$) *', 'number'], ['issue_date', 'Data de Emissão', 'date'], ['due_date', 'Data de Vencimento *', 'date'], ['payment_date', 'Data de Pagamento', 'date'], ['status', 'Status', 'select', 'pending,paid,overdue,draft,cancelled'], ['description', 'Descrição / Serviços Faturados *', 'textarea']] },
   tasks: { label: 'Tarefas', title: 'Central de tarefas', description: 'Priorize a execução e acompanhe prazos.', fields: [['title', 'Título'], ['project_id', 'Projeto', 'select-api', 'projects'], ['status', 'Status', 'select', 'todo,in_progress,done'], ['priority', 'Prioridade', 'select', 'low,medium,high'], ['due_date', 'Prazo', 'date'], ['description', 'Descrição', 'textarea']] },
   meetings: { label: 'Reuniões', title: 'Reuniões e agenda', description: 'Registre compromissos e decisões com os clientes.', fields: [['title', 'Título'], ['client_id', 'Cliente', 'select-api', 'clients'], ['starts_at', 'Data e hora', 'datetime-local'], ['duration_minutes', 'Duração (minutos)', 'number'], ['notes', 'Notas', 'textarea']] },
   contacts: { label: 'Contatos', title: 'Diretório de contatos', description: 'As pessoas-chave em cada conta.', fields: [['name', 'Nome'], ['email', 'E-mail', 'email'], ['role', 'Cargo'], ['phone', 'Telefone'], ['client_id', 'Cliente', 'select-api', 'clients']] },
@@ -32,7 +33,7 @@ function nav() {
   $('#nav').innerHTML = Object.entries(config)
     .filter(([key]) => (key !== 'users' && key !== 'api_keys') || currentUser?.role === 'admin')
     .map(([key, x]) => {
-      let icon = key === 'api_keys' ? '🤖 ' : (key === 'users' ? '👥 ' : '');
+      let icon = key === 'api_keys' ? '🤖 ' : (key === 'users' ? '👥 ' : (key === 'invoices' ? '📄 ' : ''));
       return `<button class="nav ${key === section ? 'active' : ''}" data-go="${key}">${icon}${x.label}</button>`;
     })
     .join('');
@@ -57,7 +58,7 @@ function projectCard(p) {
 
 async function dashboard() {
   let d = await api('dashboard');
-  return title() + `<section class="metrics"><div class="card"><div class="metric-label">Clientes ativos</div><div class="metric">${d.active_clients}</div></div><div class="card"><div class="metric-label">Projetos em andamento</div><div class="metric">${d.active_projects}</div></div><div class="card"><div class="metric-label">Tarefas para hoje</div><div class="metric">${d.tasks_today}</div></div><div class="card"><div class="metric-label">Reuniões hoje</div><div class="metric">${d.meetings_today}</div></div></section><div class="card revenue"><div class="metric-label">Receita mensal sob gestão</div><div class="metric">${money(d.monthly_value)}</div><p>Dados calculados a partir das contas ativas.</p></div><section class="project-areas">${projectArea('Projetos em andamento', 'Execução e entregas ativas', d.in_progress_projects, 'active')}${projectArea('Projetos em prospecção', 'Oportunidades em planejamento', d.prospecting_projects, 'planning')}</section>`;
+  return title() + `<section class="metrics"><div class="card"><div class="metric-label">Clientes ativos</div><div class="metric">${d.active_clients}</div></div><div class="card"><div class="metric-label">Projetos em andamento</div><div class="metric">${d.active_projects}</div></div><div class="card"><div class="metric-label">Faturas a receber</div><div class="metric">${money(d.invoices_pending_value)}</div><p style="font-size:12px;margin-top:4px">${d.invoices_pending_count} faturas pendentes · ${d.invoices_overdue_count} vencidas</p></div><div class="card"><div class="metric-label">Tarefas para hoje</div><div class="metric">${d.tasks_today}</div></div></section><div class="card revenue"><div class="metric-label">Receita mensal sob gestão</div><div class="metric">${money(d.monthly_value)}</div><p>Dados calculados a partir das contas ativas.</p></div><section class="project-areas">${projectArea('Projetos em andamento', 'Execução e entregas ativas', d.in_progress_projects, 'active')}${projectArea('Projetos em prospecção', 'Oportunidades em planejamento', d.prospecting_projects, 'planning')}</section>`;
 }
 
 function canDelete(record) {
@@ -67,8 +68,9 @@ function canDelete(record) {
 function columns() {
   return {
     users: [['name', 'Nome'], ['email', 'E-mail'], ['role', 'Perfil'], ['is_active', 'Status']],
-    clients: [['name', 'Cliente'], ['industry', 'Segmento'], ['status', 'Status'], ['health_score', 'Health'], ['monthly_value', 'Valor mensal']],
-    projects: [['name', 'Projeto'], ['client_id', 'Cliente'], ['status', 'Status'], ['due_date', 'Prazo']],
+    clients: [['name', 'Cliente'], ['cnpj', 'CNPJ'], ['industry', 'Segmento'], ['status', 'Status'], ['health_score', 'Health'], ['monthly_value', 'Valor mensal']],
+    projects: [['name', 'Projeto'], ['client_name', 'Cliente'], ['invoice_contact_name', 'Contato Faturamento'], ['status', 'Status'], ['due_date', 'Prazo']],
+    invoices: [['invoice_number', 'Fatura'], ['project_name', 'Projeto'], ['client_name', 'Cliente'], ['contact_name', 'Destinatário'], ['amount', 'Valor'], ['issue_date', 'Emissão'], ['due_date', 'Vencimento'], ['status', 'Status']],
     tasks: [['title', 'Tarefa'], ['project_id', 'Projeto'], ['status', 'Status'], ['priority', 'Prioridade'], ['due_date', 'Prazo']],
     meetings: [['title', 'Reunião'], ['client_id', 'Cliente'], ['starts_at', 'Data'], ['duration_minutes', 'Duração']],
     contacts: [['name', 'Contato'], ['email', 'E-mail'], ['role', 'Cargo'], ['client_id', 'Cliente']],
@@ -79,14 +81,23 @@ function columns() {
 function cell(r, k) {
   let v = r[k];
   if (k === 'key_prefix') return `<code style="background:#f1f5f9;padding:3px 6px;border-radius:4px;font-family:monospace;font-weight:600">${v}••••••••</code>`;
-  if (k === 'status' || k === 'priority') return status(v);
+  if (k === 'invoice_number') return `<code style="font-family:monospace;font-weight:700;color:var(--blue);font-size:13px">${v}</code>`;
+  if (k === 'status' || k === 'priority') {
+    if (section === 'invoices' && v === 'pending' && r.due_date && new Date(r.due_date + 'T23:59:59') < new Date()) {
+      return `<span class="pill overdue" title="Vencida em ${new Date(r.due_date + 'T12:00').toLocaleDateString('pt-BR')}">Vencida</span>`;
+    }
+    return status(v);
+  }
   if (k === 'role') return `<span class="pill ${v}">${v === 'agent' ? 'Agente IA' : (v === 'admin' ? 'Administrador' : 'Membro')}</span>`;
   if (k === 'is_active') return status(v ? 'active' : 'inactive');
-  if (k === 'monthly_value') return money(v);
+  if (k === 'monthly_value' || k === 'amount') return money(v);
   if (k === 'health_score') return `${v}%`;
   if (k === 'starts_at' || k === 'created_at') return v ? new Date(v).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+  if (k === 'due_date' || k === 'issue_date' || k === 'payment_date' || k === 'start_date') return v ? new Date(v + 'T12:00').toLocaleDateString('pt-BR') : '—';
   if (k === 'last_used_at') return v ? new Date(v).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '<span style="color:#94a3b8">Nunca utilizada</span>';
   if (k === 'duration_minutes') return `${v} min`;
+  if (k === 'contact_name') return v ? `<b>${v}</b>${r.contact_email ? `<br><small style="color:var(--muted)">${r.contact_email}</small>` : ''}` : '—';
+  if (k === 'invoice_contact_name') return v ? `<b>${v}</b>${r.invoice_contact_email ? `<br><small style="color:var(--muted)">${r.invoice_contact_email}</small>` : ''}` : '<span style="color:#94a3b8">Não definido</span>';
   if (k.endsWith('_id')) return v ? '#' + v : '—';
   return v || '—';
 }
@@ -177,28 +188,49 @@ async function openForm(record = null) {
   let isApiKey = section === 'api_keys';
   $('#form-title').textContent = isApiKey ? 'Gerar Chave de API' : (record ? 'Editar registro' : 'Novo ' + config[section].label.slice(0, -1));
   let data = record || {};
+  let projRowsCache = null;
 
   $('#fields').innerHTML = (await Promise.all(config[section].fields.map(async ([name, label, type = 'text', opts]) => {
     let val = data[name] ?? defaults(name);
     if (type === 'select-api') {
       let rows = await api(opts);
+      if (opts === 'projects') projRowsCache = rows;
       return field(name, label, `<select name="${name}"><option value="">${isApiKey ? 'Agente IA Padrão' : 'Sem vínculo'}</option>${rows.map(r => `<option value="${r.id}" ${r.id == val ? 'selected' : ''}>${r.name}</option>`).join('')}</select>`);
     }
     if (type === 'select') {
       return field(name, label, `<select name="${name}">${opts.split(',').map(o => `<option value="${o}" ${o == val ? 'selected' : ''}>${o === 'agent' ? 'Agente IA' : (o === 'admin' ? 'Administrador' : (o === 'member' ? 'Membro' : cap(o)))}</option>`).join('')}</select>`);
     }
-    let actual = type === 'textarea' ? `<textarea name="${name}">${val || ''}</textarea>` : `<input name="${name}" type="${type}" value="${type === 'datetime-local' && val ? String(val).slice(0, 16) : val ?? ''}">`;
+    let actual = type === 'textarea' ? `<textarea name="${name}" ${name === 'address' ? 'placeholder="Logradouro, número, bairro, cidade, UF, CEP"' : ''}>${val || ''}</textarea>` : `<input name="${name}" type="${type}" ${type === 'number' ? 'step="any"' : ''} value="${type === 'datetime-local' && val ? String(val).slice(0, 16) : val ?? ''}">`;
     return field(name, label, actual);
   }))).join('');
+
+  if (section === 'invoices' && projRowsCache) {
+    let projSelect = $('#fields select[name="project_id"]');
+    let contactSelect = $('#fields select[name="contact_id"]');
+    if (projSelect && contactSelect) {
+      projSelect.onchange = () => {
+        let p = projRowsCache.find(x => x.id == projSelect.value);
+        if (p && p.invoice_contact_id) {
+          contactSelect.value = p.invoice_contact_id;
+        }
+      };
+    }
+  }
 
   $('#error').textContent = '';
   $('#modal').showModal();
 }
 
 function defaults(name) {
+  if (name === 'issue_date') return new Date().toISOString().slice(0, 10);
+  if (name === 'due_date' && section === 'invoices') {
+    let d = new Date();
+    d.setDate(d.getDate() + 15);
+    return d.toISOString().slice(0, 10);
+  }
   return {
     health_score: 100,
-    status: section === 'clients' ? 'prospect' : (section === 'projects' ? 'planning' : (section === 'tasks' ? 'todo' : undefined)),
+    status: section === 'clients' ? 'prospect' : (section === 'projects' ? 'planning' : (section === 'tasks' ? 'todo' : (section === 'invoices' ? 'pending' : undefined))),
     priority: 'medium',
     duration_minutes: 30,
     role: 'member'
@@ -214,7 +246,7 @@ $('#form').addEventListener('submit', async e => {
   let targetSection = forcedTargetSection || section;
   let data = Object.fromEntries(new FormData(e.target));
   for (let k of Object.keys(data)) if (data[k] === '') data[k] = null;
-  ['health_score', 'monthly_value', 'client_id', 'project_id', 'duration_minutes', 'user_id'].forEach(k => {
+  ['health_score', 'monthly_value', 'client_id', 'project_id', 'contact_id', 'invoice_contact_id', 'duration_minutes', 'user_id', 'amount'].forEach(k => {
     if (data[k] !== undefined && data[k] !== null) data[k] = Number(data[k]);
   });
   if (data.is_active !== undefined) data.is_active = data.is_active === 'true';

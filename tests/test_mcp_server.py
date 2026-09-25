@@ -134,6 +134,23 @@ def run_tests():
         assert not contact_result.is_error
         print(f"   ✓ Tool add_contact executada com sucesso")
 
+        # Tool: list_contacts
+        contacts_result = asyncio.run(mcp_server.call_tool("list_contacts", {"client_id": c_id}))
+        assert not contacts_result.is_error
+        contacts_found = contacts_result.structured_content.get("result", [])
+        assert len(contacts_found) > 0
+        contact_id_created = contacts_found[0]["id"]
+        print(f"   ✓ Tool list_contacts executada com sucesso: {len(contacts_found)} contato(s)")
+
+        # Tool: get_contact_details
+        contact_details_result = asyncio.run(mcp_server.call_tool("get_contact_details", {"contact_id": contact_id_created}))
+        assert not contact_details_result.is_error
+        details_data = contact_details_result.structured_content
+        if "result" in details_data and isinstance(details_data["result"], dict):
+            details_data = details_data["result"]
+        assert "email" in details_data
+        print(f"   ✓ Tool get_contact_details executada com sucesso para: {details_data['name']}")
+
         # Tool: schedule_meeting
         meeting_result = asyncio.run(
             mcp_server.call_tool(
@@ -212,6 +229,10 @@ def run_tests():
         clients_res_data = asyncio.run(mcp_server.read_resource("crm://clients/active"))
         assert clients_res_data is not None and len(clients_res_data) > 0
         print("   ✓ Recurso crm://clients/active lido com sucesso")
+
+        contacts_res_data = asyncio.run(mcp_server.read_resource("crm://contacts"))
+        assert contacts_res_data is not None and len(contacts_res_data) > 0
+        print("   ✓ Recurso crm://contacts lido com sucesso")
 
     finally:
         current_mcp_user_id.reset(token)

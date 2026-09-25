@@ -19,7 +19,7 @@ def ensure_schema() -> None:
     existentes. Isto mantém bancos criados antes da adoção do soft delete
     compatíveis com os modelos atuais.
     """
-    table_names = ("users", "clients", "contacts", "projects", "tasks", "meetings", "api_keys")
+    table_names = ("users", "clients", "contacts", "projects", "tasks", "meetings", "api_keys", "invoices")
     inspector = inspect(engine)
     existing_tables = set(inspector.get_table_names())
 
@@ -44,6 +44,18 @@ def ensure_schema() -> None:
                     f"ALTER TABLE {table_name} "
                     "ADD COLUMN created_by_id INTEGER"
                 ))
+
+        if "clients" in existing_tables:
+            client_cols = {col["name"] for col in inspector.get_columns("clients")}
+            if "cnpj" not in client_cols:
+                connection.execute(text("ALTER TABLE clients ADD COLUMN cnpj VARCHAR(20)"))
+            if "address" not in client_cols:
+                connection.execute(text("ALTER TABLE clients ADD COLUMN address TEXT"))
+
+        if "projects" in existing_tables:
+            project_cols = {col["name"] for col in inspector.get_columns("projects")}
+            if "invoice_contact_id" not in project_cols:
+                connection.execute(text("ALTER TABLE projects ADD COLUMN invoice_contact_id INTEGER REFERENCES contacts(id)"))
 
 
 def get_db():

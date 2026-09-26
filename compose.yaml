@@ -7,6 +7,8 @@ services:
       SECRET_KEY: ${SECRET_KEY:-change-this-secret-key-before-production}
     ports:
       - "8000:8000"
+    volumes:
+      - ./backups:/app/backups
     depends_on:
       db:
         condition: service_healthy

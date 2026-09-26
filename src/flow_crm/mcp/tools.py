@@ -667,8 +667,8 @@ def get_contact_details(contact_id: int) -> dict[str, Any]:
 
 
 def get_project_details(project_id: int) -> dict[str, Any]:
-    """Retorna detalhes completos de um projeto, incluindo dados fiscais da empresa cliente (CNPJ e Endereço)
-    e o contato designado para o envio de faturas e cobranças.
+    """Retorna detalhes completos de um projeto, incluindo dados fiscais da empresa cliente (CNPJ e Endereço),
+    contatos, faturas, histórico de valores mensais, tarefas e reuniões.
     
     Args:
         project_id: ID do projeto no CRM.
@@ -680,6 +680,8 @@ def get_project_details(project_id: int) -> dict[str, Any]:
                 selectinload(Project.client).selectinload(Client.contacts),
                 selectinload(Project.invoice_contact),
                 selectinload(Project.invoices),
+                selectinload(Project.tasks),
+                selectinload(Project.monthly_values),
             )
             .where(Project.id == project_id, Project.is_deleted.is_(False))
         )
@@ -688,6 +690,24 @@ def get_project_details(project_id: int) -> dict[str, Any]:
 
         client = project.client
         invoice_contact = project.invoice_contact
+
+        meetings = []
+        if client:
+            meetings_rows = db.scalars(
+                select(Meeting)
+                .where(Meeting.client_id == client.id, Meeting.is_deleted.is_(False))
+                .order_by(Meeting.starts_at.desc())
+            ).all()
+            meetings = [
+                {
+                    "id": m.id,
+                    "title": m.title,
+                    "starts_at": m.starts_at.isoformat(),
+                    "duration_minutes": m.duration_minutes,
+                    "notes": m.notes,
+                }
+                for m in meetings_rows
+            ]
 
         return {
             "id": project.id,
@@ -735,6 +755,28 @@ def get_project_details(project_id: int) -> dict[str, Any]:
                 for inv in project.invoices
                 if not inv.is_deleted
             ],
+            "valores_mensais": [
+                {
+                    "id": mv.id,
+                    "year_month": mv.year_month,
+                    "amount": float(mv.amount),
+                    "notes": mv.notes,
+                }
+                for mv in project.monthly_values
+                if not mv.is_deleted
+            ],
+            "tarefas": [
+                {
+                    "id": t.id,
+                    "title": t.title,
+                    "status": t.status.value,
+                    "priority": t.priority.value,
+                    "due_date": t.due_date.isoformat() if t.due_date else None,
+                }
+                for t in project.tasks
+                if not t.is_deleted
+            ],
+            "reunioes_cliente": meetings,
         }
 
 

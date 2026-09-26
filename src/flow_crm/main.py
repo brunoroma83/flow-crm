@@ -177,6 +177,9 @@ def ensure_agent_user(db: Session) -> User:
     return agent_user
 
 
+from .scheduler import start_backup_scheduler, stop_backup_scheduler
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     Base.metadata.create_all(bind=engine)
@@ -185,7 +188,11 @@ async def lifespan(_: FastAPI):
         ensure_admin(db)
         ensure_agent_user(db)
         seed_data(db)
-    yield
+    start_backup_scheduler()
+    try:
+        yield
+    finally:
+        stop_backup_scheduler()
 
 
 app = FastAPI(title="FlowCRM API", version="0.1.0", lifespan=lifespan)
@@ -799,6 +806,157 @@ def delete_project(
     return delete_record(db, Project, item_id, actor)
 
 
+@app.get("/api/projects/{item_id}/details")
+def get_project_details_endpoint(
+    item_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    project = db.scalar(
+        select(Project)
+        .options(
+            selectinload(Project.client).selectinload(Client.contacts),
+            selectinload(Project.invoice_contact),
+            selectinload(Project.tasks),
+            selectinload(Project.invoices),
+            selectinload(Project.monthly_values),
+        )
+        .where(Project.id == item_id, Project.is_deleted.is_(False))
+    )
+    if not project:
+        raise HTTPException(404, "Projeto não encontrado")
+
+    client = project.client if (project.client and not project.client.is_deleted) else None
+    invoice_contact = project.invoice_contact if (project.invoice_contact and not project.invoice_contact.is_deleted) else None
+
+    meetings = []
+    if client:
+        meetings_rows = db.scalars(
+            select(Meeting)
+            .where(Meeting.client_id == client.id, Meeting.is_deleted.is_(False))
+            .order_by(Meeting.starts_at.desc())
+        ).all()
+        meetings = [
+            {
+                "id": m.id,
+                "title": m.title,
+                "starts_at": m.starts_at.isoformat(),
+                "duration_minutes": m.duration_minutes,
+                "notes": m.notes,
+            }
+            for m in meetings_rows
+        ]
+
+    tasks = [
+        {
+            "id": t.id,
+            "title": t.title,
+            "description": t.description,
+            "status": t.status,
+            "priority": t.priority,
+            "due_date": t.due_date.isoformat() if t.due_date else None,
+        }
+        for t in project.tasks
+        if not t.is_deleted
+    ]
+
+    invoices = [
+        {
+            "id": inv.id,
+            "invoice_number": inv.invoice_number,
+            "description": inv.description,
+            "amount": float(inv.amount),
+            "status": inv.status,
+            "issue_date": inv.issue_date.isoformat() if inv.issue_date else None,
+            "due_date": inv.due_date.isoformat() if inv.due_date else None,
+            "payment_date": inv.payment_date.isoformat() if inv.payment_date else None,
+        }
+        for inv in sorted(project.invoices, key=lambda x: x.id, reverse=True)
+        if not inv.is_deleted
+    ]
+
+    monthly_values = [
+        {
+            "id": mv.id,
+            "year_month": mv.year_month,
+            "amount": float(mv.amount),
+            "notes": mv.notes,
+            "created_at": mv.created_at.isoformat() if mv.created_at else None,
+        }
+        for mv in sorted(project.monthly_values, key=lambda x: x.year_month, reverse=True)
+        if not mv.is_deleted
+    ]
+
+    client_contacts = [
+        {
+            "id": ct.id,
+            "name": ct.name,
+            "email": ct.email,
+            "phone": ct.phone,
+            "role": ct.role,
+        }
+        for ct in (client.contacts if client else [])
+        if not ct.is_deleted
+    ]
+
+    client_dict = (
+        {
+            "id": client.id,
+            "name": client.name,
+            "nome": client.name,
+            "cnpj": client.cnpj,
+            "address": client.address,
+            "endereco": client.address,
+            "industry": client.industry,
+            "segmento": client.industry,
+            "status": client.status,
+            "health_score": client.health_score,
+            "monthly_value": float(client.monthly_value or 0),
+        }
+        if client
+        else None
+    )
+
+    return {
+        "id": project.id,
+        "name": project.name,
+        "description": project.description,
+        "status": project.status,
+        "start_date": project.start_date.isoformat() if project.start_date else None,
+        "due_date": project.due_date.isoformat() if project.due_date else None,
+        "project_value": float(project.project_value or 0),
+        "contract_type": project.contract_type,
+        "created_at": project.created_at.isoformat() if project.created_at else None,
+        "client": client_dict,
+        "cliente": client_dict,
+        "invoice_contact": (
+            {
+                "id": invoice_contact.id,
+                "name": invoice_contact.name,
+                "nome": invoice_contact.name,
+                "email": invoice_contact.email,
+                "phone": invoice_contact.phone,
+                "telefone": invoice_contact.phone,
+                "role": invoice_contact.role,
+                "cargo": invoice_contact.role,
+            }
+            if invoice_contact
+            else None
+        ),
+        "contacts": client_contacts,
+        "contatos": client_contacts,
+        "invoices": invoices,
+        "faturas": invoices,
+        "monthly_values": monthly_values,
+        "valores_mensais": monthly_values,
+        "tasks": tasks,
+        "tarefas": tasks,
+        "meetings": meetings,
+        "reunioes": meetings,
+    }
+
+
+
 def sync_project_value(db: Session, project_id: int) -> Decimal:
     total = db.scalar(
         select(func.coalesce(func.sum(ProjectMonthlyValue.amount), 0)).where(
@@ -1135,6 +1293,66 @@ def delete_meeting(
     actor: User = Depends(get_current_user),
 ):
     return delete_record(db, Meeting, item_id, actor)
+
+
+# --- Endpoints de Backup & Restauração (Admin) ---
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from .backup import (
+    create_backup,
+    delete_backup,
+    get_backup_dir,
+    list_backups,
+    restore_backup,
+)
+
+
+class BackupCreateIn(BaseModel):
+    label: str = "manual"
+
+
+class BackupRestoreIn(BaseModel):
+    safety_snapshot: bool = True
+    confirm: bool = False
+
+
+@app.get("/api/v1/admin/backups")
+def get_admin_backups(_: User = Depends(require_admin)):
+    return list_backups()
+
+
+@app.post("/api/v1/admin/backups", status_code=201)
+def trigger_admin_backup(payload: BackupCreateIn = BackupCreateIn(), _: User = Depends(require_admin)):
+    try:
+        return create_backup(label=payload.label)
+    except Exception as e:
+        raise HTTPException(500, f"Falha ao gerar backup: {e}")
+
+
+@app.get("/api/v1/admin/backups/{filename}/download")
+def download_admin_backup(filename: str, _: User = Depends(require_admin)):
+    safe_filename = Path(filename).name
+    backup_dir = get_backup_dir()
+    filepath = backup_dir / safe_filename
+    if not filepath.exists() or not filepath.is_file():
+        raise HTTPException(404, "Arquivo de backup não encontrado")
+    return FileResponse(path=filepath, filename=safe_filename, media_type="application/octet-stream")
+
+
+@app.post("/api/v1/admin/backups/{filename}/restore")
+def restore_admin_backup(filename: str, payload: BackupRestoreIn, _: User = Depends(require_admin)):
+    if not payload.confirm:
+        raise HTTPException(400, "É necessário confirmar a operação com confirm: true")
+    try:
+        return restore_backup(filename=filename, safety_snapshot=payload.safety_snapshot)
+    except Exception as e:
+        raise HTTPException(500, f"Falha ao restaurar backup: {e}")
+
+
+@app.delete("/api/v1/admin/backups/{filename}", status_code=204)
+def delete_admin_backup(filename: str, _: User = Depends(require_admin)):
+    delete_backup(filename=filename)
+    return Response(status_code=204)
 
 
 # Servidor MCP (Model Context Protocol) via SSE para agentes de IA

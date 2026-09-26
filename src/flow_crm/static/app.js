@@ -7,11 +7,19 @@ const config = {
   meetings: { label: 'Reuniões', title: 'Reuniões e agenda', description: 'Registre compromissos e decisões com os clientes.', fields: [['title', 'Título'], ['client_id', 'Cliente', 'select-api', 'clients'], ['starts_at', 'Data e hora', 'datetime-local'], ['duration_minutes', 'Duração (minutos)', 'number'], ['notes', 'Notas', 'textarea']] },
   contacts: { label: 'Contatos', title: 'Diretório de contatos', description: 'As pessoas-chave em cada conta.', fields: [['name', 'Nome'], ['email', 'E-mail', 'email'], ['role', 'Cargo'], ['phone', 'Telefone'], ['client_id', 'Cliente', 'select-api', 'clients']] },
   users: { label: 'Usuários', title: 'Usuários & Permissões', description: 'Controle de acessos e permissões da equipe e agentes de IA.', fields: [['name', 'Nome'], ['email', 'E-mail', 'email'], ['password', 'Senha', 'password'], ['role', 'Perfil', 'select', 'member,admin,agent'], ['is_active', 'Ativo', 'select', 'true,false']] },
-  api_keys: { label: 'Agentes & API Keys', title: 'Chaves de API para Agentes de IA', description: 'Credenciais de acesso para agentes de IA autônomos e conexão com o Servidor MCP.', fields: [['name', 'Identificação do Agente (ex: Antigravity Assistant, Claude Desktop, Bot SDR)'], ['user_id', 'Vincular ao Usuário', 'select-api', 'users']] }
+  api_keys: { label: 'Agentes & API Keys', title: 'Chaves de API para Agentes de IA', description: 'Credenciais de acesso para agentes de IA autônomos e conexão com o Servidor MCP.', fields: [['name', 'Identificação do Agente (ex: Antigravity Assistant, Claude Desktop, Bot SDR)'], ['user_id', 'Vincular ao Usuário', 'select-api', 'users']] },
+  backups: { label: 'Backups', title: 'Backup & Restauração', description: 'Gerenciamento de cópias de segurança do banco de dados e restauração do sistema.' }
 };
 
 document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="/auth.css"><link rel="stylesheet" href="/dashboard.css">');
-let section = location.hash.slice(1) || 'dashboard', records = [], editing = null, currentUser = null, forcedTargetSection = null;
+function getRoute() {
+  let raw = location.hash.slice(1) || 'dashboard';
+  let [sec, queryStr] = raw.split('?');
+  let params = new URLSearchParams(queryStr || '');
+  return { section: sec, params };
+}
+
+let { section } = getRoute(), records = [], editing = null, currentUser = null, forcedTargetSection = null;
 
 const $ = s => document.querySelector(s),
       cap = s => s.charAt(0).toUpperCase() + s.slice(1),
@@ -39,14 +47,17 @@ function nav() {
     meetings: '🤝 ',
     contacts: '📇 ',
     users: '👥 ',
-    api_keys: '🤖 '
+    api_keys: '🤖 ',
+    backups: '💾 '
   };
 
+  let activeSection = section === 'project_details' ? 'projects' : section;
+
   $('#nav').innerHTML = Object.entries(config)
-    .filter(([key]) => (key !== 'users' && key !== 'api_keys') || currentUser?.role === 'admin')
+    .filter(([key]) => (key !== 'users' && key !== 'api_keys' && key !== 'backups') || currentUser?.role === 'admin')
     .map(([key, x]) => {
       let icon = icons[key] || '';
-      return `<button class="nav ${key === section ? 'active' : ''}" data-go="${key}">${icon}${x.label}</button>`;
+      return `<button class="nav ${key === activeSection ? 'active' : ''}" data-go="${key}">${icon}${x.label}</button>`;
     })
     .join('');
   document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { location.hash = b.dataset.go; });
@@ -68,8 +79,8 @@ function projectCard(p) {
   return `<article class="project-card">
   <div class="project-top">
     <div>
-      <h3>
-        ${p.name}
+      <h3 style="cursor:pointer" onclick="location.hash='project_details?id=${p.id}'" title="Ver detalhes do projeto">
+        ${p.name} <span style="font-size:12px;color:var(--blue);font-weight:normal">👁️</span>
       </h3>
       <p>
         ${p.client?.name || 'Sem cliente'}
@@ -207,6 +218,9 @@ function columns() {
 
 function cell(r, k) {
   let v = r[k];
+  if (k === 'name' && section === 'projects') {
+    return `<a href="#project_details?id=${r.id}" style="color:var(--blue);font-weight:600;text-decoration:none" title="Ver detalhes do projeto">${v}</a>`;
+  }
   if (k === 'key_prefix') return `<code style="background:#f1f5f9;padding:3px 6px;border-radius:4px;font-family:monospace;font-weight:600">${v}••••••••</code>`;
   if (k === 'invoice_number') return `<code style="font-family:monospace;font-weight:700;color:var(--blue);font-size:13px">${v}</code>`;
   if (k === 'status' || k === 'priority') {
@@ -263,7 +277,7 @@ async function table() {
   let rows = records.map(r => `<tr>
     ${cols.map(([k]) => `<td>${cell(r, k)}</td>`).join('')}
     <td class="actions-cell">
-      ${section === 'projects' ? `<button class="link monthly-values-btn" data-id="${r.id}" data-name="${r.name}" style="color:#0284c7;font-weight:600">💰 Valores</button>` : ''}
+      ${section === 'projects' ? `<button class="link project-details-btn" data-id="${r.id}" style="color:var(--blue);font-weight:600">👁️ Detalhes</button><button class="link monthly-values-btn" data-id="${r.id}" data-name="${r.name}" style="color:#0284c7;font-weight:600">💰 Valores</button>` : ''}
       ${section === 'users' && currentUser?.role === 'admin' ? `<button class="link generate-key-user" data-user-id="${r.id}" data-user-name="${r.name}" style="color:#16a34a;font-weight:600">🔑 Gerar Chave</button>` : ''}
       ${section !== 'api_keys' ? `<button class="link edit" data-id="${r.id}">Editar</button>` : ''}
       ${canDelete(r) ? `<button class="link danger remove" data-id="${r.id}">${section === 'api_keys' ? 'Revogar' : 'Excluir'}</button>` : ''}
@@ -273,29 +287,340 @@ async function table() {
   return title() + integrationBanners() + `<div class="table-card"><table><thead><tr>${cols.map(c => `<th>${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>${rows || `<tr><td colspan="${cols.length + 1}" class="empty">Nenhum registro encontrado.</td></tr>`}</tbody></table></div>`;
 }
 
+async function projectDetails(projectId) {
+  if (!projectId) {
+    return `<div class="card"><b>ID do projeto não especificado.</b><p style="margin-top:8px"><a href="#projects">← Voltar para Projetos</a></p></div>`;
+  }
+  try {
+    let p = await api(`projects/${projectId}/details`);
+    let client = p.cliente;
+    let invContact = p.invoice_contact;
+    let contacts = p.contatos || [];
+    let monthly = p.valores_mensais || [];
+    let invoices = p.faturas || [];
+    let tasks = p.tarefas || [];
+    let meetings = p.reunioes || [];
+
+    let totalMonthlySum = monthly.reduce((acc, item) => acc + (item.amount || 0), 0);
+    let paidInvoicesSum = invoices.filter(i => i.status === 'paid').reduce((acc, item) => acc + (item.amount || 0), 0);
+
+    let monthlyRows = monthly.length ? monthly.map(m => {
+      let parts = m.year_month.split('-');
+      return `<tr>
+        <td style="font-weight:600">${parts[1]}/${parts[0]}</td>
+        <td style="color:#047857;font-weight:600">${money(m.amount)}</td>
+        <td style="color:var(--muted);font-size:12px">${m.notes || '—'}</td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="3" class="empty">Nenhum valor mensal registrado.</td></tr>`;
+
+    let invoiceRows = invoices.length ? invoices.map(inv => `<tr>
+      <td><code style="font-family:monospace;font-weight:700;color:var(--blue);font-size:13px">${inv.invoice_number}</code></td>
+      <td>${inv.description || '—'}</td>
+      <td style="font-weight:600">${money(inv.amount)}</td>
+      <td>${inv.issue_date ? new Date(inv.issue_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</td>
+      <td>${inv.due_date ? new Date(inv.due_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</td>
+      <td>${status(inv.status)}</td>
+    </tr>`).join('') : `<tr><td colspan="6" class="empty">Nenhuma fatura vinculada a este projeto.</td></tr>`;
+
+    let taskRows = tasks.length ? tasks.map(t => `<tr>
+      <td><b>${t.title}</b>${t.description ? `<br><small style="color:var(--muted)">${t.description}</small>` : ''}</td>
+      <td>${status(t.status)}</td>
+      <td><span class="pill ${t.priority}">${t.priority}</span></td>
+      <td>${t.due_date ? new Date(t.due_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</td>
+    </tr>`).join('') : `<tr><td colspan="4" class="empty">Nenhuma tarefa vinculada.</td></tr>`;
+
+    let meetingRows = meetings.length ? meetings.map(m => `<tr>
+      <td><b>${m.title}</b>${m.notes ? `<br><small style="color:var(--muted)">${m.notes}</small>` : ''}</td>
+      <td>${m.starts_at ? new Date(m.starts_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
+      <td>${m.duration_minutes} min</td>
+    </tr>`).join('') : `<tr><td colspan="3" class="empty">Nenhuma reunião com o cliente.</td></tr>`;
+
+    let contactList = contacts.length ? contacts.map(c => `
+      <div style="background:#f8fafc;padding:10px 12px;border-radius:8px;border:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <b style="color:var(--ink);font-size:13px">${c.name}</b>
+          <div style="font-size:12px;color:var(--muted)">${c.role || 'Sem cargo'} ${c.email ? '· ' + c.email : ''}</div>
+        </div>
+        ${c.phone ? `<span style="font-size:12px;background:#e2e8f0;padding:2px 8px;border-radius:4px">📞 ${c.phone}</span>` : ''}
+      </div>
+    `).join('') : `<div style="color:var(--muted);font-size:13px">Nenhum outro contato cadastrado.</div>`;
+
+    return `
+    <div style="display:grid;gap:20px;">
+      <!-- Cabeçalho de detalhes do projeto -->
+      <div class="card" style="padding:20px;border-left:5px solid var(--blue)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div>
+            <button type="button" class="secondary" onclick="location.hash='projects'" style="padding:4px 10px;font-size:12px;margin-bottom:10px">← Voltar para Projetos</button>
+            <div class="eyebrow">PROJETO #${p.id}</div>
+            <h1 style="font-size:24px;margin:4px 0 8px">${p.name}</h1>
+            <p style="color:var(--muted);font-size:14px;margin:0 0 12px">${p.description || 'Sem descrição detalhada.'}</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button type="button" class="monthly-details-btn" data-id="${p.id}" data-name="${p.name}" style="background:#0284c7;color:#fff;border:0;padding:8px 14px;font-size:13px">💰 Gerenciar Valores Mensais</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid #e2e8f0">
+          <div><b style="font-size:11px;color:var(--muted);text-transform:uppercase">Status</b><div style="margin-top:4px">${status(p.status)}</div></div>
+          <div><b style="font-size:11px;color:var(--muted);text-transform:uppercase">Valor do Projeto</b><div style="font-size:16px;font-weight:700;color:#047857">${money(p.project_value)}</div></div>
+          <div><b style="font-size:11px;color:var(--muted);text-transform:uppercase">Contrato</b><div style="font-size:14px;font-weight:600">${p.contract_type === 'avulso' ? 'Avulso' : 'Mensal'}</div></div>
+          <div><b style="font-size:11px;color:var(--muted);text-transform:uppercase">Início</b><div style="font-size:14px">${p.start_date ? new Date(p.start_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</div></div>
+          <div><b style="font-size:11px;color:var(--muted);text-transform:uppercase">Prazo / Término</b><div style="font-size:14px">${p.due_date ? new Date(p.due_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</div></div>
+        </div>
+      </div>
+
+      <!-- Bloco 1: Cliente & Contato de Cobrança -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px">
+        <div class="card">
+          <div style="font-weight:700;font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            <span>🏢</span> Cliente & Dados Fiscais
+          </div>
+          ${client ? `
+            <div style="display:grid;gap:8px;font-size:13px">
+              <div><b>Empresa:</b> ${client.nome}</div>
+              <div><b>CNPJ:</b> ${client.cnpj || '—'}</div>
+              <div><b>Segmento:</b> ${client.industry || '—'}</div>
+              <div><b>Health Score:</b> ${client.health_score}%</div>
+              <div><b>Endereço de Cobrança:</b> ${client.endereco || '—'}</div>
+            </div>
+          ` : '<div style="color:var(--muted)">Nenhum cliente vinculado a este projeto.</div>'}
+        </div>
+
+        <div class="card">
+          <div style="font-weight:700;font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            <span>📇</span> Contatos Relacionados
+          </div>
+          <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #e2e8f0;font-size:13px">
+            <b style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">Contato Designado para Faturas</b>
+            ${invContact ? `<b>${invContact.name}</b> ${invContact.email ? `(${invContact.email})` : ''} ${invContact.phone ? `· 📞 ${invContact.phone}` : ''}` : '<span style="color:#94a3b8">Não definido</span>'}
+          </div>
+          <div style="display:grid;gap:8px">
+            <b style="font-size:11px;color:var(--muted);text-transform:uppercase">Outros Contatos do Cliente</b>
+            ${contactList}
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 2: Valores Mensais & Faturas -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:20px">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px">
+              <span>💰</span> Histórico de Valores Mensais
+            </div>
+            <button type="button" class="monthly-details-btn link" data-id="${p.id}" data-name="${p.name}" style="font-size:12px;color:#0284c7;font-weight:600">+ Gerar / Editar</button>
+          </div>
+          <div class="table-card" style="box-shadow:none;border:1px solid #e2e8f0">
+            <table>
+              <thead><tr><th>Mês/Ano</th><th>Valor</th><th>Observações</th></tr></thead>
+              <tbody>${monthlyRows}</tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px;text-align:right;font-size:12px;color:var(--muted)">Total lançado: <b style="color:#047857">${money(totalMonthlySum)}</b></div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px">
+              <span>📄</span> Histórico de Faturas (${invoices.length})
+            </div>
+            <div style="font-size:12px;color:var(--muted)">Pagas: <b style="color:#047857">${money(paidInvoicesSum)}</b></div>
+          </div>
+          <div class="table-card" style="box-shadow:none;border:1px solid #e2e8f0">
+            <table>
+              <thead><tr><th>Fatura</th><th>Descrição</th><th>Valor</th><th>Emissão</th><th>Vencimento</th><th>Status</th></tr></thead>
+              <tbody>${invoiceRows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 3: Tarefas & Reuniões -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:20px">
+        <div class="card">
+          <div style="font-weight:700;font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            <span>📋</span> Tarefas Relacionadas (${tasks.length})
+          </div>
+          <div class="table-card" style="box-shadow:none;border:1px solid #e2e8f0">
+            <table>
+              <thead><tr><th>Tarefa</th><th>Status</th><th>Prioridade</th><th>Prazo</th></tr></thead>
+              <tbody>${taskRows}</tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="font-weight:700;font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            <span>🤝</span> Reuniões do Cliente (${meetings.length})
+          </div>
+          <div class="table-card" style="box-shadow:none;border:1px solid #e2e8f0">
+            <table>
+              <thead><tr><th>Reunião</th><th>Data e Hora</th><th>Duração</th></tr></thead>
+              <tbody>${meetingRows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  } catch (err) {
+    return `<div class="card"><b>Erro ao carregar detalhes do projeto.</b><p style="color:var(--red)">${err.message}</p><button type="button" onclick="location.hash='projects'">← Voltar para Projetos</button></div>`;
+  }
+}
+
+function attachProjectDetailsListeners(projectId) {
+  document.querySelectorAll('.monthly-details-btn').forEach(btn => {
+    btn.onclick = () => {
+      openMonthlyValuesModal(Number(btn.dataset.id), btn.dataset.name);
+    };
+  });
+}
+
+async function backupsView() {
+  try {
+    let backups = await api('v1/admin/backups');
+    let rows = backups.length ? backups.map(b => {
+      let sizeMb = (b.size_bytes / (1024 * 1024)).toFixed(2);
+      let dateStr = b.created_at ? new Date(b.created_at).toLocaleString('pt-BR') : '-';
+      let labelPill = b.label === 'daily' ? '<span class="pill active">Diário</span>' : (b.label.includes('safety') ? '<span class="pill paused">Safety Snapshot</span>' : '<span class="pill completed">Manual</span>');
+      return `<tr>
+        <td><b>${b.filename}</b></td>
+        <td>${labelPill}</td>
+        <td>${sizeMb} MB (${b.size_bytes} B)</td>
+        <td>${dateStr}</td>
+        <td><code style="font-size:11px;color:var(--muted)" title="${b.checksum_sha256}">${(b.checksum_sha256 || '').slice(0, 12)}...</code></td>
+        <td style="text-align:right">
+          <a class="secondary" href="/api/v1/admin/backups/${b.filename}/download" download style="display:inline-block;padding:4px 8px;font-size:12px;margin-right:6px;text-decoration:none;border:1px solid #cbd5e1;border-radius:6px;color:#334155;">📥 Baixar</a>
+          <button type="button" class="restore-backup-btn" data-file="${b.filename}" style="font-size:12px;padding:4px 8px;margin-right:6px;background:#f59e0b;color:white;border:none;border-radius:6px;cursor:pointer;">🔄 Restaurar</button>
+          <button type="button" class="delete-backup-btn" data-file="${b.filename}" style="font-size:12px;padding:4px 8px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;">🗑️</button>
+        </td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted)">Nenhum backup encontrado.</td></tr>';
+
+    return `${title()}
+      <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;background:#f8fafc;padding:14px 18px;border-radius:10px;border:1px solid #e2e8f0">
+        <div>
+          <b style="font-size:14px;color:var(--ink)">⚙️ Rotina Diária Automática</b>
+          <p style="margin:2px 0 0;font-size:12px;color:var(--muted)">Executada todos os dias às 02:00 AM com retenção automática de 30 dias.</p>
+        </div>
+        <button type="button" id="trigger-backup-now-btn" style="padding:8px 16px;font-size:13px;background:var(--blue);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600">+ Criar Backup Agora</button>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Arquivo</th>
+              <th>Origem / Rótulo</th>
+              <th>Tamanho</th>
+              <th>Data de Criação</th>
+              <th>Checksum (SHA-256)</th>
+              <th style="text-align:right">Ações</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  } catch (err) {
+    return `<div class="card"><b>Erro ao carregar backups.</b><p style="color:var(--red)">${err.message}</p></div>`;
+  }
+}
+
+function attachBackupListeners() {
+  let triggerBtn = $('#trigger-backup-now-btn');
+  if (triggerBtn) {
+    triggerBtn.onclick = async () => {
+      triggerBtn.disabled = true;
+      triggerBtn.textContent = '⏳ Criando backup...';
+      try {
+        await api('v1/admin/backups', { method: 'POST', body: JSON.stringify({ label: 'manual' }) });
+        alert('Backup criado com sucesso!');
+        render();
+      } catch (err) {
+        alert('Erro ao criar backup: ' + err.message);
+      } finally {
+        triggerBtn.disabled = false;
+        triggerBtn.textContent = '+ Criar Backup Agora';
+      }
+    };
+  }
+
+  document.querySelectorAll('.restore-backup-btn').forEach(btn => {
+    btn.onclick = async () => {
+      let fname = btn.dataset.file;
+      if (confirm(`ATENÇÃO: Deseja realmente restaurar o banco de dados a partir do arquivo '${fname}'?\n\nUm Safety Snapshot do estado atual será criado automaticamente antes da restauração.`)) {
+        btn.disabled = true;
+        btn.textContent = '⏳ Restaurando...';
+        try {
+          let res = await api(`v1/admin/backups/${fname}/restore`, {
+            method: 'POST',
+            body: JSON.stringify({ confirm: true, safety_snapshot: true })
+          });
+          alert(`Restauração concluída com sucesso!\nSafety Snapshot criado: ${res.safety_snapshot || 'Nenhum'}`);
+          render();
+        } catch (err) {
+          alert('Erro na restauração: ' + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '🔄 Restaurar';
+        }
+      }
+    };
+  });
+
+  document.querySelectorAll('.delete-backup-btn').forEach(btn => {
+    btn.onclick = async () => {
+      let fname = btn.dataset.file;
+      if (confirm(`Excluir permanentemente o backup '${fname}'?`)) {
+        try {
+          await api(`v1/admin/backups/${fname}`, { method: 'DELETE' });
+          render();
+        } catch (err) {
+          alert('Erro ao excluir backup: ' + err.message);
+        }
+      }
+    };
+  });
+}
+
 async function render() {
+  let route = getRoute();
+  section = route.section;
   nav();
   try {
-    $('#view').innerHTML = section === 'dashboard' ? await dashboard() : await table();
-    $('#create')?.addEventListener('click', () => openForm());
-    document.querySelectorAll('.edit').forEach(x => x.onclick = () => openForm(records.find(r => r.id == x.dataset.id)));
-    document.querySelectorAll('.monthly-values-btn').forEach(btn => {
-      btn.onclick = () => {
-        openMonthlyValuesModal(Number(btn.dataset.id), btn.dataset.name);
-      };
-    });
-    document.querySelectorAll('.generate-key-user').forEach(btn => {
-      btn.onclick = () => {
-        openApiKeyModal(Number(btn.dataset.userId), btn.dataset.userName);
-      };
-    });
-    document.querySelectorAll('.remove').forEach(x => x.onclick = async () => {
-      let promptMsg = section === 'api_keys' ? 'Revogar esta chave de API imediatamente? O agente perderá acesso.' : 'Excluir este registro?';
-      if (confirm(promptMsg)) {
-        await api(`${section}/${x.dataset.id}`, { method: 'DELETE' });
-        render();
-      }
-    });
+    if (section === 'project_details') {
+      let pid = Number(route.params.get('id'));
+      $('#view').innerHTML = await projectDetails(pid);
+      attachProjectDetailsListeners(pid);
+    } else if (section === 'backups') {
+      $('#view').innerHTML = await backupsView();
+      attachBackupListeners();
+    } else {
+      $('#view').innerHTML = section === 'dashboard' ? await dashboard() : await table();
+      $('#create')?.addEventListener('click', () => openForm());
+      document.querySelectorAll('.edit').forEach(x => x.onclick = () => openForm(records.find(r => r.id == x.dataset.id)));
+      document.querySelectorAll('.monthly-values-btn').forEach(btn => {
+        btn.onclick = () => {
+          openMonthlyValuesModal(Number(btn.dataset.id), btn.dataset.name);
+        };
+      });
+      document.querySelectorAll('.project-details-btn').forEach(btn => {
+        btn.onclick = () => {
+          location.hash = `project_details?id=${btn.dataset.id}`;
+        };
+      });
+      document.querySelectorAll('.generate-key-user').forEach(btn => {
+        btn.onclick = () => {
+          openApiKeyModal(Number(btn.dataset.userId), btn.dataset.userName);
+        };
+      });
+      document.querySelectorAll('.remove').forEach(x => x.onclick = async () => {
+        let promptMsg = section === 'api_keys' ? 'Revogar esta chave de API imediatamente? O agente perderá acesso.' : 'Excluir este registro?';
+        if (confirm(promptMsg)) {
+          await api(`${section}/${x.dataset.id}`, { method: 'DELETE' });
+          render();
+        }
+      });
+    }
   } catch (e) {
     $('#view').innerHTML = `<div class="card"><b>Não foi possível carregar os dados.</b><p>${e.message}</p></div>`;
   }
@@ -510,6 +835,8 @@ $('#done-monthly-btn')?.addEventListener('click', () => {
 $('#new').onclick = () => {
   if (section === 'dashboard') {
     location.hash = 'clients';
+  } else if (section === 'project_details') {
+    location.hash = 'projects';
   } else {
     openForm();
   }
@@ -520,7 +847,6 @@ $('#search').oninput = e => {
   document.querySelectorAll('tbody tr').forEach(r => r.hidden = !r.textContent.toLowerCase().includes(q));
 };
 window.onhashchange = () => {
-  section = location.hash.slice(1) || 'dashboard';
   render();
 };
 

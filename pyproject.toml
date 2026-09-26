@@ -19,7 +19,14 @@ dependencies = [
 [project.scripts]
 flow-crm = "flow_crm.main:run"
 flow-crm-mcp = "flow_crm.mcp.cli:main"
+flow-crm-backup = "flow_crm.cli_backup:main"
 
 [build-system]
 requires = ["uv_build>=0.12.0,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+]

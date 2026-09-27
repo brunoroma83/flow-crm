@@ -173,41 +173,51 @@ def restore_backup(
     if db_info["password"]:
         env["PGPASSWORD"] = db_info["password"]
 
-    if safe_filename.endswith(".dump") and pg_restore_bin:
-        cmd = [
-            pg_restore_bin,
-            "-h", db_info["host"],
-            "-p", db_info["port"],
-            "-U", db_info["user"],
-            "-d", db_info["dbname"],
-            "--clean",
-            "--if-exists",
-            "-v",
-            str(filepath),
-        ]
-        logger.info("Executando pg_restore a partir de %s...", safe_filename)
-        result = subprocess.run(cmd, env=env, capture_output=True, text=True)
-        if result.returncode != 0 and "errors ignored on restore" not in result.stderr:
-            logger.warning("Alertas/erros ao restaurar: %s", result.stderr)
-    elif safe_filename.endswith(".sql") and psql_bin:
-        cmd = [
-            psql_bin,
-            "-h", db_info["host"],
-            "-p", db_info["port"],
-            "-U", db_info["user"],
-            "-d", db_info["dbname"],
-            "-f", str(filepath),
-        ]
-        logger.info("Executando psql a partir de %s...", safe_filename)
-        result = subprocess.run(cmd, env=env, capture_output=True, text=True)
-        if result.returncode != 0:
-            raise RuntimeError(f"Falha no psql restore: {result.stderr.strip()}")
-    else:
+    from .database import engine
 
-        logger.warning(
-            "Ferramentas de restauração Postgres não disponíveis ou arquivo fallback. "
-            "Simulando restauração para %s.", safe_filename
-        )
+    # Descarta todas as conexões do pool do SQLAlchemy para garantir conexões limpas durante a restauração
+    try:
+        engine.dispose()
+    except Exception as exc:
+        logger.warning("Aviso ao descartar pool pré-restauração: %s", exc)
+
+    try:
+        if safe_filename.endswith(".dump") and pg_restore_bin:
+            cmd = [
+                pg_restore_bin,
+                "-h", db_info["host"],
+                "-p", db_info["port"],
+                "-U", db_info["user"],
+                "-d", db_info["dbname"],
+                "--clean",
+                "--if-exists",
+                "-v",
+                str(filepath),
+            ]
+            logger.info("Executando pg_restore a partir de %s...", safe_filename)
+            result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+            if result.returncode != 0 and "errors ignored on restore" not in result.stderr:
+                logger.warning("Alertas/erros ao restaurar: %s", result.stderr)
+        elif safe_filename.endswith(".sql") and psql_bin:
+            cmd = [
+                psql_bin,
+                "-h", db_info["host"],
+                "-p", db_info["port"],
+                "-U", db_info["user"],
+                "-d", db_info["dbname"],
+                "-f", str(filepath),
+            ]
+            logger.info("Executando psql a partir de %s...", safe_filename)
+            result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+            if result.returncode != 0:
+                raise RuntimeError(f"Falha no psql restore: {result.stderr.strip()}")
+        else:
+            logger.warning(
+                "Ferramentas de restauração Postgres não disponíveis ou arquivo fallback. "
+                "Simulando restauração para %s.", safe_filename
+            )
+    finally:
+        engine.dispose()
 
     return {
         "status": "restored",

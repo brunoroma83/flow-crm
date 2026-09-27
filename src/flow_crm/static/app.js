@@ -29,8 +29,12 @@ const $ = s => document.querySelector(s),
 async function api(path, options = {}) {
   let token = localStorage.getItem('flowcrm_token');
   let endpoint = path.replace(/^api_keys/, 'api-keys');
+  let isLogin = path === 'auth/login';
   const r = await fetch('/api/' + endpoint, {
-    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+    headers: {
+      'Content-Type': 'application/json',
+      ...((token && !isLogin) ? { Authorization: 'Bearer ' + token } : {})
+    },
     ...options
   });
   if (!r.ok) throw new Error((await r.json().catch(() => ({ detail: 'Erro na requisição' }))).detail);
@@ -851,15 +855,18 @@ window.onhashchange = () => {
 };
 
 function showLogin() {
+  localStorage.removeItem('flowcrm_token');
   document.body.innerHTML = `<div class="login"><form id="login-form"><div class="login-logo">F</div><h1>FlowCRM</h1><p>Acesse sua central de operações.</p><label>E-mail<input name="email" type="email" required></label><label>Senha<input name="password" type="password" required></label><p id="login-error"></p><button>Entrar</button></form></div>`;
   $('#login-form').onsubmit = async e => {
     e.preventDefault();
+    let data = Object.fromEntries(new FormData(e.target));
+    if (data.email) data.email = String(data.email).trim();
     try {
-      let r = await api('auth/login', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(e.target))) });
+      let r = await api('auth/login', { method: 'POST', body: JSON.stringify(data) });
       localStorage.setItem('flowcrm_token', r.access_token);
       location.reload();
     } catch (err) {
-      $('#login-error').textContent = err.message;
+      $('#login-error').textContent = err.message || 'Erro ao efetuar login. Verifique o e-mail e a senha.';
     }
   };
 }

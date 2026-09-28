@@ -1,8 +1,13 @@
-# 1. Baixa o código atualizado
+#!/bin/bash
+set -e
+
+echo "=== 1. Baixando alterações do Git (origin master) ==="
 git pull origin master
 
-# 2. Reconstrói apenas a imagem da aplicação (sem alterar o banco de dados)
-docker compose -f compose.yaml build app
+echo "=== 2. Reconstruindo a imagem da aplicação (sem cache) ==="
+DOCKER_BUILDKIT=0 docker compose -f compose.yaml build --no-cache app
 
-# 3. Recria o container da aplicação de forma rápida (sem reiniciar o postgres)
+echo "=== 3. Atualizando o container da aplicação ==="
 docker compose -f compose.yaml up -d --no-deps app
+
+echo "=== Deploy concluído com sucesso! ==="

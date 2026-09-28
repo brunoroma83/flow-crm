@@ -1,27 +1,35 @@
 services:
   app:
     build: .
+    container_name: crm_app
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-flowcrm}:${POSTGRES_PASSWORD:-flowcrm_dev_password}@db:5432/${POSTGRES_DB:-flowcrm}
       APP_ENV: ${APP_ENV:-development}
       SECRET_KEY: ${SECRET_KEY:-change-this-secret-key-before-production}
-    ports:
-      - "8000:8000"
+#   ports:
+#     - "8000:8000"
     volumes:
       - ./backups:/app/backups
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - default
+      - web_network
 
   db:
     image: postgres:17-alpine
+    container_name: crm_db
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-flowcrm}
       POSTGRES_USER: ${POSTGRES_USER:-flowcrm}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-flowcrm_dev_password}
-    ports:
-      - "5433:5432"
+#   ports:
+#     - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -29,6 +37,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - default
 
 volumes:
   postgres_data:
+
+networks:
+  web_network:
+    external: true

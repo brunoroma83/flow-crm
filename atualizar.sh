@@ -1,5 +1,5 @@
 # 1. Baixa o código atualizado
-git pull origin main
+git pull origin master
 
 # 2. Reconstrói apenas a imagem da aplicação (sem alterar o banco de dados)
 docker compose -f compose.yaml build app

@@ -204,7 +204,9 @@ def get_client_details(client_id: int) -> dict[str, Any]:
             select(Client)
             .options(
                 selectinload(Client.contacts),
-                selectinload(Client.projects),
+                selectinload(Client.projects).selectinload(Project.tasks),
+                selectinload(Client.projects).selectinload(Project.invoices),
+                selectinload(Client.projects).selectinload(Project.monthly_values),
                 selectinload(Client.meetings),
             )
             .where(Client.id == client_id, Client.is_deleted.is_(False))
@@ -212,27 +214,111 @@ def get_client_details(client_id: int) -> dict[str, Any]:
         if not client:
             return {"error": f"Cliente com ID {client_id} não encontrado."}
 
-        return {
+        contacts = [
+            {"id": ct.id, "name": ct.name, "nome": ct.name, "email": ct.email, "phone": ct.phone, "telefone": ct.phone, "role": ct.role, "cargo": ct.role}
+            for ct in client.contacts
+            if not ct.is_deleted
+        ]
+
+        meetings = [
+            {"id": m.id, "title": m.title, "titulo": m.title, "starts_at": m.starts_at.isoformat() if m.starts_at else None, "duration_minutes": m.duration_minutes, "notes": m.notes, "observacoes": m.notes}
+            for m in sorted(client.meetings, key=lambda x: x.starts_at, reverse=True)
+            if not m.is_deleted
+        ]
+
+        projects = []
+        all_invoices = []
+        all_tasks = []
+
+        for p in sorted(client.projects, key=lambda x: x.id, reverse=True):
+            if p.is_deleted:
+                continue
+
+            projects.append({
+                "id": p.id,
+                "name": p.name,
+                "nome": p.name,
+                "description": p.description,
+                "status": p.status.value,
+                "project_value": float(p.project_value or 0),
+                "contract_type": p.contract_type,
+                "due_date": p.due_date.isoformat() if p.due_date else None,
+            })
+
+            for inv in p.invoices:
+                if not inv.is_deleted:
+                    all_invoices.append({
+                        "id": inv.id,
+                        "invoice_number": inv.invoice_number,
+                        "numero_fatura": inv.invoice_number,
+                        "description": inv.description,
+                        "amount": float(inv.amount),
+                        "status": inv.status.value,
+                        "issue_date": inv.issue_date.isoformat() if inv.issue_date else None,
+                        "due_date": inv.due_date.isoformat() if inv.due_date else None,
+                        "payment_date": inv.payment_date.isoformat() if inv.payment_date else None,
+                        "project_id": p.id,
+                        "project_name": p.name,
+                    })
+
+            for t in p.tasks:
+                if not t.is_deleted:
+                    all_tasks.append({
+                        "id": t.id,
+                        "title": t.title,
+                        "titulo": t.title,
+                        "description": t.description,
+                        "status": t.status.value,
+                        "priority": t.priority.value,
+                        "due_date": t.due_date.isoformat() if t.due_date else None,
+                        "project_id": p.id,
+                        "project_name": p.name,
+                    })
+
+        all_invoices.sort(key=lambda x: x["id"], reverse=True)
+        all_tasks.sort(key=lambda x: (x["due_date"] or "9999-12-31", x["id"]), reverse=False)
+
+        metrics = {
+            "total_projects": len(projects),
+            "active_projects": sum(1 for p in projects if p["status"] == "active"),
+            "completed_projects": sum(1 for p in projects if p["status"] == "completed"),
+            "total_invoiced": sum(inv["amount"] for inv in all_invoices),
+            "paid_invoices_sum": sum(inv["amount"] for inv in all_invoices if inv["status"] == "paid"),
+            "total_tasks_count": len(all_tasks),
+            "pending_tasks_count": sum(1 for t in all_tasks if t["status"] != "done"),
+        }
+
+        client_dict = {
             "id": client.id,
             "name": client.name,
+            "nome": client.name,
             "industry": client.industry,
+            "segmento": client.industry,
             "cnpj": client.cnpj,
             "address": client.address,
+            "endereco": client.address,
             "status": client.status.value,
             "health_score": client.health_score,
             "monthly_value": float(client.monthly_value or 0),
-            "contacts": [
-                {"id": ct.id, "name": ct.name, "email": ct.email, "phone": ct.phone, "role": ct.role}
-                for ct in client.contacts if not ct.is_deleted
-            ],
-            "projects": [
-                {"id": p.id, "name": p.name, "status": p.status.value, "due_date": p.due_date.isoformat() if p.due_date else None}
-                for p in client.projects if not p.is_deleted
-            ],
-            "meetings": [
-                {"id": m.id, "title": m.title, "starts_at": m.starts_at.isoformat(), "notes": m.notes}
-                for m in client.meetings if not m.is_deleted
-            ],
+        }
+
+        return {
+            "id": client.id,
+            "name": client.name,
+            "client": client_dict,
+            "cliente": client_dict,
+            "contacts": contacts,
+            "contatos": contacts,
+            "projects": projects,
+            "projetos": projects,
+            "invoices": all_invoices,
+            "faturas": all_invoices,
+            "meetings": meetings,
+            "reunioes": meetings,
+            "tasks": all_tasks,
+            "tarefas": all_tasks,
+            "metrics": metrics,
+            "metricas": metrics,
         }
 
 

@@ -55,7 +55,7 @@ function nav() {
     backups: '💾 '
   };
 
-  let activeSection = section === 'project_details' ? 'projects' : section;
+  let activeSection = section === 'project_details' ? 'projects' : (section === 'client_details' ? 'clients' : section);
 
   $('#nav').innerHTML = Object.entries(config)
     .filter(([key]) => (key !== 'users' && key !== 'api_keys' && key !== 'backups') || currentUser?.role === 'admin')
@@ -222,6 +222,12 @@ function columns() {
 
 function cell(r, k) {
   let v = r[k];
+  if (k === 'name' && section === 'clients') {
+    return `<a href="#client_details?id=${r.id}" style="color:var(--blue);font-weight:600;text-decoration:none" title="Ver detalhes do cliente">${v}</a>`;
+  }
+  if (k === 'client_name') {
+    return v ? `<a href="#client_details?id=${r.client_id}" style="color:var(--ink);font-weight:600;text-decoration:none" title="Ver detalhes do cliente">${v}</a>` : '—';
+  }
   if (k === 'name' && section === 'projects') {
     return `<a href="#project_details?id=${r.id}" style="color:var(--blue);font-weight:600;text-decoration:none" title="Ver detalhes do projeto">${v}</a>`;
   }
@@ -281,6 +287,7 @@ async function table() {
   let rows = records.map(r => `<tr>
     ${cols.map(([k]) => `<td>${cell(r, k)}</td>`).join('')}
     <td class="actions-cell">
+      ${section === 'clients' ? `<button class="link client-details-btn" data-id="${r.id}" style="color:var(--blue);font-weight:600">👁️ Detalhes</button>` : ''}
       ${section === 'projects' ? `<button class="link project-details-btn" data-id="${r.id}" style="color:var(--blue);font-weight:600">👁️ Detalhes</button><button class="link monthly-values-btn" data-id="${r.id}" data-name="${r.name}" style="color:#0284c7;font-weight:600">💰 Valores</button>` : ''}
       ${section === 'users' && currentUser?.role === 'admin' ? `<button class="link generate-key-user" data-user-id="${r.id}" data-user-name="${r.name}" style="color:#16a34a;font-weight:600">🔑 Gerar Chave</button>` : ''}
       ${section !== 'api_keys' ? `<button class="link edit" data-id="${r.id}">Editar</button>` : ''}
@@ -382,7 +389,7 @@ async function projectDetails(projectId) {
           </div>
           ${client ? `
             <div style="display:grid;gap:8px;font-size:13px">
-              <div><b>Empresa:</b> ${client.nome}</div>
+              <div><b>Empresa:</b> <a href="#client_details?id=${client.id}" style="color:var(--blue);font-weight:600;text-decoration:none" title="Ver detalhes do cliente">${client.nome} 👁️</a></div>
               <div><b>CNPJ:</b> ${client.cnpj || '—'}</div>
               <div><b>Segmento:</b> ${client.industry || '—'}</div>
               <div><b>Health Score:</b> ${client.health_score}%</div>
@@ -476,6 +483,217 @@ function attachProjectDetailsListeners(projectId) {
   document.querySelectorAll('.monthly-details-btn').forEach(btn => {
     btn.onclick = () => {
       openMonthlyValuesModal(Number(btn.dataset.id), btn.dataset.name);
+    };
+  });
+}
+
+async function clientDetails(clientId) {
+  if (!clientId) {
+    return `<div class="card"><b>ID do cliente não especificado.</b><p style="margin-top:8px"><a href="#clients">← Voltar para Clientes</a></p></div>`;
+  }
+  try {
+    let d = await api(`clients/${clientId}/details`);
+    let c = d.cliente || d.client;
+    let contacts = d.contatos || d.contacts || [];
+    let projects = d.projetos || d.projects || [];
+    let invoices = d.faturas || d.invoices || [];
+    let meetings = d.reunioes || d.meetings || [];
+    let tasks = d.tarefas || d.tasks || [];
+    let m = d.metricas || d.metrics || {};
+
+    let healthColor = c.health_score >= 80 ? '#059669' : (c.health_score >= 50 ? '#d97706' : '#dc2626');
+
+    let contactRows = contacts.length ? contacts.map(ct => `
+      <div style="background:#f8fafc;padding:12px 14px;border-radius:8px;border:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <b style="color:var(--ink);font-size:14px">${ct.name || ct.nome}</b>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${ct.role || ct.cargo || 'Sem cargo'} ${ct.email ? '· ✉️ ' + ct.email : ''}</div>
+        </div>
+        ${(ct.phone || ct.telefone) ? `<span style="font-size:12px;background:#e2e8f0;padding:4px 10px;border-radius:6px;font-weight:500">📞 ${ct.phone || ct.telefone}</span>` : ''}
+      </div>
+    `).join('') : `<div style="color:var(--muted);font-size:13px">Nenhum contato cadastrado para este cliente.</div>`;
+
+    let projectRows = projects.length ? projects.map(p => `<tr>
+      <td><b><a href="#project_details?id=${p.id}" style="color:var(--blue);font-weight:600;text-decoration:none">${p.name || p.nome} 👁️</a></b></td>
+      <td>${status(p.status)}</td>
+      <td>${p.contract_type === 'avulso' ? 'Avulso' : 'Mensal'}</td>
+      <td style="font-weight:600;color:#047857">${money(p.project_value)}</td>
+      <td>${p.due_date ? new Date(p.due_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</td>
+      <td style="text-align:right"><button type="button" class="link" onclick="location.hash='project_details?id=${p.id}'" style="color:var(--blue);font-size:12px;font-weight:600">👁️ Detalhes</button></td>
+    </tr>`).join('') : `<tr><td colspan="6" class="empty">Nenhum projeto registrado para este cliente.</td></tr>`;
+
+    let invoiceRows = invoices.length ? invoices.map(inv => `<tr>
+      <td><code style="font-family:monospace;font-weight:700;color:var(--blue);font-size:13px">${inv.invoice_number || inv.numero_fatura}</code></td>
+      <td>${inv.project_name ? `<a href="#project_details?id=${inv.project_id}" style="color:var(--ink);text-decoration:none">${inv.project_name}</a>` : '—'}</td>
+      <td style="font-weight:600">${money(inv.amount || inv.valor)}</td>
+      <td>${inv.issue_date ? new Date(inv.issue_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</td>
+      <td>${inv.due_date ? new Date(inv.due_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</td>
+      <td>${status(inv.status)}</td>
+    </tr>`).join('') : `<tr><td colspan="6" class="empty">Nenhuma fatura lançada para os projetos deste cliente.</td></tr>`;
+
+    let taskRows = tasks.length ? tasks.map(t => `<tr>
+      <td><b>${t.title || t.titulo}</b>${t.description ? `<br><small style="color:var(--muted)">${t.description}</small>` : ''}</td>
+      <td><small style="color:var(--muted)">${t.project_name}</small></td>
+      <td>${status(t.status)}</td>
+      <td><span class="pill ${t.priority}">${t.priority}</span></td>
+      <td>${t.due_date ? new Date(t.due_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</td>
+    </tr>`).join('') : `<tr><td colspan="5" class="empty">Nenhuma tarefa ativa.</td></tr>`;
+
+    let meetingRows = meetings.length ? meetings.map(mt => `<tr>
+      <td><b>${mt.title || mt.titulo}</b>${mt.notes ? `<br><small style="color:var(--muted)">${mt.notes}</small>` : ''}</td>
+      <td>${mt.starts_at ? new Date(mt.starts_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
+      <td>${mt.duration_minutes} min</td>
+    </tr>`).join('') : `<tr><td colspan="3" class="empty">Nenhuma reunião registrada com este cliente.</td></tr>`;
+
+    return `
+    <div style="display:grid;gap:20px;">
+      <!-- Cabeçalho Principal do Cliente -->
+      <div class="card" style="padding:20px;border-left:5px solid #2563eb">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div>
+            <button type="button" class="secondary" onclick="location.hash='clients'" style="padding:4px 10px;font-size:12px;margin-bottom:10px">← Voltar para Clientes</button>
+            <div class="eyebrow">CLIENTE #${c.id}</div>
+            <h1 style="font-size:26px;margin:4px 0 8px;display:flex;align-items:center;gap:10px">
+              ${c.name || c.nome}
+              ${status(c.status)}
+            </h1>
+            <p style="color:var(--muted);font-size:13px;margin:0 0 12px">
+              ${c.industry || c.segmento ? 'Segmento: <b>' + (c.industry || c.segmento) + '</b> · ' : ''}
+              CNPJ: <b>${c.cnpj || 'Não informado'}</b>
+            </p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button type="button" class="edit-client-btn" data-id="${c.id}" style="background:var(--blue);color:#fff;border:0;padding:8px 14px;font-size:13px">✏️ Editar Cliente</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid #e2e8f0">
+          <div>
+            <b style="font-size:11px;color:var(--muted);text-transform:uppercase">Health Score</b>
+            <div style="font-size:18px;font-weight:700;color:${healthColor};margin-top:2px">
+              ${c.health_score}%
+              <span style="font-size:12px;font-weight:normal;color:var(--muted)">/ 100</span>
+            </div>
+          </div>
+          <div>
+            <b style="font-size:11px;color:var(--muted);text-transform:uppercase">Valor Mensal (MRR)</b>
+            <div style="font-size:18px;font-weight:700;color:#047857;margin-top:2px">${money(c.monthly_value)}</div>
+          </div>
+          <div>
+            <b style="font-size:11px;color:var(--muted);text-transform:uppercase">Endereço de Cobrança</b>
+            <div style="font-size:13px;color:var(--ink);margin-top:2px">${c.address || c.endereco || '—'}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Métricas em Cards -->
+      <div class="metrics" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+        <div class="card" style="border-left: 4px solid #2563eb;">
+          <div class="metric-label">🚀 Projetos</div>
+          <div class="metric" style="font-size:24px;color:#2563eb;margin-top:4px">${m.active_projects || 0} ativos</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:4px">${m.total_projects || 0} projetos no total</p>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #059669;">
+          <div class="metric-label">💰 Faturamento Pago (Acumulado)</div>
+          <div class="metric" style="font-size:22px;color:#059669;margin-top:4px">${money(m.paid_invoices_sum)}</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:4px">Total Faturado: <b>${money(m.total_invoiced)}</b></p>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #d97706;">
+          <div class="metric-label">📋 Tarefas da Conta</div>
+          <div class="metric" style="font-size:24px;color:#d97706;margin-top:4px">${m.pending_tasks_count || 0} pendentes</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:4px">${m.total_tasks_count || 0} tarefas associadas</p>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #7c3aed;">
+          <div class="metric-label">🤝 Reuniões</div>
+          <div class="metric" style="font-size:24px;color:#7c3aed;margin-top:4px">${meetings.length}</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:4px">Compromissos com a conta</p>
+        </div>
+      </div>
+
+      <!-- Bloco 1: Projetos & Contatos da Conta -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px">
+              <span>🚀</span> Projetos da Empresa (${projects.length})
+            </div>
+            <button type="button" class="link" onclick="openForm({ client_id: ${c.id} }); section='projects';" style="font-size:12px;color:var(--blue);font-weight:600">+ Novo Projeto</button>
+          </div>
+          <div class="table-card" style="box-shadow:none;border:1px solid #e2e8f0">
+            <table>
+              <thead><tr><th>Projeto</th><th>Status</th><th>Tipo</th><th>Valor</th><th>Prazo</th><th></th></tr></thead>
+              <tbody>${projectRows}</tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px">
+              <span>📇</span> Contatos da Conta (${contacts.length})
+            </div>
+            <button type="button" class="link" onclick="openForm({ client_id: ${c.id} }); section='contacts';" style="font-size:12px;color:var(--blue);font-weight:600">+ Novo Contato</button>
+          </div>
+          <div style="display:grid;gap:10px">
+            ${contactRows}
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 2: Faturas & Reuniões -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px">
+        <div class="card">
+          <div style="font-weight:700;font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            <span>📄</span> Histórico de Faturas & Cobranças (${invoices.length})
+          </div>
+          <div class="table-card" style="box-shadow:none;border:1px solid #e2e8f0">
+            <table>
+              <thead><tr><th>Fatura</th><th>Projeto</th><th>Valor</th><th>Emissão</th><th>Vencimento</th><th>Status</th></tr></thead>
+              <tbody>${invoiceRows}</tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="font-weight:700;font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            <span>🤝</span> Reuniões & Compromissos (${meetings.length})
+          </div>
+          <div class="table-card" style="box-shadow:none;border:1px solid #e2e8f0">
+            <table>
+              <thead><tr><th>Reunião</th><th>Data/Hora</th><th>Duração</th></tr></thead>
+              <tbody>${meetingRows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 3: Tarefas da Conta -->
+      <div class="card">
+        <div style="font-weight:700;font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+          <span>📋</span> Central de Tarefas Ativas (${tasks.length})
+        </div>
+        <div class="table-card" style="box-shadow:none;border:1px solid #e2e8f0">
+          <table>
+            <thead><tr><th>Tarefa</th><th>Projeto</th><th>Status</th><th>Prioridade</th><th>Prazo</th></tr></thead>
+            <tbody>${taskRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  } catch (err) {
+    return `<div class="card"><b>Erro ao carregar detalhes do cliente.</b><p style="color:var(--red)">${err.message}</p><button type="button" onclick="location.hash='clients'">← Voltar para Clientes</button></div>`;
+  }
+}
+
+function attachClientDetailsListeners(clientId) {
+  document.querySelectorAll('.edit-client-btn').forEach(btn => {
+    btn.onclick = () => {
+      let clientRec = records.find(r => r.id == btn.dataset.id);
+      section = 'clients';
+      openForm(clientRec);
     };
   });
 }
@@ -591,7 +809,11 @@ async function render() {
   section = route.section;
   nav();
   try {
-    if (section === 'project_details') {
+    if (section === 'client_details') {
+      let cid = Number(route.params.get('id'));
+      $('#view').innerHTML = await clientDetails(cid);
+      attachClientDetailsListeners(cid);
+    } else if (section === 'project_details') {
       let pid = Number(route.params.get('id'));
       $('#view').innerHTML = await projectDetails(pid);
       attachProjectDetailsListeners(pid);
@@ -605,6 +827,11 @@ async function render() {
       document.querySelectorAll('.monthly-values-btn').forEach(btn => {
         btn.onclick = () => {
           openMonthlyValuesModal(Number(btn.dataset.id), btn.dataset.name);
+        };
+      });
+      document.querySelectorAll('.client-details-btn').forEach(btn => {
+        btn.onclick = () => {
+          location.hash = `client_details?id=${btn.dataset.id}`;
         };
       });
       document.querySelectorAll('.project-details-btn').forEach(btn => {
@@ -841,6 +1068,8 @@ $('#new').onclick = () => {
     location.hash = 'clients';
   } else if (section === 'project_details') {
     location.hash = 'projects';
+  } else if (section === 'client_details') {
+    location.hash = 'clients';
   } else {
     openForm();
   }

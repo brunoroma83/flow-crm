@@ -117,11 +117,14 @@ class TaskIn(BaseModel):
     priority: Priority = Priority.medium
     due_date: date | None = None
     project_id: int | None = None
+    client_id: int | None = None
 
 
 class TaskOut(TaskIn, ORMModel):
     id: int
     created_by_id: int | None
+    client_name: str | None = None
+    project_name: str | None = None
 
 
 class MeetingIn(BaseModel):

@@ -83,6 +83,7 @@ class Client(TimestampMixin, Base):
     contacts: Mapped[list["Contact"]] = relationship(back_populates="client", cascade="all, delete-orphan")
     projects: Mapped[list["Project"]] = relationship(back_populates="client", cascade="all, delete-orphan")
     meetings: Mapped[list["Meeting"]] = relationship(back_populates="client", cascade="all, delete-orphan")
+    tasks: Mapped[list["Task"]] = relationship(back_populates="client")
     is_deleted: Mapped[bool] = mapped_column(SQLBool, default=False)
 
 class Contact(TimestampMixin, Base):
@@ -158,8 +159,10 @@ class Task(TimestampMixin, Base):
     priority: Mapped[Priority] = mapped_column(Enum(Priority), default=Priority.medium)
     due_date: Mapped[date | None] = mapped_column(Date)
     project_id: Mapped[int | None] = mapped_column(ForeignKey("projects.id"))
+    client_id: Mapped[int | None] = mapped_column(ForeignKey("clients.id"), nullable=True)
     created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     project: Mapped[Project | None] = relationship(back_populates="tasks")
+    client: Mapped[Client | None] = relationship(back_populates="tasks")
     is_deleted: Mapped[bool] = mapped_column(SQLBool, default=False)
 
 class Meeting(TimestampMixin, Base):

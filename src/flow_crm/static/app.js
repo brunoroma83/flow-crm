@@ -3,7 +3,7 @@ const config = {
   clients: { label: 'Clientes', title: 'Diretório de clientes', description: 'Contas, dados fiscais, saúde e valor mensal sob gestão.', fields: [['name', 'Nome da Empresa *'], ['cnpj', 'CNPJ'], ['address', 'Endereço Completo de Cobrança', 'textarea'], ['industry', 'Segmento'], ['status', 'Status', 'select', 'prospect,active,inactive'], ['health_score', 'Health score', 'number'], ['monthly_value', 'Valor mensal (R$)', 'number']] },
   projects: { label: 'Projetos', title: 'Projetos', description: 'Entregas organizadas por cliente, contato de cobrança e fase.', fields: [['name', 'Nome do Projeto *'], ['client_id', 'Cliente *', 'select-api', 'clients'], ['invoice_contact_id', 'Contato Designado para Faturas', 'select-api', 'contacts'], ['status', 'Status', 'select', 'planning,active,paused,completed'], ['project_value', 'Valor do projeto (R$)', 'number'], ['contract_type', 'Tipo de contrato', 'select', 'mensal,avulso'], ['description', 'Descrição', 'textarea'], ['start_date', 'Início', 'date'], ['due_date', 'Prazo', 'date']] },
   invoices: { label: 'Faturas', title: 'Faturas & Cobranças', description: 'Controle de faturamento, prazos de vencimento e recebimento por projeto.', fields: [['invoice_number', 'Número da Fatura *'], ['project_id', 'Projeto *', 'select-api', 'projects'], ['contact_id', 'Para quem foi enviada (Contato)', 'select-api', 'contacts'], ['amount', 'Valor (R$) *', 'number'], ['issue_date', 'Data de Emissão', 'date'], ['due_date', 'Data de Vencimento *', 'date'], ['payment_date', 'Data de Pagamento', 'date'], ['status', 'Status', 'select', 'pending,paid,overdue,draft,cancelled'], ['description', 'Descrição / Serviços Faturados *', 'textarea']] },
-  tasks: { label: 'Tarefas', title: 'Central de tarefas', description: 'Priorize a execução e acompanhe prazos.', fields: [['title', 'Título'], ['project_id', 'Projeto', 'select-api', 'projects'], ['status', 'Status', 'select', 'todo,in_progress,done'], ['priority', 'Prioridade', 'select', 'low,medium,high'], ['due_date', 'Prazo', 'date'], ['description', 'Descrição', 'textarea']] },
+  tasks: { label: 'Tarefas', title: 'Central de tarefas', description: 'Priorize a execução e acompanhe prazos.', fields: [['title', 'Título *'], ['client_id', 'Cliente (opcional)', 'select-api', 'clients'], ['project_id', 'Projeto (opcional)', 'select-api', 'projects'], ['status', 'Status', 'select', 'todo,in_progress,done'], ['priority', 'Prioridade', 'select', 'low,medium,high'], ['due_date', 'Prazo', 'date'], ['description', 'Descrição', 'textarea']] },
   meetings: { label: 'Reuniões', title: 'Reuniões e agenda', description: 'Registre compromissos e decisões com os clientes.', fields: [['title', 'Título'], ['client_id', 'Cliente', 'select-api', 'clients'], ['starts_at', 'Data e hora', 'datetime-local'], ['duration_minutes', 'Duração (minutos)', 'number'], ['notes', 'Notas', 'textarea']] },
   contacts: { label: 'Contatos', title: 'Diretório de contatos', description: 'As pessoas-chave em cada conta.', fields: [['name', 'Nome'], ['email', 'E-mail', 'email'], ['role', 'Cargo'], ['phone', 'Telefone'], ['client_id', 'Cliente', 'select-api', 'clients']] },
   users: { label: 'Usuários', title: 'Usuários & Permissões', description: 'Controle de acessos e permissões da equipe e agentes de IA.', fields: [['name', 'Nome'], ['email', 'E-mail', 'email'], ['password', 'Senha', 'password'], ['role', 'Perfil', 'select', 'member,admin,agent'], ['is_active', 'Ativo', 'select', 'true,false']] },
@@ -213,7 +213,7 @@ function columns() {
     clients: [['name', 'Cliente'], ['cnpj', 'CNPJ'], ['industry', 'Segmento'], ['status', 'Status'], ['health_score', 'Health'], ['monthly_value', 'Valor mensal']],
     projects: [['name', 'Projeto'], ['client_name', 'Cliente'], ['project_value', 'Valor do projeto'], ['contract_type', 'Tipo de contrato'], ['invoice_contact_name', 'Contato Faturamento'], ['status', 'Status'], ['due_date', 'Prazo']],
     invoices: [['invoice_number', 'Fatura'], ['project_name', 'Projeto'], ['client_name', 'Cliente'], ['contact_name', 'Destinatário'], ['amount', 'Valor'], ['issue_date', 'Emissão'], ['due_date', 'Vencimento'], ['status', 'Status']],
-    tasks: [['title', 'Tarefa'], ['project_id', 'Projeto'], ['status', 'Status'], ['priority', 'Prioridade'], ['due_date', 'Prazo']],
+    tasks: [['title', 'Tarefa'], ['client_name', 'Cliente'], ['project_name', 'Projeto'], ['status', 'Status'], ['priority', 'Prioridade'], ['due_date', 'Prazo']],
     meetings: [['title', 'Reunião'], ['client_id', 'Cliente'], ['starts_at', 'Data'], ['duration_minutes', 'Duração']],
     contacts: [['name', 'Contato'], ['email', 'E-mail'], ['role', 'Cargo'], ['client_id', 'Cliente']],
     api_keys: [['name', 'Identificação'], ['key_prefix', 'Prefixo'], ['user_name', 'Usuário Vinculado'], ['created_at', 'Criada em'], ['last_used_at', 'Último Uso']]
@@ -230,6 +230,9 @@ function cell(r, k) {
   }
   if (k === 'name' && section === 'projects') {
     return `<a href="#project_details?id=${r.id}" style="color:var(--blue);font-weight:600;text-decoration:none" title="Ver detalhes do projeto">${v}</a>`;
+  }
+  if (k === 'project_name') {
+    return v ? `<a href="#project_details?id=${r.project_id}" style="color:var(--ink);font-weight:600;text-decoration:none" title="Ver detalhes do projeto">${v}</a>` : '—';
   }
   if (k === 'key_prefix') return `<code style="background:#f1f5f9;padding:3px 6px;border-radius:4px;font-family:monospace;font-weight:600">${v}••••••••</code>`;
   if (k === 'invoice_number') return `<code style="font-family:monospace;font-weight:700;color:var(--blue);font-size:13px">${v}</code>`;
@@ -533,7 +536,7 @@ async function clientDetails(clientId) {
 
     let taskRows = tasks.length ? tasks.map(t => `<tr>
       <td><b>${t.title || t.titulo}</b>${t.description ? `<br><small style="color:var(--muted)">${t.description}</small>` : ''}</td>
-      <td><small style="color:var(--muted)">${t.project_name}</small></td>
+      <td>${t.project_id ? `<a href="#project_details?id=${t.project_id}" style="color:var(--blue);font-weight:600;text-decoration:none"><small>${t.project_name}</small></a>` : `<small style="color:var(--muted)">Sem projeto</small>`}</td>
       <td>${status(t.status)}</td>
       <td><span class="pill ${t.priority}">${t.priority}</span></td>
       <td>${t.due_date ? new Date(t.due_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</td>
@@ -902,6 +905,19 @@ async function openForm(record = null) {
         let p = projRowsCache.find(x => x.id == projSelect.value);
         if (p && p.invoice_contact_id) {
           contactSelect.value = p.invoice_contact_id;
+        }
+      };
+    }
+  }
+
+  if (section === 'tasks' && projRowsCache) {
+    let projSelect = $('#fields select[name="project_id"]');
+    let clientSelect = $('#fields select[name="client_id"]');
+    if (projSelect && clientSelect) {
+      projSelect.onchange = () => {
+        let p = projRowsCache.find(x => x.id == projSelect.value);
+        if (p && p.client_id) {
+          clientSelect.value = p.client_id;
         }
       };
     }

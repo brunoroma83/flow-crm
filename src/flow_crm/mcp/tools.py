@@ -204,6 +204,7 @@ def get_client_details(client_id: int) -> dict[str, Any]:
             select(Client)
             .options(
                 selectinload(Client.contacts),
+                selectinload(Client.tasks).selectinload(Task.project),
                 selectinload(Client.projects).selectinload(Project.tasks),
                 selectinload(Client.projects).selectinload(Project.invoices),
                 selectinload(Client.projects).selectinload(Project.monthly_values),
@@ -274,6 +275,22 @@ def get_client_details(client_id: int) -> dict[str, Any]:
                         "project_id": p.id,
                         "project_name": p.name,
                     })
+
+        seen_task_ids = {t["id"] for t in all_tasks}
+        for t in client.tasks:
+            if not t.is_deleted and t.id not in seen_task_ids:
+                all_tasks.append({
+                    "id": t.id,
+                    "title": t.title,
+                    "titulo": t.title,
+                    "description": t.description,
+                    "status": t.status.value,
+                    "priority": t.priority.value,
+                    "due_date": t.due_date.isoformat() if t.due_date else None,
+                    "project_id": t.project_id,
+                    "project_name": t.project.name if t.project else "Sem projeto",
+                })
+                seen_task_ids.add(t.id)
 
         all_invoices.sort(key=lambda x: x["id"], reverse=True)
         all_tasks.sort(key=lambda x: (x["due_date"] or "9999-12-31", x["id"]), reverse=False)
@@ -374,6 +391,7 @@ def create_client(
 
 def list_tasks(
     project_id: int | None = None,
+    client_id: int | None = None,
     status: str | None = None,
     priority: str | None = None,
     limit: int = 50,
@@ -382,6 +400,7 @@ def list_tasks(
     
     Args:
         project_id: ID do projeto para filtrar (opcional).
+        client_id: ID do cliente para filtrar (opcional).
         status: Filtro por status ('todo', 'in_progress', 'done').
         priority: Filtro por prioridade ('low', 'medium', 'high').
         limit: Máximo de registros a retornar (padrão: 50).
@@ -389,11 +408,18 @@ def list_tasks(
     with SessionLocal() as db:
         stmt = (
             select(Task)
-            .options(selectinload(Task.project))
+            .options(
+                selectinload(Task.client),
+                selectinload(Task.project).selectinload(Project.client),
+            )
             .where(Task.is_deleted.is_(False))
         )
         if project_id:
             stmt = stmt.where(Task.project_id == project_id)
+        if client_id:
+            stmt = stmt.where(
+                (Task.client_id == client_id) | (Task.project.has(Project.client_id == client_id))
+            )
         if status:
             try:
                 stmt = stmt.where(Task.status == TaskStatus(status.lower()))
@@ -416,6 +442,8 @@ def list_tasks(
                 "status": t.status.value,
                 "priority": t.priority.value,
                 "due_date": t.due_date.isoformat() if t.due_date else None,
+                "client_id": t.client_id,
+                "client_name": t.client.name if t.client else (t.project.client.name if t.project and t.project.client else None),
                 "project_id": t.project_id,
                 "project_name": t.project.name if t.project else None,
                 "created_by_id": t.created_by_id,
@@ -427,16 +455,18 @@ def list_tasks(
 def create_task(
     title: str,
     description: str | None = None,
+    client_id: int | None = None,
     project_id: int | None = None,
     priority: str = "medium",
     due_date: str | None = None,
     status: str = "todo",
 ) -> dict[str, Any]:
-    """Cria uma nova tarefa no FlowCRM.
+    """Cria uma nova tarefa no FlowCRM. Pode ser vinculada a um cliente, a um projeto, a ambos ou a nenhum (avulsa).
     
     Args:
         title: Título descritivo da tarefa.
         description: Detalhes ou orientações adicionais.
+        client_id: ID do cliente vinculado (opcional).
         project_id: ID do projeto vinculado (opcional).
         priority: Nível de prioridade ('low', 'medium', 'high'). Padrão: 'medium'.
         due_date: Data de entrega no formato AAAA-MM-DD (ex: '2026-10-15').
@@ -461,15 +491,27 @@ def create_task(
             except ValueError:
                 return {"error": f"Formato de data inválido: '{due_date}'. Use AAAA-MM-DD."}
 
+        project = None
         if project_id:
             project = db.get(Project, project_id)
             if not project or project.is_deleted:
                 return {"error": f"Projeto com ID {project_id} não existe."}
 
+        client = None
+        if client_id:
+            client = db.get(Client, client_id)
+            if not client or client.is_deleted:
+                return {"error": f"Cliente com ID {client_id} não existe."}
+
+        if project and not client_id:
+            client_id = project.client_id
+            client = project.client
+
         task = Task(
             title=title.strip(),
             description=description.strip() if description else None,
             project_id=project_id,
+            client_id=client_id,
             priority=task_priority,
             status=task_status,
             due_date=parsed_date,
@@ -478,6 +520,10 @@ def create_task(
         db.add(task)
         db.commit()
         db.refresh(task)
+        db.refresh(task, ["client", "project"])
+
+        client_name = task.client.name if task.client else (client.name if client else None)
+        project_name = task.project.name if task.project else (project.name if project else None)
 
         return {
             "success": True,
@@ -486,6 +532,10 @@ def create_task(
             "status": task.status.value,
             "priority": task.priority.value,
             "due_date": task.due_date.isoformat() if task.due_date else None,
+            "client_id": task.client_id,
+            "client_name": client_name,
+            "project_id": task.project_id,
+            "project_name": project_name,
             "created_by_id": task.created_by_id,
             "message": f"Tarefa '{task.title}' criada com sucesso.",
         }

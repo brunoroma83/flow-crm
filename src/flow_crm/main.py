@@ -966,6 +966,7 @@ def get_client_details_endpoint(
         select(Client)
         .options(
             selectinload(Client.contacts),
+            selectinload(Client.tasks).selectinload(Task.project),
             selectinload(Client.projects).selectinload(Project.tasks),
             selectinload(Client.projects).selectinload(Project.invoices),
             selectinload(Client.projects).selectinload(Project.monthly_values),
@@ -1065,6 +1066,26 @@ def get_client_details_endpoint(
                         "project_name": p.name,
                     }
                 )
+
+    seen_task_ids = {t["id"] for t in all_tasks}
+    for t in client.tasks:
+        if not t.is_deleted and t.id not in seen_task_ids:
+            all_tasks.append(
+                {
+                    "id": t.id,
+                    "title": t.title,
+                    "titulo": t.title,
+                    "description": t.description,
+                    "descricao": t.description,
+                    "status": t.status,
+                    "priority": t.priority,
+                    "prioridade": t.priority,
+                    "due_date": t.due_date.isoformat() if t.due_date else None,
+                    "project_id": t.project_id,
+                    "project_name": t.project.name if t.project else "Sem projeto",
+                }
+            )
+            seen_task_ids.add(t.id)
 
     all_invoices.sort(key=lambda x: x["id"], reverse=True)
     all_tasks.sort(key=lambda x: (x["due_date"] or "9999-12-31", x["id"]), reverse=False)
@@ -1394,9 +1415,37 @@ def delete_invoice_endpoint(
     return delete_record(db, Invoice, item_id, actor)
 
 
+def task_to_out(t: Task) -> TaskOut:
+    client_name = t.client.name if t.client else (t.project.client.name if t.project and t.project.client else None)
+    project_name = t.project.name if t.project else None
+    return TaskOut(
+        id=t.id,
+        title=t.title,
+        description=t.description,
+        status=t.status,
+        priority=t.priority,
+        due_date=t.due_date,
+        project_id=t.project_id,
+        client_id=t.client_id,
+        created_by_id=t.created_by_id,
+        client_name=client_name,
+        project_name=project_name,
+    )
+
+
 @app.get("/api/tasks", response_model=list[TaskOut])
 def tasks(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    return list_records(db, Task)
+    stmt = (
+        select(Task)
+        .options(
+            selectinload(Task.client),
+            selectinload(Task.project).selectinload(Project.client),
+        )
+        .where(Task.is_deleted.is_(False))
+        .order_by(Task.id.desc())
+    )
+    rows = db.scalars(stmt).all()
+    return [task_to_out(t) for t in rows]
 
 
 @app.post("/api/tasks", response_model=TaskOut, status_code=201)
@@ -1405,7 +1454,26 @@ def create_task(
     db: Session = Depends(get_db),
     actor: User = Depends(get_current_user),
 ):
-    return create_record(db, Task, payload, actor)
+    project = None
+    if payload.project_id:
+        project = get_or_404(db, Project, payload.project_id)
+    if payload.client_id:
+        get_or_404(db, Client, payload.client_id)
+
+    client_id = payload.client_id
+    if not client_id and project:
+        client_id = project.client_id
+
+    data = payload.model_dump()
+    data["client_id"] = client_id
+    task = Task(**data, created_by_id=actor.id)
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    db.refresh(task, ["client", "project"])
+    if task.project and not task.project.client:
+        db.refresh(task.project, ["client"])
+    return task_to_out(task)
 
 
 @app.put("/api/tasks/{item_id}", response_model=TaskOut)
@@ -1415,7 +1483,27 @@ def update_task(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ):
-    return update_record(db, Task, item_id, payload)
+    task = get_or_404(db, Task, item_id)
+    project = None
+    if payload.project_id:
+        project = get_or_404(db, Project, payload.project_id)
+    if payload.client_id:
+        get_or_404(db, Client, payload.client_id)
+
+    client_id = payload.client_id
+    if not client_id and project:
+        client_id = project.client_id
+
+    data = payload.model_dump()
+    data["client_id"] = client_id
+    for key, value in data.items():
+        setattr(task, key, value)
+    db.commit()
+    db.refresh(task)
+    db.refresh(task, ["client", "project"])
+    if task.project and not task.project.client:
+        db.refresh(task.project, ["client"])
+    return task_to_out(task)
 
 
 @app.delete("/api/tasks/{item_id}", status_code=204)

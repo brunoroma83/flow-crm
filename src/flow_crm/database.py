@@ -91,6 +91,26 @@ def ensure_schema() -> None:
             except Exception:
                 pass
 
+        if "tasks" in existing_tables:
+            task_cols = {col["name"] for col in inspector.get_columns("tasks")}
+            if "client_id" not in task_cols:
+                connection.execute(text("ALTER TABLE tasks ADD COLUMN client_id INTEGER REFERENCES clients(id)"))
+
+        if "tasks" in existing_tables and "projects" in existing_tables:
+            try:
+                connection.execute(text("""
+                    UPDATE tasks
+                    SET client_id = (
+                        SELECT client_id
+                        FROM projects
+                        WHERE projects.id = tasks.project_id
+                    )
+                    WHERE project_id IS NOT NULL AND client_id IS NULL
+                """))
+            except Exception:
+                pass
+
+
 
 
 def get_db():

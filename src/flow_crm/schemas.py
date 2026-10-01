@@ -127,6 +127,10 @@ class TaskOut(TaskIn, ORMModel):
     project_name: str | None = None
 
 
+class TaskStatusUpdate(BaseModel):
+    status: TaskStatus
+
+
 class MeetingIn(BaseModel):
     title: str = Field(min_length=2, max_length=200)
     starts_at: datetime

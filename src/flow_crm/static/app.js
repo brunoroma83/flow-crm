@@ -807,6 +807,339 @@ function attachBackupListeners() {
   });
 }
 
+let taskViewMode = localStorage.getItem('flowcrm_task_view') || 'kanban';
+let taskPriorityFilter = 'all';
+let taskLinkFilter = 'all';
+
+function filterTasksList(list) {
+  return list.filter(t => {
+    if (taskPriorityFilter !== 'all' && t.priority !== taskPriorityFilter) return false;
+    if (taskLinkFilter === 'client' && !t.client_id) return false;
+    if (taskLinkFilter === 'project' && !t.project_id) return false;
+    if (taskLinkFilter === 'standalone' && (t.client_id || t.project_id)) return false;
+    return true;
+  });
+}
+
+function kanbanCardHtml(t) {
+  let todayStr = new Date().toISOString().slice(0, 10);
+  let dueBadge = '';
+  if (t.due_date) {
+    let isOverdue = t.status !== 'done' && t.due_date < todayStr;
+    let isToday = t.due_date === todayStr;
+    let formattedDate = new Date(t.due_date + 'T12:00').toLocaleDateString('pt-BR');
+    if (isOverdue) {
+      dueBadge = `<span class="kanban-due overdue" title="Tarefa atrasada!">⚠️ ${formattedDate}</span>`;
+    } else if (isToday) {
+      dueBadge = `<span class="kanban-due today" title="Vence hoje!">📅 Hoje</span>`;
+    } else {
+      dueBadge = `<span class="kanban-due" title="Prazo de entrega">📅 ${formattedDate}</span>`;
+    }
+  }
+
+  let priorityLabel = t.priority === 'high' ? 'Alta' : (t.priority === 'low' ? 'Baixa' : 'Média');
+  let priorityPill = `<span class="pill ${t.priority}">${priorityLabel}</span>`;
+
+  let chips = [];
+  if (t.client_id && t.client_name) {
+    chips.push(`<a href="#client_details?id=${t.client_id}" class="kanban-chip client" title="Ver detalhes do cliente">🏢 ${t.client_name}</a>`);
+  }
+  if (t.project_id && t.project_name) {
+    chips.push(`<a href="#project_details?id=${t.project_id}" class="kanban-chip project" title="Ver detalhes do projeto">🚀 ${t.project_name}</a>`);
+  }
+  if (!t.client_id && !t.project_id) {
+    chips.push(`<span class="kanban-chip standalone">📝 Avulsa</span>`);
+  }
+
+  let moveButtons = [];
+  if (t.status === 'in_progress') {
+    moveButtons.push(`<button type="button" class="kanban-btn-action move kanban-move-btn" data-id="${t.id}" data-target="todo" title="Mover para A Fazer">← A Fazer</button>`);
+    moveButtons.push(`<button type="button" class="kanban-btn-action move kanban-move-btn" data-id="${t.id}" data-target="done" title="Mover para Concluída">Concluir ✓</button>`);
+  } else if (t.status === 'todo') {
+    moveButtons.push(`<button type="button" class="kanban-btn-action move kanban-move-btn" data-id="${t.id}" data-target="in_progress" title="Iniciar tarefa">Iniciar →</button>`);
+  } else if (t.status === 'done') {
+    moveButtons.push(`<button type="button" class="kanban-btn-action move kanban-move-btn" data-id="${t.id}" data-target="in_progress" title="Reabrir tarefa">← Reabrir</button>`);
+  }
+
+  let deleteBtn = canDelete(t) ? `<button type="button" class="kanban-btn-action danger kanban-delete-btn" data-id="${t.id}" title="Excluir tarefa">🗑️</button>` : '';
+
+  return `
+  <div class="kanban-card" draggable="true" data-id="${t.id}" data-status="${t.status}">
+    <div class="kanban-card-top">
+      ${priorityPill}
+      ${dueBadge}
+    </div>
+    <div class="kanban-card-title edit-task-trigger" data-id="${t.id}" title="Clique para editar">${t.title}</div>
+    ${t.description ? `<div class="kanban-card-desc">${t.description}</div>` : ''}
+    ${chips.length ? `<div class="kanban-card-tags">${chips.join('')}</div>` : ''}
+    <div class="kanban-card-actions">
+      <div class="kanban-move-group">
+        ${moveButtons.join('')}
+      </div>
+      <div style="display:flex;gap:4px">
+        <button type="button" class="kanban-btn-action edit-task-trigger" data-id="${t.id}" title="Editar tarefa">✏️</button>
+        ${deleteBtn}
+      </div>
+    </div>
+  </div>`;
+}
+
+function updateKanbanCounts() {
+  ['todo', 'in_progress', 'done'].forEach(st => {
+    let colCards = document.querySelector(`#cards-${st}`);
+    if (colCards) {
+      let visible = Array.from(colCards.querySelectorAll('.kanban-card')).filter(c => c.style.display !== 'none').length;
+      let countEl = document.querySelector(`#count-${st}`);
+      if (countEl) countEl.textContent = visible;
+    }
+  });
+}
+
+async function tasksView() {
+  records = await api('tasks');
+  let filtered = filterTasksList(records);
+
+  let toolbarHtml = `
+    <div class="title-row">
+      <div>
+        <div class="eyebrow">FLOWCRM / OPERAÇÕES</div>
+        <h1>Central de tarefas</h1>
+        <p>Priorize a execução, acompanhe fluxos e prazos de entrega.</p>
+      </div>
+      <button id="create">+ Nova Tarefa</button>
+    </div>
+    <div class="kanban-toolbar">
+      <div class="kanban-toolbar-left">
+        <div class="view-toggle">
+          <button type="button" class="view-toggle-btn ${taskViewMode === 'kanban' ? 'active' : ''}" data-view="kanban">📋 Kanban</button>
+          <button type="button" class="view-toggle-btn ${taskViewMode === 'table' ? 'active' : ''}" data-view="table">☰ Tabela</button>
+        </div>
+        <select class="kanban-filter-select" id="task-filter-priority">
+          <option value="all" ${taskPriorityFilter === 'all' ? 'selected' : ''}>Prioridade: Todas</option>
+          <option value="high" ${taskPriorityFilter === 'high' ? 'selected' : ''}>Alta</option>
+          <option value="medium" ${taskPriorityFilter === 'medium' ? 'selected' : ''}>Média</option>
+          <option value="low" ${taskPriorityFilter === 'low' ? 'selected' : ''}>Baixa</option>
+        </select>
+        <select class="kanban-filter-select" id="task-filter-link">
+          <option value="all" ${taskLinkFilter === 'all' ? 'selected' : ''}>Vínculo: Todos</option>
+          <option value="client" ${taskLinkFilter === 'client' ? 'selected' : ''}>Com Cliente</option>
+          <option value="project" ${taskLinkFilter === 'project' ? 'selected' : ''}>Com Projeto</option>
+          <option value="standalone" ${taskLinkFilter === 'standalone' ? 'selected' : ''}>Avulsas (sem vínculo)</option>
+        </select>
+      </div>
+      <div style="font-size:12px;color:var(--muted);font-weight:600">
+        Total: <b style="color:var(--ink)" id="total-tasks-badge">${filtered.length}</b> de ${records.length} tarefas
+      </div>
+    </div>
+  `;
+
+  if (taskViewMode === 'table') {
+    let cols = columns();
+    let rows = filtered.map(r => `<tr>
+      ${cols.map(([k]) => `<td>${cell(r, k)}</td>`).join('')}
+      <td class="actions-cell">
+        <button class="link edit" data-id="${r.id}">Editar</button>
+        ${canDelete(r) ? `<button class="link danger remove" data-id="${r.id}">Excluir</button>` : ''}
+      </td>
+    </tr>`).join('');
+
+    return toolbarHtml + `<div class="table-card"><table><thead><tr>${cols.map(c => `<th>${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>${rows || `<tr><td colspan="${cols.length + 1}" class="empty">Nenhuma tarefa encontrada com os filtros aplicados.</td></tr>`}</tbody></table></div>`;
+  }
+
+  // Modo Kanban
+  let todoTasks = filtered.filter(t => t.status === 'todo');
+  let inProgressTasks = filtered.filter(t => t.status === 'in_progress');
+  let doneTasks = filtered.filter(t => t.status === 'done');
+
+  let todoCardsHtml = todoTasks.map(kanbanCardHtml).join('');
+  let inProgressCardsHtml = inProgressTasks.map(kanbanCardHtml).join('');
+  let doneCardsHtml = doneTasks.map(kanbanCardHtml).join('');
+
+  let boardHtml = `
+  <div class="kanban-board">
+    <!-- TODO -->
+    <div class="kanban-column col-todo">
+      <div class="kanban-column-header">
+        <div class="col-header-left">
+          <span class="col-indicator todo"></span>
+          <span class="col-title">A Fazer</span>
+          <span class="col-count" id="count-todo">${todoTasks.length}</span>
+        </div>
+        <div class="col-header-actions">
+          <button type="button" class="col-add-btn" data-status="todo" title="Adicionar tarefa em A Fazer">+</button>
+        </div>
+      </div>
+      <div class="kanban-cards" data-status="todo" id="cards-todo">
+        ${todoCardsHtml || '<div class="kanban-empty">Nenhuma tarefa a fazer</div>'}
+      </div>
+    </div>
+
+    <!-- IN PROGRESS -->
+    <div class="kanban-column col-in_progress">
+      <div class="kanban-column-header">
+        <div class="col-header-left">
+          <span class="col-indicator in_progress"></span>
+          <span class="col-title">Em Andamento</span>
+          <span class="col-count" id="count-in_progress">${inProgressTasks.length}</span>
+        </div>
+        <div class="col-header-actions">
+          <button type="button" class="col-add-btn" data-status="in_progress" title="Adicionar tarefa em Andamento">+</button>
+        </div>
+      </div>
+      <div class="kanban-cards" data-status="in_progress" id="cards-in_progress">
+        ${inProgressCardsHtml || '<div class="kanban-empty">Nenhuma tarefa em andamento</div>'}
+      </div>
+    </div>
+
+    <!-- DONE -->
+    <div class="kanban-column col-done">
+      <div class="kanban-column-header">
+        <div class="col-header-left">
+          <span class="col-indicator done"></span>
+          <span class="col-title">Concluídas</span>
+          <span class="col-count" id="count-done">${doneTasks.length}</span>
+        </div>
+      </div>
+      <div class="kanban-cards" data-status="done" id="cards-done">
+        ${doneCardsHtml || '<div class="kanban-empty">Nenhuma tarefa concluída</div>'}
+      </div>
+    </div>
+  </div>`;
+
+  return toolbarHtml + boardHtml;
+}
+
+function attachTasksViewListeners() {
+  $('#create')?.addEventListener('click', () => openForm());
+
+  // View mode switcher
+  document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+    btn.onclick = () => {
+      taskViewMode = btn.dataset.view;
+      localStorage.setItem('flowcrm_task_view', taskViewMode);
+      render();
+    };
+  });
+
+  // Filters
+  $('#task-filter-priority')?.addEventListener('change', e => {
+    taskPriorityFilter = e.target.value;
+    render();
+  });
+  $('#task-filter-link')?.addEventListener('change', e => {
+    taskLinkFilter = e.target.value;
+    render();
+  });
+
+  if (taskViewMode === 'table') {
+    document.querySelectorAll('.edit').forEach(x => x.onclick = () => openForm(records.find(r => r.id == x.dataset.id)));
+    document.querySelectorAll('.remove').forEach(x => x.onclick = async () => {
+      if (confirm('Excluir esta tarefa?')) {
+        await api(`tasks/${x.dataset.id}`, { method: 'DELETE' });
+        render();
+      }
+    });
+    return;
+  }
+
+  // Quick add on columns
+  document.querySelectorAll('.col-add-btn').forEach(btn => {
+    btn.onclick = () => openForm(null, { status: btn.dataset.status });
+  });
+
+  // Edit triggers
+  document.querySelectorAll('.edit-task-trigger').forEach(el => {
+    el.onclick = e => {
+      e.stopPropagation();
+      let task = records.find(r => r.id == el.dataset.id);
+      if (task) openForm(task);
+    };
+  });
+
+  // Fast move buttons
+  document.querySelectorAll('.kanban-move-btn').forEach(btn => {
+    btn.onclick = async e => {
+      e.stopPropagation();
+      let taskId = btn.dataset.id;
+      let targetStatus = btn.dataset.target;
+      try {
+        await api(`tasks/${taskId}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: targetStatus })
+        });
+        render();
+      } catch (err) {
+        alert('Erro ao mover tarefa: ' + err.message);
+      }
+    };
+  });
+
+  // Delete triggers
+  document.querySelectorAll('.kanban-delete-btn').forEach(btn => {
+    btn.onclick = async e => {
+      e.stopPropagation();
+      if (confirm('Excluir esta tarefa?')) {
+        await api(`tasks/${btn.dataset.id}`, { method: 'DELETE' });
+        render();
+      }
+    };
+  });
+
+  // Drag and Drop
+  let draggedCardId = null;
+
+  document.querySelectorAll('.kanban-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      draggedCardId = card.dataset.id;
+      e.dataTransfer.setData('text/plain', draggedCardId);
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => card.classList.add('dragging'), 0);
+    });
+
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      document.querySelectorAll('.kanban-cards').forEach(col => col.classList.remove('drag-over'));
+      draggedCardId = null;
+    });
+  });
+
+  document.querySelectorAll('.kanban-cards').forEach(dropZone => {
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', e => {
+      if (!dropZone.contains(e.relatedTarget)) {
+        dropZone.classList.remove('drag-over');
+      }
+    });
+
+    dropZone.addEventListener('drop', async e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      let taskId = e.dataTransfer.getData('text/plain') || draggedCardId;
+      let newStatus = dropZone.dataset.status;
+      if (!taskId || !newStatus) return;
+
+      let task = records.find(r => r.id == taskId);
+      if (task && task.status === newStatus) return;
+
+      try {
+        await api(`tasks/${taskId}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: newStatus })
+        });
+        render();
+      } catch (err) {
+        alert('Erro ao atualizar status: ' + err.message);
+        render();
+      }
+    });
+  });
+}
+
 async function render() {
   let route = getRoute();
   section = route.section;
@@ -823,6 +1156,9 @@ async function render() {
     } else if (section === 'backups') {
       $('#view').innerHTML = await backupsView();
       attachBackupListeners();
+    } else if (section === 'tasks') {
+      $('#view').innerHTML = await tasksView();
+      attachTasksViewListeners();
     } else {
       $('#view').innerHTML = section === 'dashboard' ? await dashboard() : await table();
       $('#create')?.addEventListener('click', () => openForm());
@@ -875,12 +1211,12 @@ async function openApiKeyModal(userId, userName) {
   $('#modal').showModal();
 }
 
-async function openForm(record = null) {
+async function openForm(record = null, initialDefaults = {}) {
   forcedTargetSection = null;
   editing = record;
   let isApiKey = section === 'api_keys';
   $('#form-title').textContent = isApiKey ? 'Gerar Chave de API' : (record ? 'Editar registro' : 'Novo ' + config[section].label.slice(0, -1));
-  let data = record || {};
+  let data = record || initialDefaults;
   let projRowsCache = null;
 
   $('#fields').innerHTML = (await Promise.all(config[section].fields.map(async ([name, label, type = 'text', opts]) => {
@@ -1094,6 +1430,10 @@ $('#close').onclick = $('#cancel').onclick = () => $('#modal').close();
 $('#search').oninput = e => {
   let q = e.target.value.toLowerCase();
   document.querySelectorAll('tbody tr').forEach(r => r.hidden = !r.textContent.toLowerCase().includes(q));
+  document.querySelectorAll('.kanban-card').forEach(c => {
+    c.style.display = c.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+  updateKanbanCounts();
 };
 window.onhashchange = () => {
   render();

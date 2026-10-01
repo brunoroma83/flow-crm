@@ -46,6 +46,7 @@ from .schemas import (
     ProjectOut,
     TaskIn,
     TaskOut,
+    TaskStatusUpdate,
     LoginIn,
     UserIn,
     UserOut,
@@ -1498,6 +1499,23 @@ def update_task(
     data["client_id"] = client_id
     for key, value in data.items():
         setattr(task, key, value)
+    db.commit()
+    db.refresh(task)
+    db.refresh(task, ["client", "project"])
+    if task.project and not task.project.client:
+        db.refresh(task.project, ["client"])
+    return task_to_out(task)
+
+
+@app.patch("/api/tasks/{item_id}/status", response_model=TaskOut)
+def update_task_status_endpoint(
+    item_id: int,
+    payload: TaskStatusUpdate,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    task = get_or_404(db, Task, item_id)
+    task.status = payload.status
     db.commit()
     db.refresh(task)
     db.refresh(task, ["client", "project"])

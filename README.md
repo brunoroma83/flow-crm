@@ -35,11 +35,11 @@ Altere a chave `SECRET_KEY` no `.env` antes de publicar a aplicação. Somente u
 
 ```powershell
 uv sync
-$env:DATABASE_URL = "postgresql+psycopg://flowcrm:flowcrm_dev_password@localhost:5433/flowcrm"
+$env:DATABASE_URL = "postgresql+psycopg://flowcrm:flowcrm_dev_password@localhost:5432/flowcrm"
 uv run uvicorn flow_crm.main:app --reload
 ```
 
-Suba apenas o banco antes, se necessário: `docker compose up db -d`.
+Certifique-se de que o container central de banco de dados (`postgres_dev`) esteja em execução.
 
 ---
 

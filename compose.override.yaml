@@ -3,6 +3,9 @@ services:
   app:
     environment:
       PYTHONPATH: /app/src
+      APP_ENV: development
+    ports:
+      - "8005:8000"
     volumes:
       - ./src:/app/src
       - ./tests:/app/tests
@@ -20,3 +23,13 @@ services:
       - --reload
       - --reload-dir
       - /app/src
+    networks:
+      - dev_db_network
+
+networks:
+  web_network:
+    external: false
+  postgres_network:
+    external: false
+  dev_db_network:
+    external: true

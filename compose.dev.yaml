@@ -1,9 +1,10 @@
-# Sobreposição para desenvolvimento local. Não utilize em produção.
+# Sobreposição para desenvolvimento local (conecta ao PostgreSQL 17 central de Dev)
 services:
   app:
     environment:
       PYTHONPATH: /app/src
       APP_ENV: development
+      DATABASE_URL: ${CONTAINER_DATABASE_URL:-postgresql+psycopg://${CRM_DB_USER:-${POSTGRES_USER:-flowcrm}}:${CRM_DB_PASSWORD:-${POSTGRES_PASSWORD:-flowcrm_dev_password}}@postgres:5432/${CRM_DB_NAME:-${POSTGRES_DB:-flowcrm}}}
     ports:
       - "8005:8000"
     volumes:
@@ -24,11 +25,13 @@ services:
       - --reload
       - --reload-dir
       - /app/src
-
-  db:
-    ports:
-      - "5433:5432"
+    networks:
+      - dev_db_network
 
 networks:
   web_network:
     external: false
+  postgres_network:
+    external: false
+  dev_db_network:
+    external: true

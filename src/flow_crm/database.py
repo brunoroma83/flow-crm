@@ -26,7 +26,11 @@ def ensure_schema() -> None:
     compatíveis com os modelos atuais.
     """
     Base.metadata.create_all(bind=engine)
-    table_names = ("users", "clients", "contacts", "projects", "tasks", "meetings", "api_keys", "invoices", "project_monthly_values")
+    table_names = (
+        "users", "clients", "contacts", "projects", "tasks",
+        "meetings", "api_keys", "invoices", "project_monthly_values",
+        "task_comments",
+    )
     inspector = inspect(engine)
     existing_tables = set(inspector.get_table_names())
 
@@ -34,6 +38,12 @@ def ensure_schema() -> None:
         # Garante que o enum de role no Postgres suporte o novo papel 'agent'
         try:
             connection.execute(text("ALTER TYPE userrole ADD VALUE IF NOT EXISTS 'agent'"))
+        except Exception:
+            pass
+
+        # Garante que o enum de status da tarefa no Postgres suporte 'waiting_feedback'
+        try:
+            connection.execute(text("ALTER TYPE taskstatus ADD VALUE IF NOT EXISTS 'waiting_feedback'"))
         except Exception:
             pass
 

@@ -24,6 +24,7 @@ from .models import (
     ProjectMonthlyValue,
     ProjectStatus,
     Task,
+    TaskComment,
     TaskStatus,
     User,
     UserRole,
@@ -44,6 +45,8 @@ from .schemas import (
     ProjectMonthlyValueIn,
     ProjectMonthlyValueOut,
     ProjectOut,
+    TaskCommentIn,
+    TaskCommentOut,
     TaskIn,
     TaskOut,
     TaskStatusUpdate,
@@ -493,7 +496,7 @@ def dashboard(db: Session = Depends(get_db), _: User = Depends(get_current_user)
 
     tasks_pending_count = db.scalar(
         select(func.count()).select_from(Task).where(
-            Task.status.in_([TaskStatus.todo, TaskStatus.in_progress]),
+            Task.status.in_([TaskStatus.todo, TaskStatus.in_progress, TaskStatus.waiting_feedback]),
             Task.is_deleted.is_(False),
         )
     ) or 0
@@ -595,6 +598,7 @@ def dashboard(db: Session = Depends(get_db), _: User = Depends(get_current_user)
                 "total": len(tasks),
                 "done": sum(task.status == TaskStatus.done for task in tasks),
                 "in_progress": sum(task.status == TaskStatus.in_progress for task in tasks),
+                "waiting_feedback": sum(task.status == TaskStatus.waiting_feedback for task in tasks),
             },
         }
 
@@ -818,7 +822,7 @@ def get_project_details_endpoint(
         .options(
             selectinload(Project.client).selectinload(Client.contacts),
             selectinload(Project.invoice_contact),
-            selectinload(Project.tasks),
+            selectinload(Project.tasks).selectinload(Task.comments),
             selectinload(Project.invoices),
             selectinload(Project.monthly_values),
         )
@@ -856,6 +860,7 @@ def get_project_details_endpoint(
             "status": t.status,
             "priority": t.priority,
             "due_date": t.due_date.isoformat() if t.due_date else None,
+            "comments_count": sum(1 for c in t.comments if not c.is_deleted) if hasattr(t, "comments") and t.comments else 0,
         }
         for t in project.tasks
         if not t.is_deleted
@@ -968,7 +973,8 @@ def get_client_details_endpoint(
         .options(
             selectinload(Client.contacts),
             selectinload(Client.tasks).selectinload(Task.project),
-            selectinload(Client.projects).selectinload(Project.tasks),
+            selectinload(Client.tasks).selectinload(Task.comments),
+            selectinload(Client.projects).selectinload(Project.tasks).selectinload(Task.comments),
             selectinload(Client.projects).selectinload(Project.invoices),
             selectinload(Client.projects).selectinload(Project.monthly_values),
             selectinload(Client.meetings),
@@ -1065,6 +1071,7 @@ def get_client_details_endpoint(
                         "due_date": t.due_date.isoformat() if t.due_date else None,
                         "project_id": p.id,
                         "project_name": p.name,
+                        "comments_count": sum(1 for c in t.comments if not c.is_deleted) if hasattr(t, "comments") and t.comments else 0,
                     }
                 )
 
@@ -1084,6 +1091,7 @@ def get_client_details_endpoint(
                     "due_date": t.due_date.isoformat() if t.due_date else None,
                     "project_id": t.project_id,
                     "project_name": t.project.name if t.project else "Sem projeto",
+                    "comments_count": sum(1 for c in t.comments if not c.is_deleted) if hasattr(t, "comments") and t.comments else 0,
                 }
             )
             seen_task_ids.add(t.id)
@@ -1416,9 +1424,23 @@ def delete_invoice_endpoint(
     return delete_record(db, Invoice, item_id, actor)
 
 
+def comment_to_out(c: TaskComment) -> TaskCommentOut:
+    created_by_name = c.created_by.name if c.created_by else None
+    return TaskCommentOut(
+        id=c.id,
+        task_id=c.task_id,
+        content=c.content,
+        observation_date=c.observation_date,
+        created_by_id=c.created_by_id,
+        created_by_name=created_by_name,
+        created_at=c.created_at,
+    )
+
+
 def task_to_out(t: Task) -> TaskOut:
     client_name = t.client.name if t.client else (t.project.client.name if t.project and t.project.client else None)
     project_name = t.project.name if t.project else None
+    active_comments = [c for c in (t.comments or []) if not c.is_deleted] if hasattr(t, "comments") and t.comments else []
     return TaskOut(
         id=t.id,
         title=t.title,
@@ -1431,6 +1453,8 @@ def task_to_out(t: Task) -> TaskOut:
         created_by_id=t.created_by_id,
         client_name=client_name,
         project_name=project_name,
+        comments_count=len(active_comments),
+        comments=[comment_to_out(c) for c in active_comments],
     )
 
 
@@ -1441,6 +1465,7 @@ def tasks(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
         .options(
             selectinload(Task.client),
             selectinload(Task.project).selectinload(Project.client),
+            selectinload(Task.comments).selectinload(TaskComment.created_by),
         )
         .where(Task.is_deleted.is_(False))
         .order_by(Task.id.desc())
@@ -1471,7 +1496,7 @@ def create_task(
     db.add(task)
     db.commit()
     db.refresh(task)
-    db.refresh(task, ["client", "project"])
+    db.refresh(task, ["client", "project", "comments"])
     if task.project and not task.project.client:
         db.refresh(task.project, ["client"])
     return task_to_out(task)
@@ -1501,7 +1526,7 @@ def update_task(
         setattr(task, key, value)
     db.commit()
     db.refresh(task)
-    db.refresh(task, ["client", "project"])
+    db.refresh(task, ["client", "project", "comments"])
     if task.project and not task.project.client:
         db.refresh(task.project, ["client"])
     return task_to_out(task)
@@ -1518,7 +1543,7 @@ def update_task_status_endpoint(
     task.status = payload.status
     db.commit()
     db.refresh(task)
-    db.refresh(task, ["client", "project"])
+    db.refresh(task, ["client", "project", "comments"])
     if task.project and not task.project.client:
         db.refresh(task.project, ["client"])
     return task_to_out(task)
@@ -1531,6 +1556,60 @@ def delete_task(
     actor: User = Depends(get_current_user),
 ):
     return delete_record(db, Task, item_id, actor)
+
+
+@app.get("/api/tasks/{item_id}/comments", response_model=list[TaskCommentOut])
+def task_comments(
+    item_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    task = get_or_404(db, Task, item_id)
+    stmt = (
+        select(TaskComment)
+        .options(selectinload(TaskComment.created_by))
+        .where(TaskComment.task_id == task.id, TaskComment.is_deleted.is_(False))
+        .order_by(TaskComment.observation_date.desc(), TaskComment.id.desc())
+    )
+    rows = db.scalars(stmt).all()
+    return [comment_to_out(c) for c in rows]
+
+
+@app.post("/api/tasks/{item_id}/comments", response_model=TaskCommentOut, status_code=201)
+def create_task_comment(
+    item_id: int,
+    payload: TaskCommentIn,
+    db: Session = Depends(get_db),
+    actor: User = Depends(get_current_user),
+):
+    task = get_or_404(db, Task, item_id)
+    data = payload.model_dump()
+    obs_date = data.get("observation_date") or datetime.now()
+    comment = TaskComment(
+        task_id=task.id,
+        content=data["content"],
+        observation_date=obs_date,
+        created_by_id=actor.id,
+    )
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
+    db.refresh(comment, ["created_by"])
+    return comment_to_out(comment)
+
+
+@app.delete("/api/tasks/{item_id}/comments/{comment_id}", status_code=204)
+def delete_task_comment(
+    item_id: int,
+    comment_id: int,
+    db: Session = Depends(get_db),
+    actor: User = Depends(get_current_user),
+):
+    get_or_404(db, Task, item_id)
+    comment = get_or_404(db, TaskComment, comment_id)
+    if comment.task_id != item_id:
+        raise HTTPException(status_code=404, detail="Comentário não pertence a esta tarefa.")
+    return delete_record(db, TaskComment, comment_id, actor)
 
 
 @app.get("/api/meetings", response_model=list[MeetingOut])

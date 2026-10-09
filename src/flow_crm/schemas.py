@@ -120,11 +120,28 @@ class TaskIn(BaseModel):
     client_id: int | None = None
 
 
+class TaskCommentIn(BaseModel):
+    content: str = Field(min_length=1)
+    observation_date: datetime | None = None
+
+
+class TaskCommentOut(ORMModel):
+    id: int
+    task_id: int
+    content: str
+    observation_date: datetime
+    created_by_id: int | None = None
+    created_by_name: str | None = None
+    created_at: datetime
+
+
 class TaskOut(TaskIn, ORMModel):
     id: int
     created_by_id: int | None
     client_name: str | None = None
     project_name: str | None = None
+    comments_count: int = 0
+    comments: list[TaskCommentOut] = Field(default_factory=list)
 
 
 class TaskStatusUpdate(BaseModel):

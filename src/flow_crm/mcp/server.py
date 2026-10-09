@@ -104,6 +104,8 @@ def create_mcp_server() -> MCPServer:
     server.add_tool(tools.list_tasks)
     server.add_tool(tools.create_task)
     server.add_tool(tools.update_task_status)
+    server.add_tool(tools.add_task_comment)
+    server.add_tool(tools.list_task_comments)
     server.add_tool(tools.delete_task)
     server.add_tool(tools.schedule_meeting)
     server.add_tool(tools.list_contacts)

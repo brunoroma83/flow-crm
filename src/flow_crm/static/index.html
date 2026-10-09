@@ -87,4 +87,42 @@
     </div>
 </dialog>
 
-<script src="/app.js?v=18"></script></body></html>
+<dialog id="task-comments-modal">
+    <div class="modal-head">
+        <div>
+            <h2 id="task-comments-title" style="margin: 0; font-size: 17px;">💬 Atualizações & Comentários</h2>
+            <div id="task-comments-subtitle" style="margin-top: 4px; font-size: 12px; color: var(--muted);"></div>
+        </div>
+        <button type="button" class="icon" id="close-task-comments-modal">×</button>
+    </div>
+    <div style="padding: 18px; display: grid; gap: 16px; max-height: 70vh; overflow-y: auto;">
+        <form id="task-comment-form" style="display: grid; gap: 10px; background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-weight: 600; font-size: 13px; color: var(--ink);">+ Nova Observação / Atualização</div>
+            <div>
+                <label style="font-size: 11px; font-weight: 600; display: block; margin-bottom: 4px;">Data e Hora da Observação</label>
+                <input type="datetime-local" id="comment-observation-date" required style="padding: 6px 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px;">
+            </div>
+            <div>
+                <label style="font-size: 11px; font-weight: 600; display: block; margin-bottom: 4px;">Conteúdo / Detalhes *</label>
+                <textarea id="comment-content" required placeholder="Ex: Cliente informou que enviará o retorno até amanhã às 15h..." rows="3" style="width: 100%; box-sizing: border-box; padding: 8px; font-size: 13px; font-family: inherit; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>
+            </div>
+            <p id="comment-error" style="color: var(--red); margin: 0; font-size: 12px; display: none;"></p>
+            <button type="submit" style="justify-self: start; padding: 7px 16px; font-size: 12px;">+ Adicionar Observação</button>
+        </form>
+
+        <div>
+            <div style="font-weight: 600; font-size: 13px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span>Histórico de Atualizações</span>
+                <span id="task-comments-badge-count" style="font-size: 11px; font-weight: 700; background: #e2e8f0; color: #475569; padding: 2px 8px; border-radius: 99px;">0</span>
+            </div>
+            <div id="task-comments-list" style="display: grid; gap: 10px;">
+                <div style="padding: 16px; text-align: center; color: var(--muted); font-size: 13px;">Carregando histórico...</div>
+            </div>
+        </div>
+    </div>
+    <div class="actions">
+        <button type="button" class="secondary" id="done-task-comments-btn">Fechar</button>
+    </div>
+</dialog>
+
+<script src="/app.js?v=20"></script></body></html>

@@ -3,7 +3,7 @@ const config = {
   clients: { label: 'Clientes', title: 'Diretório de clientes', description: 'Contas, dados fiscais, saúde e valor mensal sob gestão.', fields: [['name', 'Nome da Empresa *'], ['cnpj', 'CNPJ'], ['address', 'Endereço Completo de Cobrança', 'textarea'], ['industry', 'Segmento'], ['status', 'Status', 'select', 'prospect,active,inactive'], ['health_score', 'Health score', 'number'], ['monthly_value', 'Valor mensal (R$)', 'number']] },
   projects: { label: 'Projetos', title: 'Projetos', description: 'Entregas organizadas por cliente, contato de cobrança e fase.', fields: [['name', 'Nome do Projeto *'], ['client_id', 'Cliente *', 'select-api', 'clients'], ['invoice_contact_id', 'Contato Designado para Faturas', 'select-api', 'contacts'], ['status', 'Status', 'select', 'planning,active,paused,completed'], ['project_value', 'Valor do projeto (R$)', 'number'], ['contract_type', 'Tipo de contrato', 'select', 'mensal,avulso'], ['description', 'Descrição', 'textarea'], ['start_date', 'Início', 'date'], ['due_date', 'Prazo', 'date']] },
   invoices: { label: 'Faturas', title: 'Faturas & Cobranças', description: 'Controle de faturamento, prazos de vencimento e recebimento por projeto.', fields: [['invoice_number', 'Número da Fatura *'], ['project_id', 'Projeto *', 'select-api', 'projects'], ['contact_id', 'Para quem foi enviada (Contato)', 'select-api', 'contacts'], ['amount', 'Valor (R$) *', 'number'], ['issue_date', 'Data de Emissão', 'date'], ['due_date', 'Data de Vencimento *', 'date'], ['payment_date', 'Data de Pagamento', 'date'], ['status', 'Status', 'select', 'pending,paid,overdue,draft,cancelled'], ['description', 'Descrição / Serviços Faturados *', 'textarea']] },
-  tasks: { label: 'Tarefas', title: 'Central de tarefas', description: 'Priorize a execução e acompanhe prazos.', fields: [['title', 'Título *'], ['client_id', 'Cliente (opcional)', 'select-api', 'clients'], ['project_id', 'Projeto (opcional)', 'select-api', 'projects'], ['status', 'Status', 'select', 'todo,in_progress,done'], ['priority', 'Prioridade', 'select', 'low,medium,high'], ['due_date', 'Prazo', 'date'], ['description', 'Descrição', 'textarea']] },
+  tasks: { label: 'Tarefas', title: 'Central de tarefas', description: 'Priorize a execução e acompanhe prazos.', fields: [['title', 'Título *'], ['client_id', 'Cliente (opcional)', 'select-api', 'clients'], ['project_id', 'Projeto (opcional)', 'select-api', 'projects'], ['status', 'Status', 'select', 'todo,in_progress,waiting_feedback,done'], ['priority', 'Prioridade', 'select', 'low,medium,high'], ['due_date', 'Prazo', 'date'], ['description', 'Descrição', 'textarea']] },
   meetings: { label: 'Reuniões', title: 'Reuniões e agenda', description: 'Registre compromissos e decisões com os clientes.', fields: [['title', 'Título'], ['client_id', 'Cliente', 'select-api', 'clients'], ['starts_at', 'Data e hora', 'datetime-local'], ['duration_minutes', 'Duração (minutos)', 'number'], ['notes', 'Notas', 'textarea']] },
   contacts: { label: 'Contatos', title: 'Diretório de contatos', description: 'As pessoas-chave em cada conta.', fields: [['name', 'Nome'], ['email', 'E-mail', 'email'], ['role', 'Cargo'], ['phone', 'Telefone'], ['client_id', 'Cliente', 'select-api', 'clients']] },
   users: { label: 'Usuários', title: 'Usuários & Permissões', description: 'Controle de acessos e permissões da equipe e agentes de IA.', fields: [['name', 'Nome'], ['email', 'E-mail', 'email'], ['password', 'Senha', 'password'], ['role', 'Perfil', 'select', 'member,admin,agent'], ['is_active', 'Ativo', 'select', 'true,false']] },
@@ -23,7 +23,15 @@ let { section } = getRoute(), records = [], editing = null, currentUser = null, 
 
 const $ = s => document.querySelector(s),
       cap = s => s.charAt(0).toUpperCase() + s.slice(1),
-      status = v => `<span class="pill ${v}">${String(v).replaceAll('_', ' ')}</span>`,
+      status = v => {
+        let label = v;
+        if (v === 'todo') label = 'A Fazer';
+        else if (v === 'in_progress') label = 'Em Andamento';
+        else if (v === 'waiting_feedback') label = 'Aguardando Retorno';
+        else if (v === 'done') label = 'Concluída';
+        else label = String(v).replaceAll('_', ' ');
+        return `<span class="pill ${v}">${label}</span>`;
+      },
       money = v => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 
 async function api(path, options = {}) {
@@ -341,7 +349,8 @@ async function projectDetails(projectId) {
       <td>${status(t.status)}</td>
       <td><span class="pill ${t.priority}">${t.priority}</span></td>
       <td>${t.due_date ? new Date(t.due_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</td>
-    </tr>`).join('') : `<tr><td colspan="4" class="empty">Nenhuma tarefa vinculada.</td></tr>`;
+      <td style="text-align:right"><button type="button" class="link open-comments-btn" data-id="${t.id}" title="Ver observações">💬 ${t.comments_count || 0}</button></td>
+    </tr>`).join('') : `<tr><td colspan="5" class="empty">Nenhuma tarefa vinculada.</td></tr>`;
 
     let meetingRows = meetings.length ? meetings.map(m => `<tr>
       <td><b>${m.title}</b>${m.notes ? `<br><small style="color:var(--muted)">${m.notes}</small>` : ''}</td>
@@ -458,7 +467,7 @@ async function projectDetails(projectId) {
           </div>
           <div class="table-card" style="box-shadow:none;border:1px solid #e2e8f0">
             <table>
-              <thead><tr><th>Tarefa</th><th>Status</th><th>Prioridade</th><th>Prazo</th></tr></thead>
+              <thead><tr><th>Tarefa</th><th>Status</th><th>Prioridade</th><th>Prazo</th><th style="text-align:right">Obs</th></tr></thead>
               <tbody>${taskRows}</tbody>
             </table>
           </div>
@@ -540,7 +549,8 @@ async function clientDetails(clientId) {
       <td>${status(t.status)}</td>
       <td><span class="pill ${t.priority}">${t.priority}</span></td>
       <td>${t.due_date ? new Date(t.due_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</td>
-    </tr>`).join('') : `<tr><td colspan="5" class="empty">Nenhuma tarefa ativa.</td></tr>`;
+      <td style="text-align:right"><button type="button" class="link open-comments-btn" data-id="${t.id}" title="Ver observações">💬 ${t.comments_count || 0}</button></td>
+    </tr>`).join('') : `<tr><td colspan="6" class="empty">Nenhuma tarefa ativa.</td></tr>`;
 
     let meetingRows = meetings.length ? meetings.map(mt => `<tr>
       <td><b>${mt.title || mt.titulo}</b>${mt.notes ? `<br><small style="color:var(--muted)">${mt.notes}</small>` : ''}</td>
@@ -680,7 +690,7 @@ async function clientDetails(clientId) {
         </div>
         <div class="table-card" style="box-shadow:none;border:1px solid #e2e8f0">
           <table>
-            <thead><tr><th>Tarefa</th><th>Projeto</th><th>Status</th><th>Prioridade</th><th>Prazo</th></tr></thead>
+            <thead><tr><th>Tarefa</th><th>Projeto</th><th>Status</th><th>Prioridade</th><th>Prazo</th><th style="text-align:right">Obs</th></tr></thead>
             <tbody>${taskRows}</tbody>
           </table>
         </div>
@@ -850,13 +860,20 @@ function kanbanCardHtml(t) {
   if (!t.client_id && !t.project_id) {
     chips.push(`<span class="kanban-chip standalone">📝 Avulsa</span>`);
   }
+  let commentsCount = t.comments_count || (t.comments ? t.comments.length : 0);
+  chips.push(`<button type="button" class="kanban-chip comments open-comments-btn" data-id="${t.id}" title="Histórico de atualizações e observações">💬 ${commentsCount} obs</button>`);
 
   let moveButtons = [];
   if (t.status === 'in_progress') {
     moveButtons.push(`<button type="button" class="kanban-btn-action move kanban-move-btn" data-id="${t.id}" data-target="todo" title="Mover para A Fazer">← A Fazer</button>`);
+    moveButtons.push(`<button type="button" class="kanban-btn-action move kanban-move-btn" data-id="${t.id}" data-target="waiting_feedback" title="Aguardando retorno">⏳ Aguardar</button>`);
     moveButtons.push(`<button type="button" class="kanban-btn-action move kanban-move-btn" data-id="${t.id}" data-target="done" title="Mover para Concluída">Concluir ✓</button>`);
   } else if (t.status === 'todo') {
     moveButtons.push(`<button type="button" class="kanban-btn-action move kanban-move-btn" data-id="${t.id}" data-target="in_progress" title="Iniciar tarefa">Iniciar →</button>`);
+    moveButtons.push(`<button type="button" class="kanban-btn-action move kanban-move-btn" data-id="${t.id}" data-target="waiting_feedback" title="Aguardando retorno">⏳ Aguardar</button>`);
+  } else if (t.status === 'waiting_feedback') {
+    moveButtons.push(`<button type="button" class="kanban-btn-action move kanban-move-btn" data-id="${t.id}" data-target="in_progress" title="Retomar em andamento">← Em Andamento</button>`);
+    moveButtons.push(`<button type="button" class="kanban-btn-action move kanban-move-btn" data-id="${t.id}" data-target="done" title="Mover para Concluída">Concluir ✓</button>`);
   } else if (t.status === 'done') {
     moveButtons.push(`<button type="button" class="kanban-btn-action move kanban-move-btn" data-id="${t.id}" data-target="in_progress" title="Reabrir tarefa">← Reabrir</button>`);
   }
@@ -877,6 +894,7 @@ function kanbanCardHtml(t) {
         ${moveButtons.join('')}
       </div>
       <div style="display:flex;gap:4px">
+        <button type="button" class="kanban-btn-action open-comments-btn" data-id="${t.id}" title="Comentários e atualizações">💬</button>
         <button type="button" class="kanban-btn-action edit-task-trigger" data-id="${t.id}" title="Editar tarefa">✏️</button>
         ${deleteBtn}
       </div>
@@ -885,7 +903,7 @@ function kanbanCardHtml(t) {
 }
 
 function updateKanbanCounts() {
-  ['todo', 'in_progress', 'done'].forEach(st => {
+  ['todo', 'in_progress', 'waiting_feedback', 'done'].forEach(st => {
     let colCards = document.querySelector(`#cards-${st}`);
     if (colCards) {
       let visible = Array.from(colCards.querySelectorAll('.kanban-card')).filter(c => c.style.display !== 'none').length;
@@ -938,6 +956,7 @@ async function tasksView() {
     let rows = filtered.map(r => `<tr>
       ${cols.map(([k]) => `<td>${cell(r, k)}</td>`).join('')}
       <td class="actions-cell">
+        <button class="link open-comments-btn" data-id="${r.id}" title="Ver observações">💬 Obs (${r.comments_count || 0})</button>
         <button class="link edit" data-id="${r.id}">Editar</button>
         ${canDelete(r) ? `<button class="link danger remove" data-id="${r.id}">Excluir</button>` : ''}
       </td>
@@ -949,10 +968,12 @@ async function tasksView() {
   // Modo Kanban
   let todoTasks = filtered.filter(t => t.status === 'todo');
   let inProgressTasks = filtered.filter(t => t.status === 'in_progress');
+  let waitingTasks = filtered.filter(t => t.status === 'waiting_feedback');
   let doneTasks = filtered.filter(t => t.status === 'done');
 
   let todoCardsHtml = todoTasks.map(kanbanCardHtml).join('');
   let inProgressCardsHtml = inProgressTasks.map(kanbanCardHtml).join('');
+  let waitingCardsHtml = waitingTasks.map(kanbanCardHtml).join('');
   let doneCardsHtml = doneTasks.map(kanbanCardHtml).join('');
 
   let boardHtml = `
@@ -988,6 +1009,23 @@ async function tasksView() {
       </div>
       <div class="kanban-cards" data-status="in_progress" id="cards-in_progress">
         ${inProgressCardsHtml || '<div class="kanban-empty">Nenhuma tarefa em andamento</div>'}
+      </div>
+    </div>
+
+    <!-- WAITING FEEDBACK -->
+    <div class="kanban-column col-waiting_feedback">
+      <div class="kanban-column-header">
+        <div class="col-header-left">
+          <span class="col-indicator waiting_feedback"></span>
+          <span class="col-title">Aguardando Retorno</span>
+          <span class="col-count" id="count-waiting_feedback">${waitingTasks.length}</span>
+        </div>
+        <div class="col-header-actions">
+          <button type="button" class="col-add-btn" data-status="waiting_feedback" title="Adicionar tarefa Aguardando Retorno">+</button>
+        </div>
+      </div>
+      <div class="kanban-cards" data-status="waiting_feedback" id="cards-waiting_feedback">
+        ${waitingCardsHtml || '<div class="kanban-empty">Nenhuma tarefa aguardando retorno</div>'}
       </div>
     </div>
 
@@ -1227,7 +1265,18 @@ async function openForm(record = null, initialDefaults = {}) {
       return field(name, label, `<select name="${name}"><option value="">${isApiKey ? 'Agente IA Padrão' : 'Sem vínculo'}</option>${rows.map(r => `<option value="${r.id}" ${r.id == val ? 'selected' : ''}>${r.name}</option>`).join('')}</select>`);
     }
     if (type === 'select') {
-      return field(name, label, `<select name="${name}">${opts.split(',').map(o => `<option value="${o}" ${o == val ? 'selected' : ''}>${o === 'agent' ? 'Agente IA' : (o === 'admin' ? 'Administrador' : (o === 'member' ? 'Membro' : cap(o)))}</option>`).join('')}</select>`);
+      return field(name, label, `<select name="${name}">${opts.split(',').map(o => {
+        let optLabel = o;
+        if (o === 'agent') optLabel = 'Agente IA';
+        else if (o === 'admin') optLabel = 'Administrador';
+        else if (o === 'member') optLabel = 'Membro';
+        else if (o === 'todo') optLabel = 'A Fazer';
+        else if (o === 'in_progress') optLabel = 'Em Andamento';
+        else if (o === 'waiting_feedback') optLabel = 'Aguardando Retorno';
+        else if (o === 'done') optLabel = 'Concluída';
+        else optLabel = cap(o);
+        return `<option value="${o}" ${o == val ? 'selected' : ''}>${optLabel}</option>`;
+      }).join('')}</select>`);
     }
     let actual = type === 'textarea' ? `<textarea name="${name}" ${name === 'address' ? 'placeholder="Logradouro, número, bairro, cidade, UF, CEP"' : ''}>${val || ''}</textarea>` : `<input name="${name}" type="${type}" ${type === 'number' ? 'step="any"' : ''} value="${type === 'datetime-local' && val ? String(val).slice(0, 16) : val ?? ''}">`;
     return field(name, label, actual);
@@ -1411,6 +1460,143 @@ $('#close-monthly-modal')?.addEventListener('click', () => {
 $('#done-monthly-btn')?.addEventListener('click', () => {
   $('#monthly-modal').close();
   if (section === 'projects') render();
+});
+
+// Modal de Comentários e Atualizações da Tarefa
+let currentTaskCommentsId = null;
+
+async function openTaskCommentsModal(taskId) {
+  currentTaskCommentsId = taskId;
+  let task = (records && section === 'tasks') ? records.find(r => r.id === taskId) : null;
+  let titleEl = $('#task-comments-title');
+  let subEl = $('#task-comments-subtitle');
+  if (task) {
+    titleEl.textContent = `💬 ${task.title}`;
+    subEl.innerHTML = `Status: ${status(task.status)} • Prioridade: <span class="pill ${task.priority}">${task.priority}</span> ${task.client_name ? `• Cliente: <b>${task.client_name}</b>` : ''}`;
+  } else {
+    titleEl.textContent = `💬 Tarefa #${taskId}`;
+    subEl.textContent = 'Acompanhe as observações e o andamento da tarefa.';
+  }
+
+  // Preenche a data/hora local atual: YYYY-MM-DDTHH:MM
+  let now = new Date();
+  let localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  $('#comment-observation-date').value = localIso;
+  $('#comment-content').value = '';
+  let errEl = $('#comment-error');
+  if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+
+  $('#task-comments-modal').showModal();
+  await loadTaskCommentsList(taskId);
+}
+
+async function loadTaskCommentsList(taskId) {
+  let listEl = $('#task-comments-list');
+  let badgeEl = $('#task-comments-badge-count');
+  try {
+    let comments = await api(`tasks/${taskId}/comments`);
+    if (badgeEl) badgeEl.textContent = comments.length;
+    if (!comments.length) {
+      listEl.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--muted); font-size: 13px; background: #fff; border: 1px dashed #cbd5e1; border-radius: 8px;">Nenhuma observação ou atualização registrada ainda para esta tarefa.</div>';
+      return;
+    }
+    listEl.innerHTML = comments.map(c => {
+      let obsDateFormatted = new Date(c.observation_date).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+      let authorLabel = c.created_by_name || 'Equipe';
+      let isOwner = currentUser && (currentUser.role === 'admin' || currentUser.id === c.created_by_id);
+      let deleteBtn = isOwner ? `<button type="button" class="link danger delete-comment-btn" data-id="${c.id}" style="font-size: 11px; padding: 2px 6px;">Excluir</button>` : '';
+      return `
+        <div class="comment-card">
+          <div class="comment-card-header">
+            <span class="comment-card-author">👤 ${authorLabel}</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="comment-card-date">📅 ${obsDateFormatted}</span>
+              ${deleteBtn}
+            </div>
+          </div>
+          <div class="comment-card-body">${c.content}</div>
+        </div>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('.delete-comment-btn').forEach(btn => {
+      btn.onclick = async () => {
+        if (confirm('Excluir esta observação?')) {
+          try {
+            await api(`tasks/${taskId}/comments/${btn.dataset.id}`, { method: 'DELETE' });
+            await loadTaskCommentsList(taskId);
+            let t = records && records.find ? records.find(r => r.id === taskId) : null;
+            if (t && t.comments_count) t.comments_count = Math.max(0, t.comments_count - 1);
+            if (section === 'tasks') {
+              let chip = document.querySelector(`.open-comments-btn[data-id="${taskId}"]`);
+              if (chip && t) chip.textContent = `💬 ${t.comments_count} obs`;
+            }
+          } catch (err) {
+            alert('Erro ao excluir: ' + err.message);
+          }
+        }
+      };
+    });
+  } catch (err) {
+    listEl.innerHTML = `<div style="color: var(--red); padding: 10px;">Erro ao carregar histórico: ${err.message}</div>`;
+  }
+}
+
+$('#task-comment-form')?.addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!currentTaskCommentsId) return;
+
+  let obsDate = $('#comment-observation-date').value;
+  let content = $('#comment-content').value.trim();
+  let errEl = $('#comment-error');
+
+  if (!content) {
+    if (errEl) { errEl.textContent = 'O conteúdo da observação é obrigatório.'; errEl.style.display = 'block'; }
+    return;
+  }
+
+  try {
+    if (errEl) errEl.style.display = 'none';
+    await api(`tasks/${currentTaskCommentsId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({
+        content: content,
+        observation_date: obsDate ? new Date(obsDate).toISOString() : null
+      })
+    });
+    $('#comment-content').value = '';
+    await loadTaskCommentsList(currentTaskCommentsId);
+    let t = records && records.find ? records.find(r => r.id === currentTaskCommentsId) : null;
+    if (t) {
+      t.comments_count = (t.comments_count || 0) + 1;
+      let chip = document.querySelector(`.open-comments-btn[data-id="${currentTaskCommentsId}"]`);
+      if (chip) chip.textContent = `💬 ${t.comments_count} obs`;
+    }
+  } catch (err) {
+    if (errEl) {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+    }
+  }
+});
+
+$('#close-task-comments-modal')?.addEventListener('click', () => {
+  $('#task-comments-modal').close();
+  if (section === 'tasks') render();
+});
+
+$('#done-task-comments-btn')?.addEventListener('click', () => {
+  $('#task-comments-modal').close();
+  if (section === 'tasks') render();
+});
+
+document.addEventListener('click', e => {
+  let btn = e.target.closest('.open-comments-btn');
+  if (btn) {
+    e.stopPropagation();
+    e.preventDefault();
+    openTaskCommentsModal(Number(btn.dataset.id));
+  }
 });
 
 

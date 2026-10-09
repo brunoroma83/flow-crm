@@ -18,6 +18,7 @@ from flow_crm.models import (
     ProjectMonthlyValue,
     ProjectStatus,
     Task,
+    TaskComment,
     TaskStatus,
     UserRole,
 )
@@ -79,7 +80,7 @@ def get_dashboard() -> dict[str, Any]:
 
         tasks_pending_count = db.scalar(
             select(func.count()).select_from(Task).where(
-                Task.status.in_([TaskStatus.todo, TaskStatus.in_progress]),
+                Task.status.in_([TaskStatus.todo, TaskStatus.in_progress, TaskStatus.waiting_feedback]),
                 Task.is_deleted.is_(False),
             )
         ) or 0
@@ -401,7 +402,7 @@ def list_tasks(
     Args:
         project_id: ID do projeto para filtrar (opcional).
         client_id: ID do cliente para filtrar (opcional).
-        status: Filtro por status ('todo', 'in_progress', 'done').
+        status: Filtro por status ('todo', 'in_progress', 'waiting_feedback', 'done').
         priority: Filtro por prioridade ('low', 'medium', 'high').
         limit: Máximo de registros a retornar (padrão: 50).
     """
@@ -411,6 +412,7 @@ def list_tasks(
             .options(
                 selectinload(Task.client),
                 selectinload(Task.project).selectinload(Project.client),
+                selectinload(Task.comments),
             )
             .where(Task.is_deleted.is_(False))
         )
@@ -447,6 +449,7 @@ def list_tasks(
                 "project_id": t.project_id,
                 "project_name": t.project.name if t.project else None,
                 "created_by_id": t.created_by_id,
+                "comments_count": sum(1 for c in t.comments if not c.is_deleted) if hasattr(t, "comments") and t.comments else 0,
             }
             for t in tasks
         ]
@@ -546,7 +549,7 @@ def update_task_status(task_id: int, status: str) -> dict[str, Any]:
     
     Args:
         task_id: ID da tarefa.
-        status: Novo status ('todo', 'in_progress', 'done').
+        status: Novo status ('todo', 'in_progress', 'waiting_feedback', 'done').
     """
     with SessionLocal() as db:
         task = db.get(Task, task_id)
@@ -556,7 +559,7 @@ def update_task_status(task_id: int, status: str) -> dict[str, Any]:
         try:
             new_status = TaskStatus(status.lower())
         except ValueError:
-            return {"error": f"Status inválido: '{status}'. Opções válidas: 'todo', 'in_progress', 'done'."}
+            return {"error": f"Status inválido: '{status}'. Opções válidas: 'todo', 'in_progress', 'waiting_feedback', 'done'."}
 
         task.status = new_status
         db.commit()
@@ -566,6 +569,94 @@ def update_task_status(task_id: int, status: str) -> dict[str, Any]:
             "title": task.title,
             "new_status": task.status.value,
             "message": f"Status da tarefa '{task.title}' atualizado para '{task.status.value}'.",
+        }
+
+
+def add_task_comment(
+    task_id: int,
+    content: str,
+    observation_date: str | None = None,
+) -> dict[str, Any]:
+    """Adiciona um comentário ou atualização a uma tarefa no CRM.
+    
+    Args:
+        task_id: ID da tarefa.
+        content: Conteúdo do comentário ou atualização / observação.
+        observation_date: Data/hora da observação no formato ISO (ex: '2026-10-09T14:30:00'). Se omitido, usa o momento atual.
+    """
+    with SessionLocal() as db:
+        task = db.get(Task, task_id)
+        if not task or task.is_deleted:
+            return {"error": f"Tarefa com ID {task_id} não encontrada."}
+
+        if not content or not content.strip():
+            return {"error": "O conteúdo da observação não pode ser vazio."}
+
+        obs_dt = datetime.now()
+        if observation_date:
+            try:
+                obs_dt = datetime.fromisoformat(observation_date)
+            except ValueError:
+                return {"error": f"Formato de data inválido: '{observation_date}'. Use formato ISO, ex: '2026-10-09T14:30:00'."}
+
+        actor = get_current_actor(db)
+        actor_id = actor.id if actor else None
+        comment = TaskComment(
+            task_id=task.id,
+            content=content.strip(),
+            observation_date=obs_dt,
+            created_by_id=actor_id,
+        )
+        db.add(comment)
+        db.commit()
+        db.refresh(comment)
+
+        return {
+            "success": True,
+            "comment_id": comment.id,
+            "task_id": task.id,
+            "content": comment.content,
+            "observation_date": comment.observation_date.isoformat(),
+            "created_by_id": comment.created_by_id,
+            "created_by_name": actor.name if actor else None,
+            "message": f"Comentário adicionado com sucesso à tarefa '{task.title}'.",
+        }
+
+
+def list_task_comments(task_id: int) -> dict[str, Any]:
+    """Lista o histórico de comentários e atualizações de uma tarefa.
+    
+    Args:
+        task_id: ID da tarefa.
+    """
+    with SessionLocal() as db:
+        task = db.get(Task, task_id)
+        if not task or task.is_deleted:
+            return {"error": f"Tarefa com ID {task_id} não encontrada."}
+
+        stmt = (
+            select(TaskComment)
+            .options(selectinload(TaskComment.created_by))
+            .where(TaskComment.task_id == task.id, TaskComment.is_deleted.is_(False))
+            .order_by(TaskComment.observation_date.desc(), TaskComment.id.desc())
+        )
+        comments = db.scalars(stmt).all()
+
+        return {
+            "task_id": task.id,
+            "task_title": task.title,
+            "comments_count": len(comments),
+            "comments": [
+                {
+                    "id": c.id,
+                    "content": c.content,
+                    "observation_date": c.observation_date.isoformat(),
+                    "created_by_id": c.created_by_id,
+                    "created_by_name": c.created_by.name if c.created_by else None,
+                    "created_at": c.created_at.isoformat() if c.created_at else None,
+                }
+                for c in comments
+            ],
         }
 
 

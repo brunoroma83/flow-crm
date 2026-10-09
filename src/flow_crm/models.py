@@ -29,6 +29,7 @@ class ProjectContractType(StrEnum):
 class TaskStatus(StrEnum):
     todo = "todo"
     in_progress = "in_progress"
+    waiting_feedback = "waiting_feedback"
     done = "done"
 
 
@@ -163,7 +164,26 @@ class Task(TimestampMixin, Base):
     created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     project: Mapped[Project | None] = relationship(back_populates="tasks")
     client: Mapped[Client | None] = relationship(back_populates="tasks")
+    comments: Mapped[list["TaskComment"]] = relationship(
+        back_populates="task",
+        cascade="all, delete-orphan",
+        order_by="TaskComment.observation_date.desc()",
+    )
     is_deleted: Mapped[bool] = mapped_column(SQLBool, default=False)
+
+
+class TaskComment(TimestampMixin, Base):
+    __tablename__ = "task_comments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"), index=True)
+    content: Mapped[str] = mapped_column(Text)
+    observation_date: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(SQLBool, default=False)
+
+    task: Mapped[Task] = relationship(back_populates="comments")
+    created_by: Mapped[User | None] = relationship(foreign_keys=[created_by_id])
 
 class Meeting(TimestampMixin, Base):
     __tablename__ = "meetings"

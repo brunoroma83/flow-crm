@@ -221,7 +221,7 @@ function columns() {
     clients: [['name', 'Cliente'], ['cnpj', 'CNPJ'], ['industry', 'Segmento'], ['status', 'Status'], ['health_score', 'Health'], ['monthly_value', 'Valor mensal']],
     projects: [['name', 'Projeto'], ['client_name', 'Cliente'], ['project_value', 'Valor do projeto'], ['contract_type', 'Tipo de contrato'], ['invoice_contact_name', 'Contato Faturamento'], ['status', 'Status'], ['due_date', 'Prazo']],
     invoices: [['invoice_number', 'Fatura'], ['project_name', 'Projeto'], ['client_name', 'Cliente'], ['contact_name', 'Destinatário'], ['amount', 'Valor'], ['issue_date', 'Emissão'], ['due_date', 'Vencimento'], ['status', 'Status']],
-    tasks: [['title', 'Tarefa'], ['client_name', 'Cliente'], ['project_name', 'Projeto'], ['status', 'Status'], ['priority', 'Prioridade'], ['due_date', 'Prazo']],
+    tasks: [['title', 'Tarefa'], ['client_name', 'Cliente'], ['project_name', 'Projeto'], ['status', 'Status'], ['priority', 'Prioridade'], ['due_date', 'Prazo'], ['comments_count', 'Observações']],
     meetings: [['title', 'Reunião'], ['client_id', 'Cliente'], ['starts_at', 'Data'], ['duration_minutes', 'Duração']],
     contacts: [['name', 'Contato'], ['email', 'E-mail'], ['role', 'Cargo'], ['client_id', 'Cliente']],
     api_keys: [['name', 'Identificação'], ['key_prefix', 'Prefixo'], ['user_name', 'Usuário Vinculado'], ['created_at', 'Criada em'], ['last_used_at', 'Último Uso']]
@@ -230,6 +230,10 @@ function columns() {
 
 function cell(r, k) {
   let v = r[k];
+  if (k === 'comments_count') {
+    let count = r.comments_count || 0;
+    return `<button type="button" class="table-comment-chip open-comments-btn" data-id="${r.id}" title="Ver ou incluir observações">💬 ${count > 0 ? `${count} obs` : '+ Observação'}</button>`;
+  }
   if (k === 'name' && section === 'clients') {
     return `<a href="#client_details?id=${r.id}" style="color:var(--blue);font-weight:600;text-decoration:none" title="Ver detalhes do cliente">${v}</a>`;
   }
@@ -349,7 +353,7 @@ async function projectDetails(projectId) {
       <td>${status(t.status)}</td>
       <td><span class="pill ${t.priority}">${t.priority}</span></td>
       <td>${t.due_date ? new Date(t.due_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</td>
-      <td style="text-align:right"><button type="button" class="link open-comments-btn" data-id="${t.id}" title="Ver observações">💬 ${t.comments_count || 0}</button></td>
+      <td style="text-align:right"><button type="button" class="table-comment-chip open-comments-btn" data-id="${t.id}" title="Ver ou incluir observações">💬 ${t.comments_count > 0 ? `${t.comments_count} obs` : '+ Obs'}</button></td>
     </tr>`).join('') : `<tr><td colspan="5" class="empty">Nenhuma tarefa vinculada.</td></tr>`;
 
     let meetingRows = meetings.length ? meetings.map(m => `<tr>
@@ -549,7 +553,7 @@ async function clientDetails(clientId) {
       <td>${status(t.status)}</td>
       <td><span class="pill ${t.priority}">${t.priority}</span></td>
       <td>${t.due_date ? new Date(t.due_date + 'T12:00').toLocaleDateString('pt-BR') : '—'}</td>
-      <td style="text-align:right"><button type="button" class="link open-comments-btn" data-id="${t.id}" title="Ver observações">💬 ${t.comments_count || 0}</button></td>
+      <td style="text-align:right"><button type="button" class="table-comment-chip open-comments-btn" data-id="${t.id}" title="Ver ou incluir observações">💬 ${t.comments_count > 0 ? `${t.comments_count} obs` : '+ Obs'}</button></td>
     </tr>`).join('') : `<tr><td colspan="6" class="empty">Nenhuma tarefa ativa.</td></tr>`;
 
     let meetingRows = meetings.length ? meetings.map(mt => `<tr>
@@ -861,7 +865,8 @@ function kanbanCardHtml(t) {
     chips.push(`<span class="kanban-chip standalone">📝 Avulsa</span>`);
   }
   let commentsCount = t.comments_count || (t.comments ? t.comments.length : 0);
-  chips.push(`<button type="button" class="kanban-chip comments open-comments-btn" data-id="${t.id}" title="Histórico de atualizações e observações">💬 ${commentsCount} obs</button>`);
+  let commentsLabel = commentsCount > 0 ? `💬 ${commentsCount} obs` : `💬 + Observação`;
+  chips.push(`<button type="button" class="kanban-chip comments open-comments-btn" data-id="${t.id}" title="Ver e adicionar observações">${commentsLabel}</button>`);
 
   let moveButtons = [];
   if (t.status === 'in_progress') {
@@ -894,7 +899,7 @@ function kanbanCardHtml(t) {
         ${moveButtons.join('')}
       </div>
       <div style="display:flex;gap:4px">
-        <button type="button" class="kanban-btn-action open-comments-btn" data-id="${t.id}" title="Comentários e atualizações">💬</button>
+        <button type="button" class="kanban-btn-action comments-btn open-comments-btn" data-id="${t.id}" title="Observações e atualizações da tarefa">💬 Obs ${commentsCount > 0 ? `(${commentsCount})` : '(+)'}</button>
         <button type="button" class="kanban-btn-action edit-task-trigger" data-id="${t.id}" title="Editar tarefa">✏️</button>
         ${deleteBtn}
       </div>
@@ -1308,6 +1313,22 @@ async function openForm(record = null, initialDefaults = {}) {
     }
   }
 
+  if (section === 'tasks' && editing && editing.id) {
+    let count = editing.comments_count || 0;
+    let commentsNotice = document.createElement('div');
+    commentsNotice.className = 'field';
+    commentsNotice.innerHTML = `
+      <label>Observações & Histórico</label>
+      <div style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;padding:10px 14px;border-radius:8px;border:1px solid #cbd5e1">
+        <span style="font-size:13px;color:var(--ink)">
+          💬 <b>${count > 0 ? `${count} observação(ões) registrada(s)` : 'Nenhuma observação ainda'}</b>
+        </span>
+        <button type="button" class="open-comments-btn" data-id="${editing.id}" style="padding:6px 14px;font-size:12px;background:var(--blue);color:#fff;border-radius:6px;cursor:pointer;font-weight:600">💬 Abrir Observações</button>
+      </div>
+    `;
+    $('#fields').appendChild(commentsNotice);
+  }
+
   $('#error').textContent = '';
   $('#modal').showModal();
 }
@@ -1475,7 +1496,15 @@ async function openTaskCommentsModal(taskId) {
     subEl.innerHTML = `Status: ${status(task.status)} • Prioridade: <span class="pill ${task.priority}">${task.priority}</span> ${task.client_name ? `• Cliente: <b>${task.client_name}</b>` : ''}`;
   } else {
     titleEl.textContent = `💬 Tarefa #${taskId}`;
-    subEl.textContent = 'Acompanhe as observações e o andamento da tarefa.';
+    subEl.textContent = 'Carregando detalhes...';
+    api(`tasks/${taskId}`).then(t => {
+      if (t) {
+        titleEl.textContent = `💬 ${t.title}`;
+        subEl.innerHTML = `Status: ${status(t.status)} • Prioridade: <span class="pill ${t.priority}">${t.priority}</span> ${t.client_name ? `• Cliente: <b>${t.client_name}</b>` : ''}`;
+      }
+    }).catch(() => {
+      subEl.textContent = 'Acompanhe as observações e o andamento da tarefa.';
+    });
   }
 
   // Preenche a data/hora local atual: YYYY-MM-DDTHH:MM
